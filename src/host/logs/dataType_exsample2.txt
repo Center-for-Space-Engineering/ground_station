@@ -1,0 +1,6 @@
+2023-09-08 11:53:14.414092: exsample2 added a feild: coolName : bit length 15 > converter type int
+2023-09-08 11:53:14.414100: exsample2 added a bit map step: coolName : bit length 15
+2023-09-08 11:53:14.414114: exsample2 added a feild: coolName2 : bit length 2 > converter type bool
+2023-09-08 11:53:14.414119: exsample2 added a bit map step: coolName2 : bit length 2
+2023-09-08 11:53:14.414268: exsample2 added a feild: coolName3 : bit length 5 > converter type string
+2023-09-08 11:53:14.414280: exsample2 added a bit map step: coolName3 : bit length 5

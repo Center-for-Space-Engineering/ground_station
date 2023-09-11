@@ -1,0 +1,19 @@
+2023-09-08 11:53:14.413871: exsample added a feild: igrnoed feild : bit length 10 > converter type NONE
+2023-09-08 11:53:14.413881: exsample added a bit map step: igrnoed feild : bit length 10
+2023-09-08 11:53:14.413897: exsample added a feild: feild1 : bit length 26 > converter type int
+2023-09-08 11:53:14.413903: exsample added a bit map step: feild1 : bit length 26
+2023-09-08 11:53:14.413910: exsample added a discontiunous data type:  feild1  <  feild4
+2023-09-08 11:53:14.413924: exsample added a feild: feild2 : bit length 10 > converter type float
+2023-09-08 11:53:14.413930: exsample added a bit map step: feild2 : bit length 10
+2023-09-08 11:53:14.413936: exsample added a discontiunous data type:  feild5  <  feild2
+2023-09-08 11:53:14.413950: exsample added a feild: feild3 : bit length 4 > converter type string
+2023-09-08 11:53:14.413956: exsample added a bit map step: feild3 : bit length 4
+2023-09-08 11:53:14.413969: exsample added a feild: feild4 : bit length 4 > converter type NONE
+2023-09-08 11:53:14.413975: exsample added a bit map step: feild4 : bit length 4
+2023-09-08 11:53:14.413980: exsample added a discontiunous data type:  feild4  <  feild6
+2023-09-08 11:53:14.413994: exsample added a feild: feild5 : bit length 4 > converter type NONE
+2023-09-08 11:53:14.414000: exsample added a bit map step: feild5 : bit length 4
+2023-09-08 11:53:14.414013: exsample added a feild: feild6 : bit length 2 > converter type NONE
+2023-09-08 11:53:14.414018: exsample added a bit map step: feild6 : bit length 2
+2023-09-08 11:53:14.414030: exsample added a feild: igrnoed feild : bit length 10 > converter type NONE
+2023-09-08 11:53:14.414036: exsample added a bit map step: igrnoed feild : bit length 10

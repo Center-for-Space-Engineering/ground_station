@@ -1,0 +1,73 @@
+2023-09-08 11:53:14.413763: data types file found.
+2023-09-08 11:53:14.413849: Created data group exsample
+2023-09-08 11:53:14.413861: Decoded type for group exsample : feild name ignored bits, bit length  10 
+2023-09-08 11:53:14.413890: Decoded type for group exsample : feild name feild1, bit length 26, convertion typ int
+2023-09-08 11:53:14.413918: Decoded type for group exsample : feild name feild2, bit length 10, convertion typ float
+2023-09-08 11:53:14.413944: Decoded type for group exsample : feild name feild3, bit length 4, convertion typ string
+2023-09-08 11:53:14.413963: Decoded type for group exsample : feild name feild4, bit length 4, convertion typ NONE
+2023-09-08 11:53:14.413988: Decoded type for group exsample : feild name feild5, bit length 4, convertion typ NONE
+2023-09-08 11:53:14.414007: Decoded type for group exsample : feild name feild6, bit length 2, convertion typ NONE
+2023-09-08 11:53:14.414024: Decoded type for group exsample : feild name ignored bits, bit length  10
+2023-09-08 11:53:14.414074: Created data group exsample2
+2023-09-08 11:53:14.414085: Decoded type for group exsample2 : feild name coolName, bit length 15, convertion typ int
+2023-09-08 11:53:14.414108: Decoded type for group exsample2 : feild name coolName2, bit length 2, convertion typ bool
+2023-09-08 11:53:14.414250: Decoded type for group exsample2 : feild name coolName3, bit length 5, convertion typ string
+2023-09-08 11:53:14.414349: Created data group TEST
+2023-09-08 11:53:14.414366: Decoded type for group TEST : feild name coolName, bit length 15, convertion typ int
+2023-09-08 11:53:14.414405: Decoded type for group TEST : feild name coolName2, bit length 2, convertion typ bool
+2023-09-08 11:53:14.414467: Decoded type for group TEST : feild name coolName3, bit length 5, convertion typ string
+2023-09-08 11:53:14.414569: Created data types:
+ <! DOCTYPE html>
+<html>
+<body>
+<h1><strong>Data Type:</strong> exsample</h1>
+<h1><strong>Feilds in database:</strong></h1>
+<p>&emsp;<strong>Feild:</strong> feild1 <strong>Bit lenght:</strong> 26 <strong>Converter type:</strong> int </p>
+<p>&emsp;<strong>Feild:</strong> feild2 <strong>Bit lenght:</strong> 10 <strong>Converter type:</strong> float </p>
+<p>&emsp;<strong>Feild:</strong> feild3 <strong>Bit lenght:</strong> 4 <strong>Converter type:</strong> string </p>
+<h2><strong>Bit Map:</strong></h2>
+<p>&emsp;<strong>Feild:</strong> igrnoed feild <strong>Bit lenght:</strong> 10 </p>
+<p>&emsp;<strong>Feild:</strong> feild1 <strong>Bit lenght:</strong> 26 </p>
+<p>&emsp;<strong>Feild:</strong> feild2 <strong>Bit lenght:</strong> 10 </p>
+<p>&emsp;<strong>Feild:</strong> feild3 <strong>Bit lenght:</strong> 4 </p>
+<p>&emsp;<strong>Feild:</strong> feild4 <strong>Bit lenght:</strong> 4 </p>
+<p>&emsp;<strong>Feild:</strong> feild5 <strong>Bit lenght:</strong> 4 </p>
+<p>&emsp;<strong>Feild:</strong> feild6 <strong>Bit lenght:</strong> 2 </p>
+<p>&emsp;<strong>Feild:</strong> igrnoed feild <strong>Bit lenght:</strong> 10 </p>
+<h3><strong>Discontinuous Mappings:</strong></h3>
+<p>&emsp;<strong>Feild MSB:</strong>  feild1  <strong>Feild LSB</strong>  feild4 </p>
+<p>&emsp;<strong>Feild MSB:</strong>  feild5  <strong>Feild LSB</strong>  feild2 </p>
+<p>&emsp;<strong>Feild MSB:</strong>  feild4  <strong>Feild LSB</strong>  feild6 </p>
+</body>
+</html>
+<! DOCTYPE html>
+<html>
+<body>
+<h1><strong>Data Type:</strong> exsample2</h1>
+<h1><strong>Feilds in database:</strong></h1>
+<p>&emsp;<strong>Feild:</strong> coolName <strong>Bit lenght:</strong> 15 <strong>Converter type:</strong> int </p>
+<p>&emsp;<strong>Feild:</strong> coolName2 <strong>Bit lenght:</strong> 2 <strong>Converter type:</strong> bool </p>
+<p>&emsp;<strong>Feild:</strong> coolName3 <strong>Bit lenght:</strong> 5 <strong>Converter type:</strong> string </p>
+<h2><strong>Bit Map:</strong></h2>
+<p>&emsp;<strong>Feild:</strong> coolName <strong>Bit lenght:</strong> 15 </p>
+<p>&emsp;<strong>Feild:</strong> coolName2 <strong>Bit lenght:</strong> 2 </p>
+<p>&emsp;<strong>Feild:</strong> coolName3 <strong>Bit lenght:</strong> 5 </p>
+<h3><strong>Discontinuous Mappings:</strong></h3>
+</body>
+</html>
+<! DOCTYPE html>
+<html>
+<body>
+<h1><strong>Data Type:</strong> TEST</h1>
+<h1><strong>Feilds in database:</strong></h1>
+<p>&emsp;<strong>Feild:</strong> coolName <strong>Bit lenght:</strong> 15 <strong>Converter type:</strong> int </p>
+<p>&emsp;<strong>Feild:</strong> coolName2 <strong>Bit lenght:</strong> 2 <strong>Converter type:</strong> bool </p>
+<p>&emsp;<strong>Feild:</strong> coolName3 <strong>Bit lenght:</strong> 5 <strong>Converter type:</strong> string </p>
+<h2><strong>Bit Map:</strong></h2>
+<p>&emsp;<strong>Feild:</strong> coolName <strong>Bit lenght:</strong> 15 </p>
+<p>&emsp;<strong>Feild:</strong> coolName2 <strong>Bit lenght:</strong> 2 </p>
+<p>&emsp;<strong>Feild:</strong> coolName3 <strong>Bit lenght:</strong> 5 </p>
+<h3><strong>Discontinuous Mappings:</strong></h3>
+</body>
+</html>
+

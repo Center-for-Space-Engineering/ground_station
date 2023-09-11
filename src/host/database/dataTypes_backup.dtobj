@@ -1,0 +1,42 @@
+// this file holds all the data types to be collected.
+// RULES: 
+// 1: Any line holding // is igrnored. (basically this is how you comment)
+// 2: Any line with out a tab is consider a data group name, and will be stored into the data base as that name
+// 3: Any line with a TABS will be consider a data type of the data group above it. These type of lines must have a : and >.
+//  the format is <name of data feild> : <number of bits> > <data type>.
+//  This format is used to collected data from the bit stream then store it into the database.
+//  Data feild is the name of the data row to be added to the data base. 
+//  number of bits is how many bits are in the bit stream from the sensor. 
+//  data type is the type that the collected data should be converted to.  
+// 4: any line with # is igrnored bits. This is inteded for a header or footer. These lines have the following format. 
+//  # : <number of bits igrnored>
+// 5: lines that contain the @ are for discontinuos bit streams. This means that bits somewhere else in the bit stream
+//  that need to be added to this feild. The syntax is:
+//  <name of data feild> : <number of bits> > <data type> @ <MSB feild> < <LSB feild>.
+//  <name of data feild> : <number of bits> (See feil2 < feild5)
+//  NOTE: the first feild in the file can be the MSB or the LSB. 
+//  NOTE: this is consider the same data type as 3, it just tells the bit map grave the bits out of order. 
+//  NOTE: if you are going to do mulpile discontinuos types mapping to the same elment then the intermiate types must have a type cast of NONE. See feild1 < feild4 < feild 6.
+exsample
+# : 10 
+    feild1:26 > int @ feild1 < feild4
+    feild2:10 > float @ feild5 < feild2
+    feild3:4 > string
+    feild4:4 > NONE @ feild4 < feild6
+    feild5:4
+    feild6:2
+# : 10
+exsample2
+    coolName:15 > int
+    coolName2:2 > bool
+    coolName3:5 > string
+// above we have 2 exsample data types. The first exsample has three feilds name feild1 feild2 feild3. feild1 collectes
+// 32 bits from the bit stream, then converts it to an int. NOTE: exsample also has 10 bits of header and 10 bits of footer 
+// igrnored.
+// NOTE: Data feilds are collected in the order that they appear in the data group. 
+// NOTE: all feild names in a data group MUST BE unique. 
+TEST
+    coolName:15 > int
+    coolName2:2 > bool
+    coolName3:5 > string
+// NOTE: NO inline comments are allowed. 

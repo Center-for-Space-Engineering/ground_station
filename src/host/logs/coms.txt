@@ -1,0 +1,66 @@
+2023-09-08 11:53:14.417063: Test Server started http://localhost:5000
+2023-09-08 11:53:16.775516: Message recived: ['', 'exsample', 'arg1']
+2023-09-08 11:53:16.775829: SENT:
+ <p>ran command exsample with args ['arg1']<p><p>Ran function for ['arg1']</p>
+2023-09-08 12:12:50.545494: Message recived: ['', '']
+2023-09-08 12:12:50.546024: SENT:
+ <h1> <strong>Supported Commands</strong></h1><p>/exsample</p><p>&emsp;/arg1</p><p>/data_Collector</p><p>&emsp;/tables</p><p>&emsp;/getDataType/data group</p><p>&emsp;/saveDummyData</p><p>&emsp;/getData/data group/start time</p>
+2023-09-08 12:13:03.652093: Message recived: ['', 'data_Collector', 'tables']
+2023-09-08 12:13:03.652395: SENT:
+ <prunning command data_Collector with args ['tables']<p><! DOCTYPE html>
+<html>
+<body>
+<h1>DataBase Tables</h1><p><strong>Table:</strong> exsample</p>
+<p><strong>Table:</strong> exsample2</p>
+<p><strong>Table:</strong> TEST</p>
+</body>
+</html>
+2023-09-08 12:13:03.679207: Message recived: ['', 'favicon.ico']
+2023-09-08 12:13:03.679509: SENT:
+ <h1> <strong>Supported Commands</strong></h1><p>/exsample</p><p>&emsp;/arg1</p><p>/data_Collector</p><p>&emsp;/tables</p><p>&emsp;/getDataType/data group</p><p>&emsp;/saveDummyData</p><p>&emsp;/getData/data group/start time</p>
+2023-09-08 12:13:10.390751: Message recived: ['', 'data_Collector', 'exsample']
+2023-09-08 12:13:10.391202: SENT:
+ <prunning command data_Collector with args ['exsample']<p><p> Not vaild arg </p>
+2023-09-08 12:13:16.264296: Message recived: ['', 'data_Collector', 'exsample', '0']
+2023-09-08 12:13:16.264576: SENT:
+ <prunning command data_Collector with args ['exsample', '0']<p><p> Not vaild arg </p>
+2023-09-08 12:13:24.940006: Message recived: ['', 'data_Collector']
+2023-09-08 12:13:24.940336: SENT:
+ No run func
+2023-09-08 12:13:32.930632: Message recived: ['', 'data_Collector', 'exsample', '0']
+2023-09-08 12:13:32.931005: SENT:
+ <prunning command data_Collector with args ['exsample', '0']<p><p> Not vaild arg </p>
+2023-09-08 12:13:40.864104: Message recived: ['', '']
+2023-09-08 12:13:40.864552: SENT:
+ <h1> <strong>Supported Commands</strong></h1><p>/exsample</p><p>&emsp;/arg1</p><p>/data_Collector</p><p>&emsp;/tables</p><p>&emsp;/getDataType/data group</p><p>&emsp;/saveDummyData</p><p>&emsp;/getData/data group/start time</p>
+2023-09-08 12:14:12.986322: Message recived: ['', 'data_Collector', 'getDataType', 'exsample']
+2023-09-08 12:14:12.986761: SENT:
+ <prunning command data_Collector with args ['getDataType', 'exsample']<p><! DOCTYPE html>
+<html>
+<body>
+<h1><strong>Data Type:</strong> exsample</h1>
+<h1><strong>Feilds in database:</strong></h1>
+<p>&emsp;<strong>Feild:</strong> feild1 <strong>Bit lenght:</strong> 26 <strong>Converter type:</strong> int </p>
+<p>&emsp;<strong>Feild:</strong> feild2 <strong>Bit lenght:</strong> 10 <strong>Converter type:</strong> float </p>
+<p>&emsp;<strong>Feild:</strong> feild3 <strong>Bit lenght:</strong> 4 <strong>Converter type:</strong> string </p>
+<h2><strong>Bit Map:</strong></h2>
+<p>&emsp;<strong>Feild:</strong> igrnoed feild <strong>Bit lenght:</strong> 10 </p>
+<p>&emsp;<strong>Feild:</strong> feild1 <strong>Bit lenght:</strong> 26 </p>
+<p>&emsp;<strong>Feild:</strong> feild2 <strong>Bit lenght:</strong> 10 </p>
+<p>&emsp;<strong>Feild:</strong> feild3 <strong>Bit lenght:</strong> 4 </p>
+<p>&emsp;<strong>Feild:</strong> feild4 <strong>Bit lenght:</strong> 4 </p>
+<p>&emsp;<strong>Feild:</strong> feild5 <strong>Bit lenght:</strong> 4 </p>
+<p>&emsp;<strong>Feild:</strong> feild6 <strong>Bit lenght:</strong> 2 </p>
+<p>&emsp;<strong>Feild:</strong> igrnoed feild <strong>Bit lenght:</strong> 10 </p>
+<h3><strong>Discontinuous Mappings:</strong></h3>
+<p>&emsp;<strong>Feild MSB:</strong>  feild1  <strong>Feild LSB</strong>  feild4 </p>
+<p>&emsp;<strong>Feild MSB:</strong>  feild5  <strong>Feild LSB</strong>  feild2 </p>
+<p>&emsp;<strong>Feild MSB:</strong>  feild4  <strong>Feild LSB</strong>  feild6 </p>
+</body>
+</html>
+2023-09-08 12:17:46.364543: Message recived: ['', 'data_Collector', 'getData', 'exsample', '0']
+2023-09-08 12:17:46.369036: SENT:
+ <prunning command data_Collector with args ['getData', 'exsample', '0']<p><h1>exsample: ['Time Stored ', 'feild1', 'feild2', 'feild3']</h1> <p>1694027663.1894243,10,1.1,hello world</p><p>1694027663.2066176,10,1.1,hello world2</p><p>1694027663.2156928,10,1.1,hello world3</p><p>1694027663.2298536,10,1.1,hello world</p><p>1694027663.2387905,10,1.1,hello world2</p><p>1694027663.2471085,10,1.1,hello world3</p><p>1694027663.2604241,10,1.1,hello world</p><p>1694027663.2689674,10,1.1,hello world2</p><p>1694027663.2770498,10,1.1,hello world3</p><p>1694027663.2920206,10,1.1,hello world</p><p>1694027663.3004434,10,1.1,hello world2</p><p>1694027663.312025,10,1.1,hello world3</p><p>1694027663.3250606,10,1.1,hello world</p><p>1694027663.3333826,10,1.1,hello world2</p><p>1694027663.34138,10,1.1,hello world3</p><p>1694027663.35976,10,1.1,hello world</p><p>1694027663.3701735,10,1.1,hello world2</p><p>1694027663.3790069,10,1.1,hello world3</p><p>1694027663.3919966,10,1.1,hello world</p><p>1694027663.4009094,10,1.1,hello world2</p><p>1694027663.409519,10,1.1,hello world3</p><p>1694027663.4230225,10,1.1,hello world</p><p>1694027663.4316173,10,1.1,hello world2</p><p>1694027663.4403372,10,1.1,hello world3</p><p>1694027663.452977,10,1.1,hello world</p><p>1694027663.4614418,10,1.1,hello world2</p><p>1694027663.4699163,10,1.1,hello world3</p><p>1694027663.4822774,10,1.1,hello world</p><p>1694027663.4918127,10,1.1,hello world2</p><p>1694027663.5004742,10,1.1,hello world3</p><p>1694027705.4751894,10,1.1,hello world</p><p>1694027705.498423,10,1.1,hello world2</p><p>1694027705.5072427,10,1.1,hello world3</p><p>1694027791.43082,10,1.1,hello world</p><p>1694027791.4472873,10,1.1,hello world2</p><p>1694027791.455978,10,1.1,hello world3</p>
+2023-09-08 12:18:41.212053: Message recived: ['', 'data_Collector', 'getData', 'exsample', '1694027663.3701735']
+2023-09-08 12:18:41.215085: SENT:
+ <prunning command data_Collector with args ['getData', 'exsample', '1694027663.3701735']<p><h1>exsample: ['Time Stored ', 'feild1', 'feild2', 'feild3']</h1> <p>1694027663.3701735,10,1.1,hello world2</p><p>1694027663.3790069,10,1.1,hello world3</p><p>1694027663.3919966,10,1.1,hello world</p><p>1694027663.4009094,10,1.1,hello world2</p><p>1694027663.409519,10,1.1,hello world3</p><p>1694027663.4230225,10,1.1,hello world</p><p>1694027663.4316173,10,1.1,hello world2</p><p>1694027663.4403372,10,1.1,hello world3</p><p>1694027663.452977,10,1.1,hello world</p><p>1694027663.4614418,10,1.1,hello world2</p><p>1694027663.4699163,10,1.1,hello world3</p><p>1694027663.4822774,10,1.1,hello world</p><p>1694027663.4918127,10,1.1,hello world2</p><p>1694027663.5004742,10,1.1,hello world3</p><p>1694027705.4751894,10,1.1,hello world</p><p>1694027705.498423,10,1.1,hello world2</p><p>1694027705.5072427,10,1.1,hello world3</p><p>1694027791.43082,10,1.1,hello world</p><p>1694027791.4472873,10,1.1,hello world2</p><p>1694027791.455978,10,1.1,hello world3</p>
