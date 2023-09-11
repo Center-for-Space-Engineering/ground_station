@@ -4,20 +4,24 @@ from database.dataType import dataType #this import is to run this file from the
 from colorama import Fore
 
 sys.path.insert(0, "..")
-from logger.logger import logggerCustom
+from infoHandling.logger import logggerCustom
 
 
+#TODO: add try except statements 
 
 
 class dataTypeImporter():
-    def __init__(self):
+    def __init__(self, coms):
         self.__dataTypes = {}
         self.__logger = logggerCustom("logs/dataTypeImporter.txt")
+        self.__coms = coms
         try:
             self.__dataFile = open("database/dataTypes.dtobj")
             self.__logger.sendLog("data types file found.")
+            self.__coms.printMessage("data types file found.", 2)
         except:
-            print(Fore.RED + "ERROR: " + Fore.WHITE + " No database/dataTypes.dtobj file detected!")   
+            self.__coms(" No database/dataTypes.dtobj file detected!", 0)   
+            self.__logger.sendLog(" No database/dataTypes.dtobj file detected!")   
     def pasreDataTypes(self):
         currentDataGroup = ""
         for line in self.__dataFile:
@@ -62,10 +66,11 @@ class dataTypeImporter():
                     processed = line.replace('  ', "")
                     processed = processed.replace("\n", "")
                     currentDataGroup = processed.strip()
-                    self.__dataTypes[currentDataGroup] = dataType(currentDataGroup)
+                    self.__dataTypes[currentDataGroup] = dataType(currentDataGroup, self.__coms)
                     self.__logger.sendLog(f"Created data group {currentDataGroup}")
 
         self.__logger.sendLog(f"Created data types:\n {self}")   
+        self.__coms.printMessage(f"Created data types:\n {self}", 2)   
     def getDataTypes(self):
         return self.__dataTypes
     def __str__(self):

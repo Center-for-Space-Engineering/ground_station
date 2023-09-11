@@ -7,15 +7,15 @@ import sys
 #custom imports
 
 from database.dataTypesImporter import dataTypeImporter
-# from dataTypesImporter import dataTypeImporter # for running locally.
 sys.path.insert(0, "..")
-from logger.logger import logggerCustom
+from infoHandling.logger import logggerCustom
 
 
 class dataBaseHandler():
-    def __init__(self, dbName = 'database/database_file'):
+    def __init__(self, coms, dbName = 'database/database_file'):
         #make class matiance vars
         self.__logger = logggerCustom("logs/database_log_file.txt")
+        self.__coms = coms
         
         #Make data base (bd)
         self.__conn = sqlite3.connect(dbName) 
@@ -32,7 +32,7 @@ class dataBaseHandler():
         } #  NOTE: this dict makes the .dtobj file syntax match sqlite3 syntax. 
 
         #find and create the data tables fro the data base
-        tableFinder = dataTypeImporter()
+        tableFinder = dataTypeImporter(coms)
         tableFinder.pasreDataTypes()
         self.__tables = tableFinder.getDataTypes() #this varible will be used for creatig/accessing/parsing the data. 
                                                    #  In other words its super imporatant.  
@@ -58,10 +58,13 @@ class dataBaseHandler():
             try :  
               self.__c.execute(dbCommand)
               self.__logger.sendLog("Created table: " + dbCommand)
+              self.__coms.printMessage("Created table: " + dbCommand, 2)
             except Exception as error:
-              print("Error: " + str(error) + " Command send to db: " + dbCommand) #TODO: replace this line with the reporter class when its made
+              self.__coms.printMessage(str(error) + " Command send to db: " + dbCommand, 0) 
               self.__logger.sendLog("Failed to created table: " + dbCommand + str(error))
+              self.__coms.printMessage("Failed to created table: " + dbCommand + str(error), 0)
         self.__logger.sendLog("Created database:\n" + self.getTablesHTML())   
+        self.__coms.printMessage("Created database:\n" + self.getTablesHTML(), 2)   
     '''This func takes in the table_name to insert and a list of data, the list must be in the same order that is defined in the .dtobj file.'''
     def insertData(self, table_name, data):
       dbCommand = f"INSERT INTO {table_name} (time_stamp"
@@ -85,8 +88,10 @@ class dataBaseHandler():
         self.__c.execute(dbCommand)
         self.__conn.commit()
         self.__logger.sendLog("INSERT COMMAND: " + dbCommand)
+        self.__coms.printMessage("INSERT COMMAND: " + dbCommand, 2)
       except Exception as error:
-              print("Error: " + str(error) + " Command send to db: " + dbCommand) #TODO: replace this line with the reporter class when its made
+              self.__coms(str(error) + " Command send to db: " + dbCommand, 0) 
+              self.__logger.sendLog(str(error) + " Command send to db: " + dbCommand) 
               raise Exception
     #some  useful getters 
     def getTablesHTML(self):
@@ -119,8 +124,10 @@ class dataBaseHandler():
         dbCommand = f"SELECT * FROM {table_name} WHERE time_stamp >= {str(start_time)} ORDER BY time_stamp"
         self.__c.execute(dbCommand)
         self.__logger.sendLog("Query command recived: "  + dbCommand)          
+        self.__coms.printMessage("Query command recived: "  + dbCommand, 2)          
        except Exception as error:
-        print("Error: " + str(error) + " Command send to db: " + dbCommand) #TODO: replace this line with the reporter class when its made
+        self.__coms.printMessage(str(error) + " Command send to db: " + dbCommand, 0)
+        self.__logger.sendLog(str(error) + " Command send to db: " + dbCommand)
         return "<p> Error getting data </p>"
        #get cols 
        cols = ["Time Stored "] # add time stamp to the cols lis
@@ -139,22 +146,5 @@ class dataBaseHandler():
          message += "</p>"
 
        self.__logger.sendLog("data collected: " + message)
+       self.__coms.printMessage("data collected: " + message, 2)
        return message
-
-if __name__ == "__main__":
-    x = dataBaseHandler()
-    print(x.getTablesHTML())
-
-    for f in x.getTables_strLIST():
-       print(x.getDataType(f))
-      
-    for f in x.getTables_strLIST():
-       print(x.getfeilds(x.getDataType(f)))
-
-
-    startT = time.time()
-    x.insertData("exsample", [10, 1.1, "hello world"])  
-    x.insertData("exsample", [10, 1.1, "hello world2"])  
-    x.insertData("exsample", [10, 1.1, "hello world3"])  
-
-    print(x.getData("exsample", startT))

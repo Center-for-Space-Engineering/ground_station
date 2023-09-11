@@ -1,14 +1,16 @@
 import sys
 sys.path.insert(0, "..")
-from logger.logger import logggerCustom
+from infoHandling.logger import logggerCustom
+
 
 class dataType():
-    def __init__(self, dataGroup):
+    def __init__(self, dataGroup, coms):
         self.__feilds = {} #this dict contains all the data types that will be saved to the data base
         self.__bitMap = []# this list contains info on how to collect the bits from the bit stream. 
         self.__convertMap = {} #this dict contatins types that need to be mapped together. The MSB is the key.  
         self.__dataGroup = dataGroup
-        self.__logger = logggerCustom(f"logs/dataType_{self.__dataGroup}.txt")  
+        self.__logger = logggerCustom(f"logs/dataType_{self.__dataGroup}.txt") 
+        self.__coms = coms 
     def addFeild(self, name, bits, convert):
         self.__feilds[name] = (bits, convert)
         self.__logger.sendLog(f"{self.__dataGroup} added a feild: {name} : bit length {bits} > converter type {convert}")

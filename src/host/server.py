@@ -7,11 +7,15 @@ from cmd import cmd
 #imports from other folders that are not local
 import sys
 sys.path.insert(0, "..")
-from logger.logger import logggerCustom
+from infoHandling.logger import logggerCustom
+from infoHandling.messageHandler import messageHandler
+
 # controlEmulo = keySimulator()
 
 log = logggerCustom("logs/coms.txt")
-cmdObj = cmd()
+coms = messageHandler()
+cmdObj = cmd(coms)
+
 
 class serverHandler():
     def __init__(self, hostName, serverPort):
@@ -21,6 +25,7 @@ class serverHandler():
     def run(self):
         webServer = HTTPServer((self.__hostName, self.__serverPort), LitServer)
         log.sendLog("Test Server started http://%s:%s" % (self.__hostName, self.__serverPort))
+        coms.printMessage("Test Server started http://%s:%s" % (self.__hostName, self.__serverPort), 2)
         print("Server started http://%s:%s" % (self.__hostName, self.__serverPort))
 
         try:
@@ -39,6 +44,7 @@ class LitServer(BaseHTTPRequestHandler):
     def do_GET(self):
         path = self.path.split("/")
         log.sendLog("Message recived: " + str(path))
+        coms.printMessage("Message recived: " + str(path), 3)
         message = cmdObj.parseCmd(path[1:])
         self.send_response(200)
         self.send_header("Content-type", "text/html")
@@ -49,6 +55,7 @@ class LitServer(BaseHTTPRequestHandler):
         self.wfile.write(bytes(message, "utf-8"))
         self.wfile.write(bytes("</body></html>", "utf-8"))
         log.sendLog("SENT:\n " + message)
+        coms.printMessage("SENT:\n " + message, 2)
 
 def test():
     x = serverHandler("localhost", 5000)
