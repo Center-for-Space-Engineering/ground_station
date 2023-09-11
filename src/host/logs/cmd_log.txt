@@ -1,6 +1,0 @@
-2023-09-11 14:10:55.535191: Commands added to the server: {'data_Collector': <cmd_dataCollector.cmd_dataCollector object at 0x000001589E1A1810>, 'exsample': <cmd_exsample.cmd_exsample object at 0x000001589E2F9290>}
-2023-09-11 14:10:59.555363: Command Action: data_Collector['data_Collector', 'saveDummyData']
-2023-09-11 14:11:07.745025: Command Action: data_Collector['data_Collector', 'saveDummyData']
-2023-09-11 14:11:09.085318: Command Action: data_Collector['data_Collector', 'saveDummyData']
-2023-09-11 14:12:02.525327: Command Action: data_Collector['data_Collector', 'getDataType', 'exsample']
-2023-09-11 14:12:12.095616: Command Action: data_Collector['data_Collector', 'getData', 'exsample', '0']

@@ -1,3 +1,0 @@
-2023-09-11 14:10:55.525089: Found Module: cmd_dataCollector
-2023-09-11 14:10:55.535191: Found Module: cmd_exsample
-2023-09-11 14:10:55.535191: Collected Modules: [<class 'cmd_dataCollector.cmd_dataCollector'>, <class 'cmd_exsample.cmd_exsample'>]
