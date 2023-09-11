@@ -1,1 +1,0 @@
-2023-09-11 12:24:19.089039: Commands added to the server: {'exsample': <cmd_exsample.cmd_exsample object at 0x7fc963ae6a60>, 'data_Collector': <cmd_dataCollector.cmd_dataCollector object at 0x7fc963ae69d0>}

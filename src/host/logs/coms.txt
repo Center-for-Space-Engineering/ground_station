@@ -1,3 +1,0 @@
-2023-09-11 12:24:19.090507: Test Server started http://localhost:5000
-2023-09-11 12:24:21.131965: Server stopped.
-2023-09-11 12:24:21.132137: Quite command recived.

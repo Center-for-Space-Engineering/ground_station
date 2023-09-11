@@ -1,6 +1,0 @@
-2023-09-11 12:24:19.088258: TEST added a feild: coolName : bit length 15 > converter type int
-2023-09-11 12:24:19.088267: TEST added a bit map step: coolName : bit length 15
-2023-09-11 12:24:19.088280: TEST added a feild: coolName2 : bit length 2 > converter type bool
-2023-09-11 12:24:19.088286: TEST added a bit map step: coolName2 : bit length 2
-2023-09-11 12:24:19.088298: TEST added a feild: coolName3 : bit length 5 > converter type string
-2023-09-11 12:24:19.088303: TEST added a bit map step: coolName3 : bit length 5
