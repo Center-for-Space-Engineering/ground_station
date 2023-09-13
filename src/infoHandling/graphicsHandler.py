@@ -1,9 +1,10 @@
 import random
+import datetime
 from infoHandling.systemEmuo import systemEmuo as sys 
 # from systemEmuo import systemEmuo as sys #for running by its self
 
 from termcolor import colored
-import time
+
 
 
 
@@ -24,7 +25,8 @@ class graphicsHandler(sys):
 
         self.__colors = ['red', 'magenta', 'blue', 'green', 'cyan', 'yellow', 'light_cyan', 'white', 'light_magenta', 'light_blue']
         self.__types = ['Error: ', 'Warning: ', 'Log: ', 'Get request: ', 'Data type found: ', 'Sensor connected: ', 'Thread created: ', 'Info: ', 'Command Mapped: ', 'reserved: ']
-        self.__messages = [(2, 'Graphics handler started')]
+        self.__messages = [(2, colored(f"[{datetime.datetime.now()}]", 'light_blue') + '\tGraphics handler started')]
+        self.__threaedsStatus = []
         super().__init__() 
 
     def test(self):
@@ -38,16 +40,30 @@ class graphicsHandler(sys):
     def displayNumber(self, num, message):
         super().print_old_continuos(colored(message,self.__colors[num]), delay=0)
 
-    def writeMessageLog(self):
+    def writeMessageLog(self, clearList = False):
         for num in self.__messages:
             super().print_old_continuos(colored(self.__types[num[0]],self.__colors[num[0]]) + num[1], delay=0, end='\n')
-        self.__messages.clear() #clear the list
+        if(len(self.__messages) > 10) or clearList:
+            self.__messages.clear() #clear the list
     
     def sendMessage(self, num, message):
-        self.__messages.append((num, message))
-    
-   
+        self.__messages.append((num, colored(f"[{datetime.datetime.now()}]", 'light_blue') + "\t" + message))
 
-if __name__ == "__main__": 
-    t = cypher()
-    t.test()
+    def reportThread(self,report):
+        self.__threaedsStatus = report
+
+    def writeThreadReport(self):
+        for report in self.__threaedsStatus:
+            if report[1] == "Running":
+                super().print_old_continuos(f"Time: {report[2]} Thread {report[0]}: " + colored(report[1],self.__colors[3]) + "\t", delay=0)
+            elif report[1] == "Error":
+                super().print_old_continuos(f"{report[2]} Thread {report[0]}: " + colored(report[1],self.__colors[0])+ "\t", delay=0)
+            else :
+                super().print_old_continuos(f"{report[2]} Thread {report[0]}: " + colored(report[1],self.__colors[2])+ "\t", delay=0)
+        if(len(self.__threaedsStatus) != 0):
+            self.__threaedsStatus.clear()
+            print() # print new line
+
+
+
+            
