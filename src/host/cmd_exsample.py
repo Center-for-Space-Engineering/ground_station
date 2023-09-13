@@ -33,7 +33,7 @@ class cmd_exsample(commandParent):
     def getArgs(self):
         message = ""
         for key in self.__args:
-            message += f"<p>&emsp;/{key}</p>"
+            message += f"<p>&emsp;/{self.__comandName}/{key}</p>"
         return message
 
     

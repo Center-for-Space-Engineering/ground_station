@@ -41,18 +41,17 @@ class cmd_dataCollector(commandParent):
         message = ""
         for key in self.__args:
             if(key == "getDataType"):
-                message += f"<p>&emsp;/{key}/data group</p>"
+                message += f"<p>&emsp;/{self.__comandName}/{key}/-data type-</p>"
             elif (key == "getData"):
-                message += f"<p>&emsp;/{key}/data group/start time</p>"
+                message += f"<p>&emsp;/{self.__comandName}/{key}/-data group-/-start time-</p>"
             else :
-                message += f"<p>&emsp;/{key}</p>"
+                message += f"<p>&emsp;/{self.__comandName}/{key}</p>"
         self.__logger.sendLog("Returned to server: " + message)
         return message
     def getDataType(self, args):
         return str(self.__dataBase.getDataType(args[1]))
     def saveDummyData(self, args):
         try :
-            aol;khdohjuaqfwe0
             self.__dataBase.insertData("exsample", [10, 1.1, "hello world"])  
             self.__dataBase.insertData("exsample", [10, 1.1, "hello world2"])  
             self.__dataBase.insertData("exsample", [10, 1.1, "hello world3"])

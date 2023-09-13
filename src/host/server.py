@@ -58,7 +58,7 @@ class LitServer(BaseHTTPRequestHandler):
         coms.printMessage("SENT:\n " + message, 2)
 
 def test():
-    x = serverHandler("localhost", 5000)
+    x = serverHandler('144.39.167.206', 5000)
     x.run()
 
 if __name__ == "__main__": 
