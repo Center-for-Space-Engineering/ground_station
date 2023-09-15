@@ -1,9 +1,7 @@
 from infoHandling.graphicsHandler import graphicsHandler
 import threading
 import time
-import sys
-sys.path.insert(0, "..")
-# from taskHandling.threadWrapper import threadWrapper # running from server
+# from host.taskHandling.threadWrapper import threadWrapper # running from server
 from threadWrapper import threadWrapper # running as test for taskHandling
 '''
 There should only be ONE of these classes! It is meant to have shared access and has threading protection.
@@ -29,24 +27,32 @@ class messageHandler(threadWrapper):
     def printMessage(self, message, typeM=2):
         with self.__graphicsLock :
             self.__graphics.sendMessage(typeM, message)
-            
+    def reportThread(self,report):
+        with self.__graphicsLock :
+            self.__graphics.reportThread(report)
+    def reportBytes(self, byteCount):
+        with self.__graphicsLock :
+            self.__graphics.reportByte(byteCount)
 
     def flush(self):
-        self.__graphics.writeMessageLog()
+        with self.__graphicsLock :
+            self.__graphics.writeMessageLog()
     def flushThreadReport(self):
-        self.__graphics.writeThreadReport()
+        with self.__graphicsLock :
+            self.__graphics.writeThreadReport()
+    def flushBytes(self):
+        with self.__graphicsLock :
+            self.__graphics.writeByteReport()
 
     def run(self, refresh = 0.5): #Note if things start getting wired it is cause the refresh rate is too fast for the screen to print it.
         super().setStatus("Running")
         while (super().getRunning()):
-            with self.__graphicsLock :
-                print("\033c", end='') #clears the terminal
-                self.flushThreadReport()
-                print()
-                self.flush()
+            print("\033c", end='') #clears the terminal
+            self.flushThreadReport()
+            print()
+            self.flush()
+            print()
+            self.flushBytes()
             time.sleep(refresh)
 
-    def reportThread(self,report):
-        with self.__graphicsLock :
-            self.__graphics.reportThread(report)
     

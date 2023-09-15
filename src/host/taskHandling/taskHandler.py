@@ -1,12 +1,12 @@
-from collections.abc import Callable, Iterable, Mapping
+
 import threading
 import time
 import sys
 sys.path.insert(0, "..")
 from infoHandling.logger import logggerCustom
 from infoHandling.messageHandler import messageHandler
-# from taskHandling.threadWrapper import threadWrapper # running from server
-from threadWrapper import threadWrapper # running alone
+from taskHandling.threadWrapper import threadWrapper # running from server
+# from threadWrapper import threadWrapper # running alone
 from termcolor import colored
 import datetime
 
@@ -58,7 +58,7 @@ class taskHandler():
                     self.__logger.sendLog(f"Thread {thread} had an Error. ")
         self.__coms.reportThread(reports)
 
-    def killTask(self):
+    def killTasks(self):
         for thread in self.__threads:
             self.__threads[thread][1].kill_Task() 
             self.__logger.sendLog(f"Thread {thread} has been killed. ")
@@ -69,18 +69,18 @@ class taskHandler():
 if __name__ == "__main__":
     coms = messageHandler()
     x = taskHandler(coms)
-    y = threadWrapper()
-    z = threadWrapper()
+    y = threadWrapper(coms)
+    z = threadWrapper(coms)
 
     x.addThread(y.test1, 'task 1', y)
     x.addThread(z.test2, 'task2', z)
 
     x.start()
-    for i in range (20):
+    for i in range (15):
         x.getThreadStatus()
         time.sleep(0.5)
 
     x.getThreadStatus()
-    x.killTask()
+    x.killTasks()
         
     
