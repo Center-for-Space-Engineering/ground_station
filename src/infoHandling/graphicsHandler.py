@@ -31,6 +31,7 @@ class graphicsHandler(sys):
         self.__byteReport = []
         self.__byteDisp = byteDisp
         self.__byteDiv = byteDiv
+        self.__messagesPrement = []
         super().__init__() 
 
     def test(self):
@@ -53,6 +54,14 @@ class graphicsHandler(sys):
         self.__messages.append((num, colored(f"[{datetime.datetime.now()}]", 'light_blue') + "\t" + message))
         if len(self.__messages) >= self.__messagsDisplayed : # this basically makes it a FIFO queue for messaging
             self.__messages.remove(self.__messages[0])
+    
+    def sendMessagePrement(self, num, message):
+        self.__messagesPrement.append((num, colored(f"[{datetime.datetime.now()}]", 'light_blue') + "\t" + message))
+    
+    def writeMessagePrementLog(self, clearList = False):
+        super().print_old_continuos(colored('Permanent Log report: ',self.__colors[3]) + "\t", delay=0, end = '\n')
+        for num in self.__messagesPrement:
+            super().print_old_continuos(colored(self.__types[num[0]],self.__colors[num[0]]) + num[1], delay=0, end='\n')
 
     def reportThread(self,report):
         self.__threaedsStatus = report

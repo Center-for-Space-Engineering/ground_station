@@ -1,8 +1,8 @@
 from infoHandling.graphicsHandler import graphicsHandler
 import threading
 import time
-# from host.taskHandling.threadWrapper import threadWrapper # running from server
-from threadWrapper import threadWrapper # running as test for taskHandling
+from host.taskHandling.threadWrapper import threadWrapper # running from server
+# from threadWrapper import threadWrapper # running as test for taskHandling
 '''
 There should only be ONE of these classes! It is meant to have shared access and has threading protection.
 '''
@@ -24,6 +24,9 @@ class messageHandler(threadWrapper):
         8  : 'light_magenta' : Command Mapped
         9  : 'light_blue' : reserved
     '''
+    def sendMessagePrement(self, message, typeM=2):
+        with self.__graphicsLock :
+            self.__graphics.sendMessagePrement(typeM, message)
     def printMessage(self, message, typeM=2):
         with self.__graphicsLock :
             self.__graphics.sendMessage(typeM, message)
@@ -37,6 +40,9 @@ class messageHandler(threadWrapper):
     def flush(self):
         with self.__graphicsLock :
             self.__graphics.writeMessageLog()
+    def flushPrem(self):
+        with self.__graphicsLock :
+            self.__graphics.writeMessagePrementLog()
     def flushThreadReport(self):
         with self.__graphicsLock :
             self.__graphics.writeThreadReport()
@@ -48,6 +54,8 @@ class messageHandler(threadWrapper):
         super().setStatus("Running")
         while (super().getRunning()):
             print("\033c", end='') #clears the terminal
+            self.flushPrem()
+            print()
             self.flushThreadReport()
             print()
             self.flush()

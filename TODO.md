@@ -20,3 +20,7 @@
     make classes for handling threading with the server and pi.
 # add automattic error reporting
     if possible have the ground station automatically report an error to someone if it fails. 
+# doc back log
+    1. graphics Handler.py
+    2. messageHandler.py
+    3. systemEmuo.py
