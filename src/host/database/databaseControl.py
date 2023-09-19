@@ -3,23 +3,30 @@ import sqlite3
 import pandas as pd
 import time
 import sys
+import threading
 
 #custom imports
 
 from database.dataTypesImporter import dataTypeImporter
 sys.path.insert(0, "..")
 from infoHandling.logger import logggerCustom
+from host.taskHandling.threadWrapper import threadWrapper 
 
 
-class dataBaseHandler():
+class dataBaseHandler(threadWrapper):
+    '''
+      calling the init function will create the basics for the class and then add the createDataBase to the queue for task to be done,
+      when you start the run function. To be clear this class should work just fine in a single thread, just dont call run, makeRequest and getRequest.
+      However, when running multi thread, the user must call run FIRST, then they can use the make request and get request to interface with the class. 
+      NOTE: When running multi threaded, only the __init__, makeRequest, getRequest, and run function should be called by out side classes and threads. 
+    '''
     def __init__(self, coms, dbName = 'database/database_file'):
+        super().__init__()
         #make class matiance vars
         self.__logger = logggerCustom("logs/database_log_file.txt")
         self.__coms = coms
-        
-        #Make data base (bd)
-        self.__conn = sqlite3.connect(dbName) 
-        self.__c = self.__conn.cursor()
+        self.__dbName = dbName
+        self.__dbLock = threading.Lock()
 
         #make Maps for db creation
         self.__typeMap = { #the point of this dictinary is to map the type names from the dataTypes.dtobj file to 
@@ -29,10 +36,34 @@ class dataBaseHandler():
             "string" : "TEXT",
             "bool" : "BOOLEAN",
             "bigint" : "BIGINT"
-        } #  NOTE: this dict makes the .dtobj file syntax match sqlite3 syntax. 
+        } #  NOTE: this dict makes the .dtobj file syntax match sqlite3 syntax.
 
-        #find and create the data tables fro the data base
-        tableFinder = dataTypeImporter(coms)
+        self.__functionMap = {
+           'createDataBase' : self.createDataBase,
+           'getTablesHTML' : self.getTablesHTML,
+           'getTables_strLIST' : self.getTables_strLIST,
+           'getDataType' : self.getDataType,
+           'getfeilds' : self.getfeilds,
+           'getfeildsList' : self.getfeildsList,
+           'getData' : self.getData,
+           'insertData' : self.insertData
+        } 
+        # this is how we keep track of requsts
+        self.__requetNum = 0
+        # this is how we handle task in this class, the format is a list [func name, list of args, bool to mark when its been served, returned time, request num]
+        self.__requets = [['createDataBase', [], False, None, self.__requetNum]]
+        self.__completedRequestes = {}
+    '''
+      Makes the data base.
+      NOTE: if you want to change the name of the data base then that needs to be done when you make the class
+    '''
+    def createDataBase(self):
+        #Make data base (bd)
+        self.__conn = sqlite3.connect(self.__dbName) 
+        self.__c = self.__conn.cursor()
+
+       #find and create the data tables fro the data base
+        tableFinder = dataTypeImporter(self.__coms)
         tableFinder.pasreDataTypes()
         self.__tables = tableFinder.getDataTypes() #this varible will be used for creatig/accessing/parsing the data. 
                                                    #  In other words its super imporatant.  
@@ -64,18 +95,21 @@ class dataBaseHandler():
               self.__logger.sendLog("Failed to created table: " + dbCommand + str(error))
               self.__coms.printMessage("Failed to created table: " + dbCommand + str(error), 0)
         self.__logger.sendLog("Created database:\n" + self.getTablesHTML())   
-        self.__coms.printMessage("Created database:\n" + self.getTablesHTML(), 2)   
-    '''This func takes in the table_name to insert and a list of data, the list must be in the same order that is defined in the .dtobj file.'''
-    def insertData(self, table_name, data):
-      dbCommand = f"INSERT INTO {table_name} (time_stamp"
-      feilds = self.getfeilds(self.getDataType(table_name)) #get the data type obj and then get the feilds list
+        self.__coms.printMessage("Created database", 2)   
+    '''
+    This func takes in the table_name to insert and a list of data, the list must be in the same order that is defined in the .dtobj file.
+    args is a list were the fist index is the table name and the second is the data
+    '''
+    def insertData(self, args):
+      dbCommand = f"INSERT INTO {args[0]} (time_stamp" #args[0] is the table name
+      feilds = self.getfeilds([self.getDataType([args[0]])]) #get the data type obj and then get the feilds list
       for feild_name in feilds:
         if(feild_name!= "igrnoed feild" and feilds[feild_name][1] != "NONE"): #we dont need feilds for igrnoed data feilds
           dbCommand += ", "
           dbCommand += f"{feild_name}"
       dbCommand +=  ") "
       dbCommand += f"VALUES ({time.time()}"
-      for val in data:
+      for val in args[1]: #args[1] is the data
          dbCommand += ", "
          # for sql str has a special format so we need the if statment
          if(type(val) != str):
@@ -93,6 +127,7 @@ class dataBaseHandler():
               self.__coms(str(error) + " Command send to db: " + dbCommand, 0) 
               self.__logger.sendLog(str(error) + " Command send to db: " + dbCommand) 
               raise Exception
+      return "Complete"
     #some  useful getters 
     def getTablesHTML(self):
         message = "<! DOCTYPE html>\n<html>\n<body>\n<h1>DataBase Tables</h1>"
@@ -105,23 +140,35 @@ class dataBaseHandler():
       for table in self.__tables:
          strList.append(table)
       return strList 
-    def getDataType(self, table_name):
-       return self.__tables[table_name]
-    def getfeilds(self, dataType):
-       return dataType.getFields()
-    def getfeildsList(self, dataType):
-       feilds = dataType.getFields()
+    '''
+    args is a list where the fist index is the table name
+    '''
+    def getDataType(self, args):
+       return self.__tables[args[0]] # the arg is the table name to find
+    '''
+    args is a list where the fist index is a data type obj 
+    '''
+    def getfeilds(self, args):
+       return args[0].getFields() # the args is a data type obj in the first index of the list
+    '''
+    args is a list where the fist index is a data type obj 
+    '''
+    def getfeildsList(self, args):
+       feilds = args[0].getFields()# the args is a data type obj in the first index of the list
        feildsList = []
        for feild in feilds:
           if(feilds[feild][1] != "NONE"): #dont add any feilds that are not in the data base
             feildsList.append(feild)
             
        return feildsList
-    def getData(self, table_name, start_time):
-       message = f"<h1>{table_name}: "
+    '''
+    args is a list where the fist index is the table name and the second is the start time for collecting the data
+    '''
+    def getData(self, args):
+       message = f"<h1>{args[0]}: " # args[0] is the table name
        try :
         #from and run db command
-        dbCommand = f"SELECT * FROM {table_name} WHERE time_stamp >= {str(start_time)} ORDER BY time_stamp"
+        dbCommand = f"SELECT * FROM {args[0]} WHERE time_stamp >= {str(args[1])} ORDER BY time_stamp" #args 1 is the time stamp
         self.__c.execute(dbCommand)
         self.__logger.sendLog("Query command recived: "  + dbCommand)          
         self.__coms.printMessage("Query command recived: "  + dbCommand, 2)          
@@ -131,7 +178,7 @@ class dataBaseHandler():
         return "<p> Error getting data </p>"
        #get cols 
        cols = ["Time Stored "] # add time stamp to the cols lis
-       cols += self.getfeildsList(self.getDataType(table_name))
+       cols += self.getfeildsList([self.getDataType([args[0]])])
 
        message += f"{cols}</h1> "
 
@@ -147,4 +194,45 @@ class dataBaseHandler():
 
        self.__logger.sendLog("data collected: " + message)
        self.__coms.printMessage("data collected: " + message, 2)
-       return message
+       return message 
+    '''
+      This function is for multi threading purpose because sql will only let one thread access it. IT works by using a FIFO queue to process
+      Task assigned to it by other threads.
+    '''
+    def run(self):
+       super().setStatus("Running")
+       sleep = False
+       while(super().getRunning()):
+          with self.__dbLock:
+              # check to see if there is a request
+              if(len(self.__requets) > 0 ):
+                  #check to see if the request has been servced
+                  if(self.__requets[0][2] == False):
+                    if(len(self.__requets[0][1]) > 0): self.__requets[0][3] = self.__functionMap[self.__requets[0][0]](self.__requets[0][1])
+                    else : self.__functionMap[self.__requets[0][0]]()
+                    self.__requets[0][2] = True
+                    self.__completedRequestes[self.__requets[0][4]] = self.__requets[0][3] # we only need the return type of the object
+                    self.__requets.remove(self.__requets[0]) # delete the completed task
+              elif (len(self.__requets) == 0):
+                 sleep = True      
+          if(sleep): #sleep if no task are needed. 
+            time.sleep(0.5)
+    '''
+      Make a request to to the database, it then returns the task number that you can pass to get Request to see if your task has been completed. 
+    '''
+    def makeRequest(self, type, args):
+       with self.__dbLock:
+        self.__requetNum += 1 # incrament the requsest num 
+        self.__requets.append([type, args, False, None, self.__requetNum])
+        temp = self.__requetNum # set a local var to the reqest num so we can relase the mutex
+       return temp
+    '''
+    Check to see if the task has been complete, if it returns None then it has not been completed. 
+    '''
+    def getRequest(self, requestNum):
+       try :
+          temp = self.__completedRequestes[requestNum] #this check to see if it is complete or not, because if it is not it just fails
+          del self.__completedRequestes[requestNum] # delete the completed task to save space
+          return temp
+       except :
+          return None        

@@ -10,7 +10,6 @@ class threadWrapper():
         self.__lockStatus = threading.Lock()
         self.__lockRunning = threading.Lock()
 
-
     def test1(self):
         self.__status = "Running"
         for i in range(5):

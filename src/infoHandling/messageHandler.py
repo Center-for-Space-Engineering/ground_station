@@ -61,6 +61,4 @@ class messageHandler(threadWrapper):
             self.flush()
             print()
             self.flushBytes()
-            time.sleep(refresh)
-
-    
+            time.sleep(refresh)    

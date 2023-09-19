@@ -12,7 +12,6 @@ class cmd():
         self.__logger = logggerCustom("logs/cmd_log.txt")
         self.__commandDict = {}
         self.__coms = coms
-        self.collectCommands()
         
     
     '''This func will look through the __commandDict to see if there is a map from the get request to a command.'''
@@ -36,12 +35,15 @@ class cmd():
     def setCommandDict(self, new):
         self.__commandDict = new
     '''This fuc creats the dynamicImporter (spelled wrong, call it my programing style), after the dynamicImporter goes through the folder searching for any extra commands it adds them into the __commandDict so that the server can levrage them.'''
-    def collectCommands(self):
+    def collectCommands(self, db):
         x = dinamicImporter(self.__coms)
         moduleList = x.getModList()
 
         for obj in moduleList: #if you want to add any args to the __init__ function other than cmd you will have to change the code in this for loop. I recomend you just use setters. Or find a way not to use them at all.  
-            myc_obj = obj(self, self.__coms) #the reason why I pass cmd into the new class is so that the class can define its own command names and structures.
+            if('cmd_dataCollector' in str(obj)):
+                 myc_obj = obj(self, self.__coms, db) #Here I need the data base refrance for the data base collector class
+            else :
+                myc_obj = obj(self, self.__coms) #the reason why I pass cmd into the new class is so that the class can define its own command names and structures.
             
         self.__logger.sendLog("Commands added to the server: " + str(self.__commandDict))
         self.__coms.printMessage(str(self.__commandDict), 8)
