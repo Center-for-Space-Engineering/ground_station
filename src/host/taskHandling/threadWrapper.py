@@ -24,7 +24,7 @@ class threadWrapper():
         self.__status = "Running"
         for i in range(40):
             if self.__coms != None:
-                self.__coms.printMessage("Test 2 dummy bytres received...")
+                # self.__coms.printMessage("Test 2 dummy bytres received...")
                 self.__coms.reportBytes(random.randint(1, 11) * 1000)
                 time.sleep(0.25)
         if self.__coms != None:

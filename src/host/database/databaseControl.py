@@ -193,7 +193,6 @@ class dataBaseHandler(threadWrapper):
          message += "</p>"
 
        self.__logger.sendLog("data collected: " + message)
-       self.__coms.printMessage("data collected: " + message, 2)
        return message 
     '''
       This function is for multi threading purpose because sql will only let one thread access it. IT works by using a FIFO queue to process
@@ -209,14 +208,15 @@ class dataBaseHandler(threadWrapper):
                   #check to see if the request has been servced
                   if(self.__requets[0][2] == False):
                     if(len(self.__requets[0][1]) > 0): self.__requets[0][3] = self.__functionMap[self.__requets[0][0]](self.__requets[0][1])
-                    else : self.__functionMap[self.__requets[0][0]]()
+                    else : self.__requets[0][3] = self.__functionMap[self.__requets[0][0]]()
                     self.__requets[0][2] = True
                     self.__completedRequestes[self.__requets[0][4]] = self.__requets[0][3] # we only need the return type of the object
                     self.__requets.remove(self.__requets[0]) # delete the completed task
               elif (len(self.__requets) == 0):
                  sleep = True      
           if(sleep): #sleep if no task are needed. 
-            time.sleep(0.5)
+            time.sleep(0.1)
+            sleep = False
     '''
       Make a request to to the database, it then returns the task number that you can pass to get Request to see if your task has been completed. 
     '''

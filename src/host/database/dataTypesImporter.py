@@ -70,7 +70,7 @@ class dataTypeImporter():
                     self.__logger.sendLog(f"Created data group {currentDataGroup}")
 
         self.__logger.sendLog(f"Created data types:\n {self}")   
-        self.__coms.printMessage(f"Created data types:\n {self}", 2)   
+        self.__coms.printMessage(f"Created data types.", 2)   
     def getDataTypes(self):
         return self.__dataTypes
     def __str__(self):

@@ -1,8 +1,6 @@
 from commandParent import commandParent
 from infoHandling.logger import logggerCustom
-
-
-####TODO: change all the function calls to the database control to only use makeRequest and getRequest
+import time
 
 class cmd_dataCollector(commandParent):
     """This class goes and dynamcal addes all the data types and then ties them to the server, so that they can be requested by the subscriber."""
@@ -22,10 +20,6 @@ class cmd_dataCollector(commandParent):
 
         self.__coms = coms
         self.__logger = logggerCustom("logs/cmd_dataCollector.txt")
-
-    # def run(self):
-    #     print("Ran command")
-
     def runArgs(self, args):
         message = f"<prunning command {self.__comandName} with args {str(args)}<p>"
         # message += self.__args[args[0]](args)
@@ -42,6 +36,7 @@ class cmd_dataCollector(commandParent):
         temp = self.__dataBase.getRequest(requestNum)
         while(temp == None): #wait until we get a return value
             temp = self.__dataBase.getRequest(requestNum)
+            time.sleep(0.1) #let other process run
         return temp 
     def getArgs(self):
         message = ""
@@ -59,6 +54,7 @@ class cmd_dataCollector(commandParent):
         temp = self.__dataBase.getRequest(requestNum)
         while(temp == None): #wait until we get a return value
             temp = self.__dataBase.getRequest(requestNum)
+            time.sleep(0.1) #let other process run
         return str(temp)
     def saveDummyData(self, args):
         try :
@@ -74,7 +70,7 @@ class cmd_dataCollector(commandParent):
         temp = self.__dataBase.getRequest(requestNum)
         while(temp == None): #wait until we get a return value
             temp = self.__dataBase.getRequest(requestNum)
+            time.sleep(0.1) #let other process run
         return temp
     def __str__(self):
         return self.__comandName
-
