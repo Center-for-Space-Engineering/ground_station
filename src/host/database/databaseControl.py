@@ -21,7 +21,6 @@ class dataBaseHandler(threadWrapper):
       NOTE: When running multi threaded, only the __init__, makeRequest, getRequest, and run function should be called by out side classes and threads. 
     '''
     def __init__(self, coms, dbName = 'database/database_file'):
-        super().__init__()
         #make class matiance vars
         self.__logger = logggerCustom("logs/database_log_file.txt")
         self.__coms = coms
@@ -48,16 +47,19 @@ class dataBaseHandler(threadWrapper):
            'getData' : self.getData,
            'insertData' : self.insertData
         } 
-        # this is how we keep track of requsts
-        self.__requetNum = 0
-        # this is how we handle task in this class, the format is a list [func name, list of args, bool to mark when its been served, returned time, request num]
-        self.__requets = [['createDataBase', [], False, None, self.__requetNum]]
-        self.__completedRequestes = {}
-    '''
-      Makes the data base.
-      NOTE: if you want to change the name of the data base then that needs to be done when you make the class
-    '''
+
+        #pass the parent the function it can call
+        super().__init__(functionMap=self.__functionMap)
+
+        #send request to parent class to make the data base
+        super().makeRequest('createDataBase', [])
+
+    
     def createDataBase(self):
+        '''
+          Makes the data base.
+          NOTE: if you want to change the name of the data base then that needs to be done when you make the class
+        '''
         #Make data base (bd)
         self.__conn = sqlite3.connect(self.__dbName) 
         self.__c = self.__conn.cursor()
@@ -193,46 +195,4 @@ class dataBaseHandler(threadWrapper):
          message += "</p>"
 
        self.__logger.sendLog("data collected: " + message)
-       return message 
-    '''
-      This function is for multi threading purpose because sql will only let one thread access it. IT works by using a FIFO queue to process
-      Task assigned to it by other threads.
-    '''
-    def run(self):
-       super().setStatus("Running")
-       sleep = False
-       while(super().getRunning()):
-          with self.__dbLock:
-              # check to see if there is a request
-              if(len(self.__requets) > 0 ):
-                  #check to see if the request has been servced
-                  if(self.__requets[0][2] == False):
-                    if(len(self.__requets[0][1]) > 0): self.__requets[0][3] = self.__functionMap[self.__requets[0][0]](self.__requets[0][1])
-                    else : self.__requets[0][3] = self.__functionMap[self.__requets[0][0]]()
-                    self.__requets[0][2] = True
-                    self.__completedRequestes[self.__requets[0][4]] = self.__requets[0][3] # we only need the return type of the object
-                    self.__requets.remove(self.__requets[0]) # delete the completed task
-              elif (len(self.__requets) == 0):
-                 sleep = True      
-          if(sleep): #sleep if no task are needed. 
-            time.sleep(0.1)
-            sleep = False
-    '''
-      Make a request to to the database, it then returns the task number that you can pass to get Request to see if your task has been completed. 
-    '''
-    def makeRequest(self, type, args):
-       with self.__dbLock:
-        self.__requetNum += 1 # incrament the requsest num 
-        self.__requets.append([type, args, False, None, self.__requetNum])
-        temp = self.__requetNum # set a local var to the reqest num so we can relase the mutex
-       return temp
-    '''
-    Check to see if the task has been complete, if it returns None then it has not been completed. 
-    '''
-    def getRequest(self, requestNum):
-       try :
-          temp = self.__completedRequestes[requestNum] #this check to see if it is complete or not, because if it is not it just fails
-          del self.__completedRequestes[requestNum] # delete the completed task to save space
-          return temp
-       except :
-          return None        
+       return message    
