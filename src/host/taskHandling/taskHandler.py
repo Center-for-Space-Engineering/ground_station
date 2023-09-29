@@ -65,24 +65,34 @@ class taskHandler():
             self.__threads[thread][1].kill_Task() 
             self.__logger.sendLog(f"Thread {thread} has been killed. ")
 
+    def passRequest(self, thread, request):
+        '''
+            This function is ment to pass information to other threads with out the two threads knowing about each other.
+            Bassically the requester say I want to talk to thread x and here is my request. This funct then pass on that requeset. 
+            NOTE: threads go by the same name that you see on the display, NOT their class name. This is ment to be easier for the user,
+            as they could run the code and see the name they need to send a request to.
 
-
-
-if __name__ == "__main__":
-    coms = messageHandler()
-    x = taskHandler(coms)
-    y = threadWrapper(coms)
-    z = threadWrapper(coms)
-
-    x.addThread(y.test1, 'task 1', y)
-    x.addThread(z.test2, 'task2', z)
-
-    x.start()
-    for i in range (15):
-        x.getThreadStatus()
-        time.sleep(0.5)
-
-    x.getThreadStatus()
-    x.killTasks()
-        
-    
+            ARGS: 
+                thread: The name of the thread as you see it on the gui, or as it is set in main.py
+                request: index 0 is the function name, 
+                        index 1 to the end is the args for that function.
+            NOTE: even if  you are only passing one thing it needs to be a list! 
+                    EX: ['funcName']
+        '''
+        with self.__requestLock:
+            if(len(request) > 0):
+                temp = self.__threads[thread][1].makeRequest(request[0], args = request[1:])
+            else :
+                temp = self.__threads[thread][1].makeRequest(request[0])
+        return temp
+            
+    def passReturn(self, thread, requestNum):
+        '''
+            This function is ment to pass the return values form a thread to another thread, without the threads having explicit knowlage of eachother. 
+            ARGS:
+                thread: The name of the thread as you see it on the gui, or as it is set in main.py
+                requestNum: the number that you got from passReequests, this is basically your ticket to map info back and forth.
+        '''
+        with self.__requestLock:
+            temp = self.__threads[thread][1].getRequest(requestNum)
+        return temp
