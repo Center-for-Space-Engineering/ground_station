@@ -1,9 +1,10 @@
 import time
 import threading
 import random
+import sys
 
 class threadWrapper():
-    def __init__(self, coms = None, functionMap = None):
+    def __init__(self, coms = None):
         self.__status = "NOT STARTED"
         self.__RUNNING = True
         self.__coms = coms
@@ -15,7 +16,6 @@ class threadWrapper():
         # this is how we keep track of requsts
         self.__requetNum = 0
         self.__completedRequestes = {}
-        self.__functionMap = functionMap
 
 
     def test1(self):
@@ -98,8 +98,8 @@ class threadWrapper():
             request = self.getNextRequest()
             # check to see if there is a request
             if(request != None):
-                if(len(request[1]) > 0): request[3] = self.__functionMap[request[0]](request[1])
-                else : request[3] = self.__functionMap[request[0]]()
+                if(len(request[1]) > 0): request[3] = eval("self." + request[0])(request[1])
+                else : request[3] = eval("self." + request[0])()
                 self.completRequest(request[4], request[3])
             else :
                 sleep = True      

@@ -3,7 +3,6 @@ import sqlite3
 import pandas as pd
 import time
 import sys
-import threading
 
 #custom imports
 
@@ -25,7 +24,6 @@ class dataBaseHandler(threadWrapper):
         self.__logger = logggerCustom("logs/database_log_file.txt")
         self.__coms = coms
         self.__dbName = dbName
-        self.__dbLock = threading.Lock()
 
         #make Maps for db creation
         self.__typeMap = { #the point of this dictinary is to map the type names from the dataTypes.dtobj file to 
@@ -37,19 +35,8 @@ class dataBaseHandler(threadWrapper):
             "bigint" : "BIGINT"
         } #  NOTE: this dict makes the .dtobj file syntax match sqlite3 syntax.
 
-        self.__functionMap = {
-           'createDataBase' : self.createDataBase,
-           'getTablesHTML' : self.getTablesHTML,
-           'getTables_strLIST' : self.getTables_strLIST,
-           'getDataType' : self.getDataType,
-           'getfeilds' : self.getfeilds,
-           'getfeildsList' : self.getfeildsList,
-           'getData' : self.getData,
-           'insertData' : self.insertData
-        } 
-
-        #pass the parent the function it can call
-        super().__init__(functionMap=self.__functionMap)
+        #Start the threaed wrapper for  the process
+        super().__init__()
 
         #send request to parent class to make the data base
         super().makeRequest('createDataBase', [])
@@ -98,11 +85,12 @@ class dataBaseHandler(threadWrapper):
               self.__coms.printMessage("Failed to created table: " + dbCommand + str(error), 0)
         self.__logger.sendLog("Created database:\n" + self.getTablesHTML())   
         self.__coms.printMessage("Created database", 2)   
-    '''
-    This func takes in the table_name to insert and a list of data, the list must be in the same order that is defined in the .dtobj file.
-    args is a list were the fist index is the table name and the second is the data
-    '''
+    
     def insertData(self, args):
+      '''
+      This func takes in the table_name to insert and a list of data, the list must be in the same order that is defined in the .dtobj file.
+      args is a list were the fist index is the table name and the second is the data
+      '''
       dbCommand = f"INSERT INTO {args[0]} (time_stamp" #args[0] is the table name
       feilds = self.getfeilds([self.getDataType([args[0]])]) #get the data type obj and then get the feilds list
       for feild_name in feilds:
@@ -142,20 +130,23 @@ class dataBaseHandler(threadWrapper):
       for table in self.__tables:
          strList.append(table)
       return strList 
-    '''
-    args is a list where the fist index is the table name
-    '''
+    
     def getDataType(self, args):
+       '''
+        args is a list where the fist index is the table name
+        '''
        return self.__tables[args[0]] # the arg is the table name to find
-    '''
-    args is a list where the fist index is a data type obj 
-    '''
+    
     def getfeilds(self, args):
+       '''
+        args is a list where the fist index is a data type obj 
+        '''
        return args[0].getFields() # the args is a data type obj in the first index of the list
-    '''
-    args is a list where the fist index is a data type obj 
-    '''
+    
     def getfeildsList(self, args):
+       '''
+        args is a list where the fist index is a data type obj 
+        '''
        feilds = args[0].getFields()# the args is a data type obj in the first index of the list
        feildsList = []
        for feild in feilds:
@@ -163,10 +154,11 @@ class dataBaseHandler(threadWrapper):
             feildsList.append(feild)
             
        return feildsList
-    '''
-    args is a list where the fist index is the table name and the second is the start time for collecting the data
-    '''
+    
     def getData(self, args):
+       '''
+        args is a list where the fist index is the table name and the second is the start time for collecting the data
+        '''
        message = f"<h1>{args[0]}: " # args[0] is the table name
        try :
         #from and run db command
