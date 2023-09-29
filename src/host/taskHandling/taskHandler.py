@@ -39,9 +39,11 @@ class taskHandler():
     '''
     def start(self):
         for thread in self.__threads:
-            self.__threads[thread][0].start() #start thread
-            self.__coms.printMessage(f"Thread {thread} started. ")
-            self.__logger.sendLog(f"Thread {thread} started. ")
+            if(self.__threads[thread][1].getStatus() == "NOT STARTED"):
+                self.__threads[thread][0].start() #start thread
+                self.__coms.printMessage(f"Thread {thread} started. ")
+                self.__logger.sendLog(f"Thread {thread} started. ")
+
 
     def getThreadStatus(self):
         reports = [] # we need to pass a list of reports so the all get displayed at the same time. 
