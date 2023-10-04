@@ -5,7 +5,7 @@
 '''
 
 from dinamicImporter import dinamicImporter
-from infoHandling.logger import logggerCustom
+from logging_system_display_python_api.logger import logggerCustom
 
 class cmd():
     '''

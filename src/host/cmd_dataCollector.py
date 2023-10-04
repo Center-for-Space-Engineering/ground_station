@@ -5,7 +5,7 @@
 '''
 import time
 from commandParent import commandParent
-from infoHandling.logger import logggerCustom
+from logging_system_display_python_api.logger import logggerCustom
 
 #pylint disable=c0103
 class cmd_dataCollector(commandParent):

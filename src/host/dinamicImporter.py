@@ -1,7 +1,7 @@
 import os
 import sys
 sys.path.insert(0, "..")
-from infoHandling.logger import logggerCustom
+from logging_system_display_python_api.logger import logggerCustom
 
 
 

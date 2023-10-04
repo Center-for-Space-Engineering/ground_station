@@ -8,9 +8,9 @@ from cmd import cmd
 #imports from other folders that are not local
 import sys
 sys.path.insert(0, "..")
-from infoHandling.logger import logggerCustom
-from infoHandling.messageHandler import messageHandler
-from threading_python_api.threadWrapper import threadWrapper 
+from logging_system_display_python_api.logger import logggerCustom
+from logging_system_display_python_api.messageHandler import messageHandler
+from threading_python_api.threadWrapper import threadWrapper
 
 
 log = logggerCustom("logs/coms.txt")
