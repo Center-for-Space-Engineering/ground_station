@@ -53,7 +53,7 @@ class threadWrapper():
         with self.__lockRunning:
             self.__RUNNING = False
     
-    def makeRequest(self, type, args):
+    def makeRequest(self, type, args=[]):
         '''
             Make a request to to the THREAD, it then returns the task number that you can pass to get Request to see if your task has been completed. 
         '''

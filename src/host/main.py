@@ -5,7 +5,7 @@
 import time
 from taskHandling.taskHandler import taskHandler
 from taskHandling.threadWrapper import threadWrapper
-from database.databaseControl import DataBaseHandler
+from database.database_control import DataBaseHandler
 from server import serverHandler
 
 
