@@ -9,7 +9,7 @@ import pandas as pd
 from database.dataTypesImporter import dataTypeImporter
 from database.dataType import dataType
 from infoHandling.logger import logggerCustom
-from taskHandling.threadWrapper import threadWrapper
+from threading_python_api.threadWrapper import threadWrapper
 class DataBaseHandler(threadWrapper):
     '''
         calling the init function will create the basics for the class and then 

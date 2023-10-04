@@ -1,7 +1,7 @@
 from infoHandling.graphicsHandler import graphicsHandler
 import threading
 import time
-from host.taskHandling.threadWrapper import threadWrapper 
+from threading_python_api.threadWrapper import threadWrapper 
 
 '''
 There should only be ONE of these classes! It is meant to have shared access and has threading protection.

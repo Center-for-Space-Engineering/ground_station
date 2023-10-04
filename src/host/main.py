@@ -3,8 +3,8 @@
     system objects and classes. 
 '''
 import time
-from taskHandling.taskHandler import taskHandler
-from taskHandling.threadWrapper import threadWrapper
+from threading_python_api.taskHandler import taskHandler
+from threading_python_api.threadWrapper import threadWrapper
 from database.database_control import DataBaseHandler
 from server import serverHandler
 
