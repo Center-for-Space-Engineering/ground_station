@@ -80,7 +80,6 @@ class messageHandler(threadWrapper):
             self.flush()
             self.flushBytes()
             time.sleep(refresh)    
-        pass
 
     def getSystemEmuo(self):
         return self.__graphics
