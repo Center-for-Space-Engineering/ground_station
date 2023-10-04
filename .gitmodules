@@ -1,3 +1,6 @@
 [submodule "src/host/threading_python_api"]
 	path = src/host/threading_python_api
 	url = git@github.com:Center-for-Space-Engineering/threading_python_api.git
+[submodule "src/host/database_python_api"]
+	path = src/host/database_python_api
+	url = git@github.com:Center-for-Space-Engineering/database_python_api.git

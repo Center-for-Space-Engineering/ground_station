@@ -5,7 +5,7 @@
 import time
 from threading_python_api.taskHandler import taskHandler
 from threading_python_api.threadWrapper import threadWrapper
-from database.database_control import DataBaseHandler
+from database_python_api.database_control import DataBaseHandler
 from server import serverHandler
 
 
