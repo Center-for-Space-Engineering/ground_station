@@ -4,7 +4,7 @@ That way if the child class is missing a func it wont crash the server, and will
 they need to add to there class. Python is not a strongly typed language, this is the best I can do to try and make it more
 strongly typed. """
 class commandParent():
-    def __init__(self, cmd):
+    def __init__(self, cmd, coms):
         errorRed = Fore.RED + "ERROR: " + Fore.WHITE
         print(errorRed + "No init func")
     def run(self):
