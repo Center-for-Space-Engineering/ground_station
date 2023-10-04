@@ -10,7 +10,7 @@ import sys
 sys.path.insert(0, "..")
 from infoHandling.logger import logggerCustom
 from infoHandling.messageHandler import messageHandler
-from host.taskHandling.threadWrapper import threadWrapper 
+from threading_python_api.threadWrapper import threadWrapper 
 
 
 log = logggerCustom("logs/coms.txt")
