@@ -54,7 +54,7 @@ class cmd_dataCollector(commandParent):
         return message
     def getTableHTML_Collector(self, _): #NOTE: we add the dont care varible (_) just to make things eaiser to call dynamically
         # pylint: disable=missing-function-docstring
-        requestNum = self.__dataBase.makeRequest('getTablesHTML')
+        requestNum = self.__dataBase.makeRequest('get_tables_html')
         temp = self.__dataBase.getRequest(requestNum)
         while temp is None: #wait until we get a return value
             temp = self.__dataBase.getRequest(requestNum)
@@ -77,7 +77,7 @@ class cmd_dataCollector(commandParent):
         return message
     def getDataType(self, args):
         # pylint: disable=missing-function-docstring
-        requestNum = self.__dataBase.makeRequest('getDataType', [args[1]])
+        requestNum = self.__dataBase.makeRequest('get_data_type', [args[1]])
         temp = self.__dataBase.getRequest(requestNum)
         while temp is None: #wait until we get a return value
             temp = self.__dataBase.getRequest(requestNum)
@@ -92,7 +92,7 @@ class cmd_dataCollector(commandParent):
                 args[1] is the table name
                 args[2] is the start time
         '''
-        requestNum = self.__dataBase.makeRequest('getData', [args[1], args[2]])
+        requestNum = self.__dataBase.makeRequest('get_data', [args[1], args[2]])
         temp = self.__dataBase.getRequest(requestNum)
         while temp is None: #wait until we get a return value
             temp = self.__dataBase.getRequest(requestNum)

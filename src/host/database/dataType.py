@@ -36,8 +36,8 @@ class dataType():
             message +=f"<p>&emsp;<strong>Feild MSB:</strong> {typeC} <strong>Feild LSB</strong> {self.__convertMap[typeC]} </p>\n"
         message += "</body>\n</html>"
         return message
-    def getFields(self):
+    def get_fields(self):
         return self.__feilds  
-    def getDataGroup(self):
+    def get_data_group(self):
         return self.__dataGroup
         

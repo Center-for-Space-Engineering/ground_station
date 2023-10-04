@@ -72,7 +72,6 @@ class messageHandler(threadWrapper):
             self.__graphics.clear()
 
     def run(self, refresh = 0.5): #Note if things start getting wired it is cause the refresh rate is too fast for the screen to print it.
-        pass
         super().setStatus("Running")
         while (super().getRunning()):
             self.clearDisp()

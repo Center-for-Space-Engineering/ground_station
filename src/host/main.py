@@ -5,7 +5,7 @@
 import time
 from taskHandling.taskHandler import taskHandler
 from taskHandling.threadWrapper import threadWrapper
-from database.databaseControl import dataBaseHandler
+from database.databaseControl import DataBaseHandler
 from server import serverHandler
 
 
@@ -15,12 +15,12 @@ def main():
     This module runs everything, its main job is to create and run all of the 
     system objects and classes. 
     '''
-    #create a server obj, not it will also create the coms object
+    #create a server obj, not it will also create the coms object #144.39.167.206
     server = serverHandler('144.39.167.206', 5000)
     coms = server.getComs()
 
     #make database object 
-    dataBase = dataBaseHandler(coms)
+    dataBase = DataBaseHandler(coms)
 
     #now that we have the data base we can collect all of our command handlers.
     server.setHandlers(dataBase)  
