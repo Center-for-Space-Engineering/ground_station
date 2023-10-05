@@ -16,7 +16,7 @@ def main():
     system objects and classes. 
     '''
     #create a server obj, not it will also create the coms object #144.39.167.206
-    server = serverHandler('144.39.167.206', 5000)
+    server = serverHandler('127.0.0.1', 5000)
     coms = server.getComs()
 
     #make database object 

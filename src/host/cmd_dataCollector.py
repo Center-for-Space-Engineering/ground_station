@@ -5,7 +5,7 @@
 '''
 import time
 from commandParent import commandParent
-from logging_system_display_python_api.logger import logggerCustom
+from logging_system_display_python_api.logger import loggerCustom
 
 #pylint disable=c0103
 class cmd_dataCollector(commandParent):
@@ -38,7 +38,7 @@ class cmd_dataCollector(commandParent):
         }
 
         self.__coms = coms
-        self.__logger = logggerCustom("logs/cmd_dataCollector.txt")
+        self.__logger = loggerCustom("logs/cmd_dataCollector.txt")
     def runArgs(self, args):
         '''
             This function is what allows the server to call function in this class
@@ -54,9 +54,9 @@ class cmd_dataCollector(commandParent):
         except : # pylint: disable=w0702
             # the above disable is for the warning for not spesifying the exception type
             message += "<p> Not vaild arg </p>"
-            self.__coms.printMessage("No valid arg on get request! ", 0)
+            self.__coms.print_message("No valid arg on get request! ", 0)
 
-        self.__logger.sendLog("Returned to server: " + message)
+        self.__logger.send_log("Returned to server: " + message)
         return message
     #NOTE: we add the dont care varible (_) just to make things eaiser to call dynamically
     def get_table_html_collector(self, _): 
@@ -80,7 +80,7 @@ class cmd_dataCollector(commandParent):
                 message += f"<p>&emsp;/{self.__comand_name}/{key}/-data group-/-start time-</p>"
             else :
                 message += f"<p>&emsp;/{self.__comand_name}/{key}</p>"
-        self.__logger.sendLog("Returned to server: " + message)
+        self.__logger.send_log("Returned to server: " + message)
         return message
     def get_data_type(self, args):
         # pylint: disable=missing-function-docstring

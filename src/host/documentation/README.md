@@ -228,19 +228,13 @@ NOTE: if you are going to do mulpile discontinuos types mapping to the same elme
 
 ![Data flow](cse_dtobj_flow.png)
 
-## running idival classes
-
-Most classes can be run on there own for testing sake. They are all ment to be run from the host folder however. If one fails to run check the imports. Sometimes they need to be changed. 
-
 ## running main
 The command to run main is `python3 main.py` from the host folder. 
 
 ## testing server
 
 ## unit tests
-
-## Logger
-The logger class conatins acces to all the logs. It takes a message write it to the file it has access to and then flushes the file. Using this system makes the files more likely to servive if the system loses power. 
+TODO, yeah gotta do thsi still
 
 ## Compling with pandocs
     To complie .md to a pdf: pandoc -s README.md -V geometry:margin=1in -o README.pdf

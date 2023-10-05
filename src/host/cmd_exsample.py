@@ -15,11 +15,11 @@ class cmd_exsample(commandParent):
 
     def run(self):
         print("Ran command")
-        self.__coms.printMessage("Ran command", 2)
+        self.__coms.print_message("Ran command", 2)
         return f"<p>ran command {self.__comandName}<p>"
     def runArgs(self, args):
         print("Ran command w/ args: " + str(args))
-        self.__coms.printMessage("Ran command w/ args: " + str(args), 2)
+        self.__coms.print_message("Ran command w/ args: " + str(args), 2)
         message = f"<p>ran command {self.__comandName} with args {str(args)}<p>"
         try:
             message += self.__args[args[0]](args)
@@ -28,7 +28,7 @@ class cmd_exsample(commandParent):
         return message
     def func1(self, arg):
         print("ran func1")
-        self.__coms.printMessage("Ran func1", 2)
+        self.__coms.print_message("Ran func1", 2)
         return f"<p>Ran function for {arg}</p>"
     def getArgs(self):
         message = ""

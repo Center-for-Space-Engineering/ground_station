@@ -5,9 +5,9 @@
 '''
 
 from dinamicImporter import dinamicImporter
-from logging_system_display_python_api.logger import logggerCustom
+from logging_system_display_python_api.logger import loggerCustom
 
-class cmd():
+class cmd_inter():
     '''
         This class takes all the commands that have been dynamically imported and maps them to the server. 
         NOTE: every command must have a unqie name.
@@ -16,7 +16,7 @@ class cmd():
         '''
             args: coms is the message handeler class
         '''
-        self.__logger = logggerCustom("logs/cmd_log.txt")
+        self.__logger = loggerCustom("logs/cmd_inter_log.txt")
         self.__commandDict = {}
         self.__coms = coms
         
@@ -26,8 +26,8 @@ class cmd():
             This func will look through the __commandDict to see if there is a map from the get request to a command.
         '''
         if message[0] in self.__commandDict:
-            self.__logger.sendLog("Command Action: " + str(self.__commandDict[message[0]]) + str(message))
-            self.__coms.printMessage("Command Action: " + str(self.__commandDict[message[0]]) + str(message), 2)
+            self.__logger.send_log("Command Action: " + str(self.__commandDict[message[0]]) + str(message))
+            self.__coms.print_message("Command Action: " + str(self.__commandDict[message[0]]) + str(message), 2)
             if len(message) == 1:
                 returnVal = self.__commandDict[message[0]].run()
             else :
@@ -59,5 +59,5 @@ class cmd():
             else :
                 _ = obj(self, self.__coms) #the reason why I pass cmd into the new class is so that the class can define its own command names and structures.
             
-        self.__logger.sendLog("Commands added to the server: " + str(self.__commandDict))
-        self.__coms.printMessage(str(self.__commandDict), 8)
+        self.__logger.send_log("Commands added to the server: " + str(self.__commandDict))
+        self.__coms.print_message(str(self.__commandDict), 8)

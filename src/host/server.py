@@ -2,21 +2,21 @@ from http.server import HTTPServer
 from http.server import BaseHTTPRequestHandler
 
 #local imports (host folder)
-from cmd import cmd
+from cmd_inter import cmd_inter
 
 
 #imports from other folders that are not local
 import sys
 sys.path.insert(0, "..")
-from logging_system_display_python_api.logger import logggerCustom
+from logging_system_display_python_api.logger import loggerCustom
 from logging_system_display_python_api.messageHandler import messageHandler
 from threading_python_api.threadWrapper import threadWrapper
 
 
-log = logggerCustom("logs/coms.txt")
+log = loggerCustom("logs/coms.txt")
 
 coms_local = messageHandler()
-cmd_local = cmd(coms_local)
+cmd_local = cmd_inter(coms_local)
 
 class serverHandler(threadWrapper):
     def __init__(self, hostName, serverPort):
@@ -26,16 +26,16 @@ class serverHandler(threadWrapper):
         self.__webServer = HTTPServer((self.__hostName, self.__serverPort), LitServer)
         
     def run(self):   
-        log.sendLog("Test Server started http://%s:%s" % (self.__hostName, self.__serverPort))
-        coms_local.sendMessagePrement("Server started http://%s:%s" % (self.__hostName, self.__serverPort), 2)
+        log.send_log("Test Server started http://%s:%s" % (self.__hostName, self.__serverPort))
+        coms_local.send_message_prement("Server started http://%s:%s" % (self.__hostName, self.__serverPort), 2)
         super().setStatus("Running")
         self.__webServer.serve_forever() 
 
     def kill_Task(self):
         super().kill_Task()
         self.__webServer.server_close()
-        log.sendLog("Server stopped.")
-        log.sendLog("Quite command recived.")   
+        log.send_log("Server stopped.")
+        log.send_log("Quite command recived.")   
 
     def getComs(self):
         return coms_local  
@@ -48,8 +48,8 @@ class serverHandler(threadWrapper):
 class LitServer(BaseHTTPRequestHandler):
     def do_GET(self):
         path = self.path.split("/")
-        log.sendLog("Message recived: " + str(path))
-        coms_local.printMessage("Message recived: " + str(path), 3)
+        log.send_log("Message recived: " + str(path))
+        coms_local.print_message("Message recived: " + str(path), 3)
         message = cmd_local.parseCmd(path[1:])
         self.send_response(200)
         self.send_header("Content-type", "text/html")
@@ -59,8 +59,8 @@ class LitServer(BaseHTTPRequestHandler):
         self.wfile.write(bytes("<body>", "utf-8"))
         self.wfile.write(bytes(message, "utf-8"))
         self.wfile.write(bytes("</body></html>", "utf-8"))
-        log.sendLog("SENT:\n " + message)
-        coms_local.printMessage("Server responed ", 2)
+        log.send_log("SENT:\n " + message)
+        coms_local.print_message("Server responed ", 2)
 
 def test():
     x = serverHandler('144.39.167.206', 5000)
