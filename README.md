@@ -163,3 +163,17 @@ The logger class conatins acces to all the logs. It takes a message write it to 
 ## Compling with pandocs
     To complie .md to a pdf: pandoc -s README.md -V geometry:margin=1in -o README.pdf
     To complie to a stand alone html doc: pandoc  --metadata title="README" -s --self-contained README.md -o README.html
+
+## Linting
+This is the method that is used to check the code and make sure it fits coding standar and best pratice. The package is called `pylint` and can be installed with \
+``` python
+    pip install pylint  
+```
+or 
+```python
+    pip3 install pylint 
+```
+depending on context. The command to run `pylint` is:
+```python
+    python3 -m pylint --jobs 0 --rcfile .pylintrc <name of python file or folder>
+```
