@@ -6,8 +6,6 @@ from cmd_inter import cmd_inter
 
 
 #imports from other folders that are not local
-import sys
-sys.path.insert(0, "..")
 from logging_system_display_python_api.logger import loggerCustom
 from logging_system_display_python_api.messageHandler import messageHandler
 from threading_python_api.threadWrapper import threadWrapper
@@ -28,7 +26,7 @@ class serverHandler(threadWrapper):
     def run(self):   
         log.send_log("Test Server started http://%s:%s" % (self.__hostName, self.__serverPort))
         coms_local.send_message_prement("Server started http://%s:%s" % (self.__hostName, self.__serverPort), 2)
-        super().setStatus("Running")
+        super().set_status("Running")
         self.__webServer.serve_forever() 
 
     def kill_Task(self):

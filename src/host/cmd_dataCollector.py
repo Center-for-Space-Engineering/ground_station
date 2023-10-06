@@ -61,10 +61,10 @@ class cmd_dataCollector(commandParent):
     #NOTE: we add the dont care varible (_) just to make things eaiser to call dynamically
     def get_table_html_collector(self, _): 
         # pylint: disable=missing-function-docstring
-        request_num = self.__data_base.makeRequest('get_tables_html')
-        temp = self.__data_base.getRequest(request_num)
+        request_num = self.__data_base.make_request('get_tables_html')
+        temp = self.__data_base.get_request(request_num)
         while temp is None: #wait until we get a return value
-            temp = self.__data_base.getRequest(request_num)
+            temp = self.__data_base.get_request(request_num)
             time.sleep(0.1) #let other process run
         return temp
     def getArgs(self):
@@ -84,10 +84,10 @@ class cmd_dataCollector(commandParent):
         return message
     def get_data_type(self, args):
         # pylint: disable=missing-function-docstring
-        request_num = self.__data_base.makeRequest('get_data_type', [args[1]])
-        temp = self.__data_base.getRequest(request_num)
+        request_num = self.__data_base.make_request('get_data_type', [args[1]])
+        temp = self.__data_base.get_request(request_num)
         while temp is None: #wait until we get a return value
-            temp = self.__data_base.getRequest(request_num)
+            temp = self.__data_base.get_request(request_num)
             time.sleep(0.1) #let other process run
         return str(temp)
     def get_data(self, args):
@@ -99,10 +99,10 @@ class cmd_dataCollector(commandParent):
                 args[1] is the table name
                 args[2] is the start time
         '''
-        request_num = self.__data_base.makeRequest('get_data', [args[1], args[2]])
-        temp = self.__data_base.getRequest(request_num)
+        request_num = self.__data_base.make_request('get_data', [args[1], args[2]])
+        temp = self.__data_base.get_request(request_num)
         while temp is None: #wait until we get a return value
-            temp = self.__data_base.getRequest(request_num)
+            temp = self.__data_base.get_request(request_num)
             time.sleep(0.1) #let other process run
         return temp
     def __str__(self):
