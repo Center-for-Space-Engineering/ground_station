@@ -39,7 +39,7 @@ class cmd_dataCollector(commandParent):
 
         self.__coms = coms
         self.__logger = loggerCustom("logs/cmd_dataCollector.txt")
-    def runArgs(self, args):
+    def run_args(self, args):
         '''
             This function is what allows the server to call function in this class
             ARGS:
@@ -67,7 +67,7 @@ class cmd_dataCollector(commandParent):
             temp = self.__data_base.get_request(request_num)
             time.sleep(0.1) #let other process run
         return temp
-    def getArgs(self):
+    def get_args(self):
         '''
             This function returns an html obj that explains the args for all the internal
             funciton calls. 

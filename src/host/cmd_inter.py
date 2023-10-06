@@ -21,7 +21,7 @@ class cmd_inter():
         self.__coms = coms
         
     
-    def parseCmd(self, message):
+    def parse_cmd(self, message):
         '''
             This func will look through the __commandDict to see if there is a map from the get request to a command.
         '''
@@ -31,27 +31,27 @@ class cmd_inter():
             if len(message) == 1:
                 returnVal = self.__commandDict[message[0]].run()
             else :
-                returnVal = self.__commandDict[message[0]].runArgs(message[1:])
+                returnVal = self.__commandDict[message[0]].run_args(message[1:])
             return returnVal
             
         #if no command recived return list of commands that can be run
         message = "<h1> <strong>Supported Commands</strong></h1>"
         for key in self.__commandDict:
             message += f"<p>/{key}</p>"
-            message += f"{self.__commandDict[key].getArgs()}"            
+            message += f"{self.__commandDict[key].get_args()}"            
         return message
-    def getCommandDict(self):
+    def get_command_dict(self):
         # pylint: disable=missing-function-docstring
         return self.__commandDict       
     def setCommandDict(self, new):
         # pylint: disable=missing-function-docstring
         self.__commandDict = new
-    def collectCommands(self, db):
+    def collect_commands(self, db):
         '''
             This fuc creats the dynamicImporter (spelled wrong, call it my programing style), after the dynamicImporter goes through the folder searching for any extra commands it adds them into the __commandDict so that the server can levrage them.
         '''
         x = dinamicImporter(self.__coms)
-        moduleList = x.getModList()
+        moduleList = x.get_mod_list()
 
         for obj in moduleList: #if you want to add any args to the __init__ function other than cmd you will have to change the code in this for loop. I recomend you just use setters. Or find a way not to use them at all.  
             if 'cmd_dataCollector' in str(obj):

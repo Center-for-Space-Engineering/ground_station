@@ -48,7 +48,7 @@ class LitServer(BaseHTTPRequestHandler):
         path = self.path.split("/")
         log.send_log("Message recived: " + str(path))
         coms_local.print_message("Message recived: " + str(path), 3)
-        message = cmd_local.parseCmd(path[1:])
+        message = cmd_local.parse_cmd(path[1:])
         self.send_response(200)
         self.send_header("Content-type", "text/html")
         self.end_headers()
@@ -59,10 +59,3 @@ class LitServer(BaseHTTPRequestHandler):
         self.wfile.write(bytes("</body></html>", "utf-8"))
         log.send_log("SENT:\n " + message)
         coms_local.print_message("Server responed ", 2)
-
-def test():
-    x = serverHandler('144.39.167.206', 5000)
-    x.run()
-
-if __name__ == "__main__": 
-    test()

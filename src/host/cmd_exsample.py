@@ -17,7 +17,7 @@ class cmd_exsample(commandParent):
         print("Ran command")
         self.__coms.print_message("Ran command", 2)
         return f"<p>ran command {self.__comandName}<p>"
-    def runArgs(self, args):
+    def run_args(self, args):
         print("Ran command w/ args: " + str(args))
         self.__coms.print_message("Ran command w/ args: " + str(args), 2)
         message = f"<p>ran command {self.__comandName} with args {str(args)}<p>"
@@ -30,14 +30,11 @@ class cmd_exsample(commandParent):
         print("ran func1")
         self.__coms.print_message("Ran func1", 2)
         return f"<p>Ran function for {arg}</p>"
-    def getArgs(self):
+    def get_args(self):
         message = ""
         for key in self.__args:
             message += f"<p>&emsp;/{self.__comandName}/{key}</p>"
         return message
-
-    
-
 
     def __str__(self):
         return self.__comandName

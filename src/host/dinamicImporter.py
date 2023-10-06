@@ -1,6 +1,7 @@
+'''
+    
+'''
 import os
-import sys
-sys.path.insert(0, "..")
 from logging_system_display_python_api.logger import loggerCustom
 
 
@@ -19,7 +20,7 @@ class dinamicImporter:
         coms.print_message("Collected Modules: " + str(self.__mods), 2)
         
 
-    def getModList(self):
+    def get_mod_list(self):
         return self.__mods
         
                 
