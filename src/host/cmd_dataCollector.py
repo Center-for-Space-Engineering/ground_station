@@ -26,7 +26,7 @@ class cmd_dataCollector(commandParent):
         # the above pylint disable turns off the warning for not calling the parent constructor.
         self.__comand_name = 'data_Collector'
         self.__data_base = db
-        dict_cmd = CMD.getCommandDict()
+        dict_cmd = CMD.get_command_dict()
         #this is the name the webserver will see, 
         # so to call the command send a request for this command.
         dict_cmd[self.__comand_name] = self

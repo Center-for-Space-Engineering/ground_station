@@ -8,7 +8,7 @@ class cmd_exsample(commandParent):
         self.__args ={
             "arg1" : self.func1
         }
-        dictCmd = CMD.getCommandDict()
+        dictCmd = CMD.get_command_dict()
         dictCmd[self.__comandName] = self #this is the name the webserver will see, so to call the command send a request for this command. 
         CMD.setCommandDict(dictCmd)
         self.__coms = coms

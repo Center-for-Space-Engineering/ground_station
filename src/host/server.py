@@ -39,7 +39,7 @@ class serverHandler(threadWrapper):
         return coms_local  
 
     def setHandlers(self, db):
-        cmd_local.collectCommands(db)    
+        cmd_local.collect_commands(db)    
          
 
 
