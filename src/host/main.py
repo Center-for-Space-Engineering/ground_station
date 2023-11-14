@@ -8,7 +8,7 @@ from threading_python_api.threadWrapper import threadWrapper
 from database_python_api.database_control import DataBaseHandler
 from server import serverHandler
 
-
+hostname = '144.39.167.206' #get this by running hostname -I
 
 def main():
     '''
@@ -16,7 +16,7 @@ def main():
     system objects and classes. 
     '''
     #create a server obj, not it will also create the coms object #144.39.167.206
-    server = serverHandler('127.0.0.1', 5000)
+    server = serverHandler(hostname, 5000)
     coms = server.getComs()
 
     #make database object 
