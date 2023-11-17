@@ -14,7 +14,7 @@ class cmd_dataCollector(commandParent):
         so that they can be requested by the subscriber.
         In addition it handles all the commands going to the data base
     """
-    def __init__(self, CMD, coms, db):
+    def __init__(self, CMD, coms, db, max_rows_per_dto = 10000):
         '''
             ARGS:
                 CMD: this is our command handler class 
@@ -35,10 +35,12 @@ class cmd_dataCollector(commandParent):
             "tables" : self.get_table_html_collector,
             "get_data_type" : self.get_data_type,
             "get_data": self.get_data,
+            "get_dto": self.get_dto,
         }
 
         self.__coms = coms
         self.__logger = loggerCustom("logs/cmd_dataCollector.txt")
+        self.__max_rows = max_rows_per_dto
     def run_args(self, args):
         '''
             This function is what allows the server to call function in this class
@@ -47,14 +49,14 @@ class cmd_dataCollector(commandParent):
                 [1:] ARGS that the function needs. NOTE: can be blank
         '''
         message = f"<prunning command {self.__comand_name} with args {str(args)}<p>"
-        # message += self.__args[args[0]](args)
-        try:
-            message += self.__args[args[0]](args) 
-            #NOTE to make this work we will always pass args even if we dont use it.
-        except : # pylint: disable=w0702
-            # the above disable is for the warning for not spesifying the exception type
-            message += "<p> Not vaild arg </p>"
-            self.__coms.print_message("No valid arg on get request! ", 0)
+        message += self.__args[args[0]](args)
+        # try:
+        #     message += self.__args[args[0]](args) 
+        #     #NOTE to make this work we will always pass args even if we dont use it.
+        # except : # pylint: disable=w0702
+        #     # the above disable is for the warning for not spesifying the exception type
+        #     message += "<p> Not vaild arg </p>"
+        #     self.__coms.print_message("No valid arg on get request! ", 0)
 
         self.__logger.send_log("Returned to server: " + message)
         return message
@@ -97,7 +99,7 @@ class cmd_dataCollector(commandParent):
                 args[0] is not used in this function, 
                     it is used by the caller function, it should be the function name
                 args[1] is the table name
-                args[2] is the start time
+                args[2] is the start index
         '''
         request_num = self.__data_base.make_request('get_data', [args[1], args[2]])
         temp = self.__data_base.get_request(request_num)
@@ -107,4 +109,41 @@ class cmd_dataCollector(commandParent):
         return temp
     def __str__(self):
         return self.__comand_name
-    
+    def get_dto(self, args):
+        '''
+            Gets data from the data base, then convert it to a dto (Data transfer Object)
+            Args:
+                args[0] is not used in this function, 
+                    it is used by the caller function, it should be the function name
+                args[1] is the table name
+                args[2] is the start index
+                args[3] is the feild in the dto to fetch
+                args[4] is optional but if passed it will set the max number of rows per dto to the new value
+        '''
+        #see if we have a new max row
+        try :
+            self.__max_rows = int(args[4])
+        except :
+            pass
+
+        #make the data request to the database.
+        request_num = self.__data_base.make_request('get_data_large', [args[1], args[2], self.__max_rows])
+        temp = self.__data_base.get_request(request_num)
+
+        #wait for the database to return the data
+        while temp is None: #wait until we get a return value
+            temp = self.__data_base.get_request(request_num)
+            time.sleep(0.1) #let other process run
+        #if the database returns a string it is an error
+        if isinstance(temp, str) : return temp
+        data = temp[args[3]] #sperate data out
+        last_db_indx = temp['Table Index'].tail(1).iat[0] #get the last row in the dto
+        #make dto
+        dto = "<! DOCTYPE html>\n<html>\n<body>\n<h1><strong>dto (data transfer object):</strong></h1>\n"
+        dto += f"<h1><strong>Data fetched {args[3]}:</strong></h1>\n<data>"
+        for data_point in data:
+            dto += (str(data_point) + ",")
+        dto += f"</data>\n<lastFetchedIndex>{last_db_indx}</lastFetchedIndex>"
+        dto += "</body>\n</html>"
+        self.__coms.print_message("DTO returned to requester.")
+        return dto
