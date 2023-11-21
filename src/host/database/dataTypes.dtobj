@@ -1,0 +1,2 @@
+serial_feed
+    batch_sample:1024
