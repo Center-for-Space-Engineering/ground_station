@@ -1,2 +1,6 @@
 serial_feed
-    batch_sample:1024
+    batch_sample:1024 > byte
+test_table1
+    norealdata:32 > int
+test_table2
+    no real data 2:32 > int

@@ -37,7 +37,6 @@ class cmd_inter():
         #if no command recived return list of commands that can be run
         message = "<h1> <strong>Supported Commands</strong></h1>"
         for key in self.__commandDict:
-            message += f"<commands>/{key}</commands>"
             message += f"{self.__commandDict[key].get_args()}"            
         return message
     def get_command_dict(self):

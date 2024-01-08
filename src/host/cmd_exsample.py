@@ -33,7 +33,7 @@ class cmd_exsample(commandParent):
     def get_args(self):
         message = ""
         for key in self.__args:
-            message += f"<p>&emsp;/{self.__comandName}/{key}</p>"
+            message += f"<url>/{self.__comandName}/{key}</url><p></p>" #NOTE: by adding the url tag, the client knows this is a something it can call, the <p></p> is basically a new line for html
         return message
 
     def __str__(self):

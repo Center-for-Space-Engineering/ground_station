@@ -74,14 +74,16 @@ class cmd_dataCollector(commandParent):
             This function returns an html obj that explains the args for all the internal
             funciton calls. 
         '''
-        message = ""
+        message = "<p></p>"
         for key in self.__args:
             if key == "get_data_type":
-                message += f"<p>&emsp;/{self.__comand_name}/{key}/-data type-</p>"
+                message += f"<url>/{self.__comand_name}/{key}/<arg>-data type-</arg></url><p></p>"
             elif key == "get_data":
-                message += f"<p>&emsp;/{self.__comand_name}/{key}/-data group-/-start time-</p>"
+                message += f"<url>/{self.__comand_name}/{key}/<arg>-table name-</arg>/<arg>-start index-</arg></url><p></p>"
+            elif key == "get_dto":
+                message += f"<url>/{self.__comand_name}/{key}/<arg>-table_name-</arg>/<arg>-start index-</arg>/<arg>-feild name-</arg>/<arg>-Optional max lines-</arg></url></url><p></p>"
             else :
-                message += f"<p>&emsp;/{self.__comand_name}/{key}</p>"
+                message += f"<url>/{self.__comand_name}/{key}</url><p></p>"
         self.__logger.send_log("Returned to server: " + message)
         return message
     def get_data_type(self, args):
@@ -125,7 +127,6 @@ class cmd_dataCollector(commandParent):
             self.__max_rows = int(args[4])
         except :
             pass
-
         #make the data request to the database.
         request_num = self.__data_base.make_request('get_data_large', [args[1], args[2], self.__max_rows])
         temp = self.__data_base.get_request(request_num)
@@ -136,6 +137,7 @@ class cmd_dataCollector(commandParent):
             time.sleep(0.1) #let other process run
         #if the database returns a string it is an error
         if isinstance(temp, str) : return temp
+        if temp.empty: return  "<! DOCTYPE html>\n<html>\n<body>\n<h1><strong>dto (data transfer object): No saved data</strong></h1>\n</body>\n</html>"
         data = temp[args[3]] #sperate data out
         last_db_indx = temp['Table Index'].tail(1).iat[0] #get the last row in the dto
         #make dto
