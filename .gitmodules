@@ -7,6 +7,3 @@
 [submodule "src/host/logging_system_display_python_api"]
 	path = src/host/logging_system_display_python_api
 	url = git@github.com:Center-for-Space-Engineering/logging_system_display_python_api.git
-[submodule "src/host/python_serial_api"]
-	path = src/host/python_serial_api
-	url = git@github.com:Center-for-Space-Engineering/python_serial_api.git
