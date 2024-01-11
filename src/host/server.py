@@ -2,6 +2,7 @@
     This modules handles request from both the web and other threads. It starts the server then servers requests. 
 '''
 #python imports
+import logging
 from flask import Flask, render_template, request , send_from_directory
 from threading import Lock
 #imports from other folders that are not local
@@ -31,37 +32,40 @@ class serverHandler(threadWrapper):
         #threading saftey 
         self.__message_lock = Lock()
 
+        #get the possible commands to run
         cmd_dict = self.__cmd.get_command_dict()
-        print(cmd_dict)
-        for var in cmd_dict:
-            print(f"{var}  maps to {cmd_dict[var]}")
 
         #set up server
+        # Disable print statements by setting the logging level to ERROR
+        log = logging.getLogger('werkzeug')
+        log.setLevel(logging.ERROR)
+
+        # set up the app
         self.app = Flask(__name__)
         self.setup_routes()
 
         
     def setup_routes(self):
+        #Paths that the server will need 
         self.app.route('/')(self.status_report)
         self.app.route('/open_data_stream')(self.open_data_stream)
         self.app.route('/Sensor')(self.open_sensor)
         self.app.route('/Command')(self.command)
         self.app.route('/page_manigure.js')(self.serve_page_manigure)
-        
-        # path = self.path.split("/")
-        # self.__log.send_log("Message recived: " + str(path))
-        # self.__coms.print_message("Message recived: " + str(path), 3)
-        # message = self.__cmd.parse_cmd(path[1:])
-        # self.send_response(200)
-        # self.send_header("Content-type", "text/html")
-        # self.end_headers()
-        # self.wfile.write(bytes("<html><head><title>https://usu.cse.spacecraftemulator.com</title></head>", "utf-8"))
-        # self.wfile.write(bytes("<p>Request: %s</p>" % self.path, "utf-8"))
-        # self.wfile.write(bytes("<body>", "utf-8"))
-        # self.wfile.write(bytes(message, "utf-8"))
-        # self.wfile.write(bytes("</body></html>", "utf-8"))
+
+        #the paths caught by this will connect to the users commands they add
+        self.app.add_url_rule('/<path:unknown_path>', 'handle_unknown_path', self.handle_unknown_path)
+
+    def handle_unknown_path(self, unknown_path):
+        path = unknown_path.split("/")
+        print(path)
+        self.__log.send_log("Message recived: " + str(path))
+        self.__coms.print_message("Message recived: " + str(path), 3)
+        message = self.__cmd.parse_cmd(path)
+        print(message)
         # self.__log.send_log("SENT:\n " + message)
         # self.__coms.print_message("Server responed ", 2)
+        return f'Unknown Path: {unknown_path}'
     def serve_page_manigure(self):
         return send_from_directory('source', 'page_manigure.js')
     def status_report(self):
@@ -91,4 +95,4 @@ class serverHandler(threadWrapper):
     def write_message_log(self, message):
         with self.__message_lock:
             self.__messages = message
-            print (self.__messages)
+        
