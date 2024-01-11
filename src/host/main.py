@@ -6,11 +6,19 @@ import time
 from threading_python_api.taskHandler import taskHandler
 from database_python_api.database_control import DataBaseHandler
 from python_serial_api.serialHandler import serialHandler
+from logging_system_display_python_api.messageHandler import messageHandler
 from server import serverHandler
+from cmd_inter import cmd_inter
 
-hostname = '144.39.167.206' #get this by running hostname -I
+#These are some Debuggin tools I add, Turning off the display is really useful for seeing erros, because the terminal wont get erased every time.
+DISPLAY_OFF = True
+NO_SERIAL_LISTENER = True
+
+# hostname = '144.39.167.206' #get this by running hostname -I
+hostname = '127.0.0.1'
 serial_handler_name = 'serial listener'
-server_name = 'Server'
+server_name = 'CSE_Server' #this the name for the interal thread that collect server info 
+server_name_host = 'CSE_Host' #this is the name for the thread that services all the web requests. 
 data_base = 'Data Base'
 
 def main():
@@ -19,14 +27,13 @@ def main():
     system objects and classes. 
     '''
     #create a server obj, not it will also create the coms object #144.39.167.206
-    server = serverHandler(hostname, 5000)
-    coms = server.getComs()
-
+    coms = messageHandler(DEBUG = DISPLAY_OFF, server_name=server_name)
     #make database object 
     dataBase = DataBaseHandler(coms, is_gui=False)
-
     #now that we have the data base we can collect all of our command handlers.
-    server.setHandlers(dataBase)
+    cmd = cmd_inter(coms, data_base)
+    #now that we have all the commands we can make the server
+    server = serverHandler(hostname, 5000, coms, cmd)    
 
     #first start our thread handler and the message haandler (coms) so we can start reporting
     threadPool = taskHandler(coms) # NOTE: we dont need to add a coms task because it add automatically.
@@ -35,7 +42,8 @@ def main():
     coms.set_thread_handler(threadPool)
 
     #Next we want to start the server and give it its own thread
-    threadPool.add_thread(server.run, server_name, server)
+    threadPool.add_thread(server.run, server_name_host, server) #this thread services incoming web request
+    threadPool.add_thread(server.run_serve_coms, server_name, server) #this thread services incoming request from other threads on the system. 
     #Now start the data base and give it a thread
     threadPool.add_thread(dataBase.run, data_base, dataBase)
     # add dummy data generator, for now this only works for the screen
@@ -58,9 +66,10 @@ def main():
         raise Exception("No serial interface defined in dataTypes.dtobj file.\nExample: serial_feed\n\tbatch_sample:1024 > byte\nMust have serial_feed and batch_sample\n")
     
     # create the ser_listener
-    ser_listener = serialHandler(coms = coms, batch_size=batch_size, thread_name=serial_handler_name)
-    threadPool.add_thread(ser_listener.run, serial_handler_name, ser_listener)
-    threadPool.start() #start the new task
+    if not NO_SERIAL_LISTENER:
+        ser_listener = serialHandler(coms = coms, batch_size=batch_size, thread_name=serial_handler_name)
+        threadPool.add_thread(ser_listener.run, serial_handler_name, ser_listener)
+        threadPool.start() #start the new task
 
     #keep the main thread alive for use to see things running. 
     running = True

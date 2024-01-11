@@ -12,13 +12,14 @@ class cmd_inter():
         This class takes all the commands that have been dynamically imported and maps them to the server. 
         NOTE: every command must have a unqie name.
     '''
-    def __init__(self, coms):
+    def __init__(self, coms, db):
         '''
             args: coms is the message handeler class
         '''
         self.__logger = loggerCustom("logs/cmd_inter_log.txt")
         self.__commandDict = {}
         self.__coms = coms
+        self.collect_commands(db)
         
     
     def parse_cmd(self, message):
