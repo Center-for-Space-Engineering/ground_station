@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>https://usu.cse.spacecraftemulator.com</title>
     <script src="page_manigure.js"></script>
+    <script>
+        $(function() {
+           $("#includeHtml").load("mesage_box.html");
+        });
+     </script>
+
     <style>
         body{
             background-color: #050505;
@@ -93,6 +99,14 @@
         <div class="tab" onclick="open_tab('Data Stream')">Data Stream</div>
         <div class="tab" onclick="open_tab('Command')">Command</div>
         <div class="tab" onclick="open_tab('Sensor')">Sensor</div>
+    </div>
+    <div class="horizontal-container"></div>
+        <h2 class="white-text">Status Report From Space craft Emulator</h2>
+        <ul>
+            {% for item in data %}
+                <li class="white-text">{{ item }}</li>
+            {% endfor %}
+        </ul>
     </div>
     <form action="/process_text" method="post">
         <label for="user_text">Enter Text:</label>

@@ -1,76 +1,62 @@
 <!-- templates/index.html -->
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>List Example</title>
-    <script src="page_manigure.js"></script>
-    <style>
-        body{
-            background-color: #050505;
+<style>
+    body{
+        background-color: #050505;
+    }
+    .white-text{
+            color: #ccc;
         }
-        form {
-            background-color: #050505;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgb(255, 254, 254);
-            width: 80%;
-            max-width: 400px;
-        }
-        label {
-            display: block;
-            margin-bottom: 10px;
-        }
-        /* Style for the individual tabs */
-        .tab {
-            padding: 10px;
-            background-color: rgb(71, 56, 239);
-            cursor: pointer;
-            border: 1px solid #30a6ea;
-            border-radius: 5px 5px 0 0;
-            margin-right: 2px;
-            box-shadow: 0 0 10px rgb(255, 254, 254);
-        }
+    form {
+        background-color: #050505;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgb(255, 254, 254);
+        width: 80%;
+        max-width: 400px;
+    }
+    label {
+        display: block;
+        margin-bottom: 10px;
+    }
+    /* Style for the individual tabs */
+    .tab {
+        padding: 10px;
+        background-color: rgb(71, 56, 239);
+        cursor: pointer;
+        border: 1px solid #30a6ea;
+        border-radius: 5px 5px 0 0;
+        margin-right: 2px;
+        box-shadow: 0 0 10px rgb(255, 254, 254);
+    }
 
-        /* Style for the content inside the tabs */
-        .tab-content {
-            display: none;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 0 0 5px 5px;
-        }
+    /* Style for the content inside the tabs */
+    .tab-content {
+        display: none;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 0 0 5px 5px;
+    }
 
-        /* Show the content of the selected tab */
-        .tab-content.active {
-            display: block;
-        }
-        /* Style for the container div */
-        .horizontal-container {
-            display: flex; /* Use flexbox layout */
-        }
+    /* Show the content of the selected tab */
+    .tab-content.active {
+        display: block;
+    }
+    /* Style for the container div */
+    .horizontal-container {
+        display: flex; /* Use flexbox layout */
+    }
 
-        /* Style for individual items within the container */
-        .item {
-            margin-right: 10px; /* Optional: Add margin between items */
-        }
-    </style>
-</head>
-<body>
-    <div class="horizontal-container">
-        <div="item"><h1 class="white-text">CSE Space Craft Emulator Data Report</h1>
-    </div>
-    <div class="tab-container">
-        <div class="tab" onclick="open_tab('Status Report')">Status Report</div>
-        <div class="tab" onclick="open_tab('Data Stream')">Data Stream</div>
-        <div class="tab" onclick="open_tab('Command')">Command</div>
-        <div class="tab" onclick="open_tab('Sensor')">Sensor</div>
-    </div>
-    <h1>List of Items</h1>
-    <ul>
-        {% for item in data %}
-            <li>{{ item }}</li>
-        {% endfor %}
-    </ul>
-</body>
-</html>
+    /* Style for individual items within the container */
+    .item {
+        margin-right: 10px; /* Optional: Add margin between items */
+    }
+</style>
+
+<h1 class="white-text"></h1>Status Report From Space craft Emulator</h1>
+<ul>
+    {% for item in data %}
+        <li>{{ item }}</li>
+    {% endfor %}
+</ul>
