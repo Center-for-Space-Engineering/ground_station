@@ -136,9 +136,9 @@
             {% endfor %}
         </ul>
         <h3 class="green-text">Status Report</h3>
-        <ul id="prem_logger_report">
+        <ul id="status">
             {% for item in status %}
-                <li class="white-text"><span class="nice_teal">item['name']</span> Reported: {{item['message']}}</li>
+                <li class="white-text"><span class="nice_teal">{{item['name']}}</span> Reported: <span class="orange-text">{{item['message']}}</span></li>
             {% endfor %}
         </ul>
         <h3 class="green-text">Threading Report</h3>
@@ -172,6 +172,7 @@
         setInterval(refresh_logger_report, 500);
         setInterval(refresh_prem_logger_report, 500);
         setInterval(refresh_thread_report, 500);
+        setInterval(refresh_status_report, 500);
     </script>
 </body>
 </html>

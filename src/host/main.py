@@ -17,6 +17,10 @@ from server_message_handler import serverMessageHandler
 if not NO_SERIAL_LISTENER:
     from python_serial_api.serialHandler import serialHandler
 
+#import DTO for comminicating internally
+from DTOs.logger_dto import logger_dto
+from DTOs.print_message_dto import print_message_dto
+
 
 
 
@@ -84,15 +88,22 @@ def main():
 
     #Good line if you need to test a thread chrashing. 
     # coms.send_request('Data Base', ['save_byte_data', 'NO_TABLE', 0, 'serial listener'])
+    
 
     #keep the main thread alive for use to see things running. 
     running = True
+    i = 0
     while running:
         try:
             threadPool.get_thread_status()
+            dto2 = print_message_dto(f'Main thread Running {i}')
+            i += 1
+            coms.report_additional_status('Main', dto2)
             time.sleep(0.35)
         except KeyboardInterrupt:
             running = False
+            dto2 = print_message_dto('Main thread Shutdown started')
+            coms.report_additional_status('Main', dto2)
         
     
     threadPool.kill_tasks()

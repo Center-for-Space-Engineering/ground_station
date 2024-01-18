@@ -48,27 +48,20 @@ class serverMessageHandler(threadWrapper):
             self.__report = report
     def report_status(self, report):
         with self.__status_lock:
-            if len(report) < 1 : self.__status = {"Not available" : "No reports at this time"}
-            else : self.__status = report
+           self.__status = report
     def get_messages(self):
-        print("HEREERE2")
-
         with self.__message_lock:
             data = self.__messages
         return data
     def get_prem_message_log(self):
-        print("HEREERE3")
         with self.__prem_message_lock:
             data = self.__prem_messages 
         return data
     def get_thread_report(self):
-        print("HEREERE4")
-
         with self.__thread_report_lock:
             data = self.__report
         return data
     def get_report_status(self):
-        print("HEREERE5")
         with self.__status_lock:
             data = self.__status
         return data

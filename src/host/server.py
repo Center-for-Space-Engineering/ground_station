@@ -41,8 +41,8 @@ class serverHandler(threadWrapper):
 
         #set up server
         # Disable print statements by setting the logging level to ERROR
-        # log = logging.getLogger('werkzeug')
-        # log.setLevel(logging.ERROR)
+        log = logging.getLogger('werkzeug')
+        log.setLevel(logging.ERROR)
 
         # set up the app
         self.app = Flask(__name__)
@@ -57,6 +57,7 @@ class serverHandler(threadWrapper):
         self.app.route('/get_updated_logger_report', methods=['GET'])(self.get_updated_logger_report)
         self.app.route('/get_updated_prem_logger_report', methods=['GET'])(self.get_updated_prem_logger_report)
         self.app.route('/get_updated_thread_report', methods=['GET'])(self.get_updated_thread_report)
+        self.app.route('/get_refresh_status_report', methods=['GET'])(self.get_update_status_report)
 
         #the paths caught by this will connect to the users commands they add
         self.app.add_url_rule('/<path:unknown_path>', 'handle_unknown_path', self.handle_unknown_path)
@@ -81,10 +82,6 @@ class serverHandler(threadWrapper):
         prem_data = self.get_prem_message_log()
         #get status report
         status = self.get_status_report()
-        status = {
-                        "name" : "No reports at this time",
-                         'message' : "not message"
-                        }
         #get thread report
         thread_report = self.get_thread_report()
         #get logs
@@ -188,20 +185,27 @@ class serverHandler(threadWrapper):
         #make a request for the messages
         id = self.__coms.send_request(self.__message_handler_name, ['get_report_status']) #send the server the info to display
         data_obj = None
-        print(id)
 
         #wait for the messages to be returneds
         while data_obj is None:
             data_obj = self.__coms.get_return(self.__message_handler_name, id)
         data = []
-        for thread_name in data_obj:
-            data.append({
-                'name':thread_name,
-                'message':data_obj[thread_name]
-            })
+        if len(data_obj[0]) < 1: 
+            data = [{
+                    'name' : "Not available",
+                    'message' : "No reports at this time",
+                    }]
+        else :
+            for dict_report in data_obj:
+                for thread_name in dict_report:
+                    data.append({
+                        'name':thread_name,
+                        'message':dict_report[thread_name]
+                    })
         return data
-    
-    
+    def get_update_status_report(self):
+        data = self.get_status_report()
+        return jsonify(status = data)  
     def run(self):
         self.__log.send_log("Test Server started http://%s:%s" % (self.__hostName, self.__serverPort))
         self.__coms.send_message_prement("Server started http://%s:%s" % (self.__hostName, self.__serverPort), 2)
