@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>https://usu.cse.spacecraftemulator.com</title>
     <script src="page_manigure.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <!-- <script src="log_report_manigure.js"></script> -->
     <script>
         $(function() {
            $("#includeHtml").load("mesage_box.html");
@@ -51,6 +53,31 @@
         }
         .white-text{
             color: #ccc;
+        }
+        .blue-text{
+            color: blue; /* Set text color to blue */
+        }
+        .green-text{
+            color: green;
+        }
+        .red-text{
+            color: red;
+        }
+        .orange-text{
+            color: rgb(229, 94, 10);
+        }
+        .nice_teal{
+            color: rgb(59, 181, 226);
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Style list items */
+        li {
+            margin-bottom: 10px; /* Add spacing between items */
         }
         /* Style for the tabs container */
         .tab-container {
@@ -102,16 +129,49 @@
     </div>
     <div class="horizontal-container"></div>
         <h2 class="white-text">Status Report From Space craft Emulator</h2>
-        <ul>
+        <h3 class="green-text">Preminate Logging Report</h3>
+        <ul id="prem_logger_report">
+            {% for item in prem_data %}
+                <li class="white-text"><span class="green-text">Log:</span> [<span class="blue-text">{{ item['time'] }}</span>] : {{item['message']}}</li>
+            {% endfor %}
+        </ul>
+        <h3 class="green-text">Status Report</h3>
+        <ul id="prem_logger_report">
+            {% for item in status %}
+                <li class="white-text"><span class="nice_teal">item['name']</span> Reported: {{item['message']}}</li>
+            {% endfor %}
+        </ul>
+        <h3 class="green-text">Threading Report</h3>
+        <ul id="thread_report">
+            {% for item in thread_report %}
+                {% if item['status'] == "Running"%}
+                    <li class="white-text">[<span class="blue-text">{{ item['time'] }}</span>] <span class="nice_teal">{{ item['name'] }}</span>: <span class="green-text">{{item['message']}}</span></li>
+                {% elif item['status'] == "Error"%}
+                    <li class="white-text">[<span class="red-text">{{ item['time'] }}</span>] <span class="nice_teal">{{ item['name'] }}</span>: <span class="red-text">{{item['message']}}</span></li>
+                {% else %}
+                    <li class="white-text">[<span class="blue-text">{{ item['time'] }}</span>] <span class="nice_teal">{{ item['name'] }}</span>: <span class="orange-text">{{item['message']}}</span></li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+        <h3 class="green-text">Logging Report</h3>
+        <ul id="logger_report">
             {% for item in data %}
-                <li class="white-text">{{ item }}</li>
+                <li class="white-text"><span class="green-text">Log:</span> [<span class="blue-text">{{ item['time'] }}</span>] : {{item['message']}}</li>
             {% endfor %}
         </ul>
     </div>
+    <div>
+        <h2 class="green-text">Send Commands to Serial Line</h3>
+    </div>
     <form action="/process_text" method="post">
-        <label for="user_text">Enter Text:</label>
-        <input type="text" id="user_text" name="user_text" placeholder="Type something...">
+        <label class = "white-text" for="user_text">Enter Command To post to Serial Line:</label>
+        <input type="text" id="user_text" name="user_text" placeholder="Type Command...">
         <input type="submit" value="Submit">
     </form>
+    <script>
+        setInterval(refresh_logger_report, 500);
+        setInterval(refresh_prem_logger_report, 500);
+        setInterval(refresh_thread_report, 500);
+    </script>
 </body>
 </html>

@@ -4,7 +4,9 @@
 import os
 from logging_system_display_python_api.logger import loggerCustom
 
-
+#import DTO for comminicating internally
+from DTOs.logger_dto import logger_dto
+from DTOs.print_message_dto import print_message_dto
 
 class dinamicImporter:
     def __init__(self, coms):
@@ -17,7 +19,8 @@ class dinamicImporter:
                 self.__mods.append(getattr(module, file.strip(".py")))
                 self.__logger.send_log("Found Module: " + file.strip(".py"))
         self.__logger.send_log("Collected Modules: " + str(self.__mods))
-        coms.print_message("Collected Modules: " + str(self.__mods), 2)
+        dto = print_message_dto("Collected Modules: " + str(self.__mods))
+        coms.print_message(dto, 2)
         
 
     def get_mod_list(self):

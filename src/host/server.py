@@ -3,12 +3,16 @@
 '''
 #python imports
 import logging
-from flask import Flask, render_template, request , send_from_directory
+from flask import Flask, render_template, request , send_from_directory, jsonify
 from threading import Lock
 #imports from other folders that are not local
 from logging_system_display_python_api.logger import loggerCustom
 from threading_python_api.threadWrapper import threadWrapper
 from server_message_handler import serverMessageHandler
+
+#import DTO for comminicating internally
+from DTOs.logger_dto import logger_dto
+from DTOs.print_message_dto import print_message_dto
 
 class serverHandler(threadWrapper):
     def __init__(self, hostName, serverPort, coms, cmd, messageHandler:serverMessageHandler, messageHandlerName:str):
@@ -42,9 +46,7 @@ class serverHandler(threadWrapper):
 
         # set up the app
         self.app = Flask(__name__)
-        self.setup_routes()
-
-        
+        self.setup_routes()     
     def setup_routes(self):
         #Paths that the server will need 
         self.app.route('/')(self.status_report)
@@ -52,15 +54,18 @@ class serverHandler(threadWrapper):
         self.app.route('/Sensor')(self.open_sensor)
         self.app.route('/Command')(self.command)
         self.app.route('/page_manigure.js')(self.serve_page_manigure)
+        self.app.route('/get_updated_logger_report', methods=['GET'])(self.get_updated_logger_report)
+        self.app.route('/get_updated_prem_logger_report', methods=['GET'])(self.get_updated_prem_logger_report)
+        self.app.route('/get_updated_thread_report', methods=['GET'])(self.get_updated_thread_report)
 
         #the paths caught by this will connect to the users commands they add
         self.app.add_url_rule('/<path:unknown_path>', 'handle_unknown_path', self.handle_unknown_path)
-
     def handle_unknown_path(self, unknown_path):
         path = unknown_path.split("/")
         print(path)
         self.__log.send_log("Message recived: " + str(path))
-        self.__coms.print_message("Message recived: " + str(path), 3)
+        dto = print_message_dto("Message recived: " + str(path))
+        self.__coms.print_message(dto, 3)
         message = self.__cmd.parse_cmd(path)
         print(message)
         # self.__log.send_log("SENT:\n " + message)
@@ -69,13 +74,134 @@ class serverHandler(threadWrapper):
     def serve_page_manigure(self):
         return send_from_directory('source', 'page_manigure.js')
     def status_report(self):
+        dto = print_message_dto('Got status_report request')
+        self.__coms.print_message(dto, 3)
+        
+        #get prelogs
+        prem_data = self.get_prem_message_log()
+        #get status report
+        status = self.get_status_report()
+        status = {
+                        "name" : "No reports at this time",
+                         'message' : "not message"
+                        }
+        #get thread report
+        thread_report = self.get_thread_report()
+        #get logs
+        data = self.get_loggs_data()
+        #get byte report
+        return render_template('status_report.html', data=data, prem_data=prem_data, thread_report=thread_report, status=status)
+    def get_prem_message_log(self):
+        #make a request for the messages
+        id = self.__coms.send_request(self.__message_handler_name, ['get_prem_message_log']) #send the server the info to display
+        data_obj = None
+        #wait for the messages to be returneds
+        while data_obj is None:
+            data_obj = self.__coms.get_return(self.__message_handler_name, id)
+        if len(data_obj) > 0:data = self.make_web_dto(data_obj[0])
+        else : 
+            data = [{
+            'time' : 'Not avalible',
+            'message':"Prem Loggs Comming online"
+            }]        
+        return data
+    def make_web_dto(self, data_in):
+        data = []
+        for i in data_in:
+            data.append({
+                'time':i.get_time(),
+                'message':i.get_message(),
+            })
+        return data
+    def get_updated_prem_logger_report(self):
+        #make a request for the messages
+        id = self.__coms.send_request(self.__message_handler_name, ['get_prem_message_log']) #send the server the info to display
+        data_obj = None
+        #wait for the messages to be returneds
+        while data_obj is None:
+            data_obj = self.__coms.get_return(self.__message_handler_name, id)
+        if len(data_obj) > 0:data = self.make_web_dto(data_obj[0])
+        else : 
+            data = [{
+            'time' : 'Not avalible',
+            'message':"Loggs Comming online"
+            }]
+        return jsonify(prem_logger_report=data)
+    def get_loggs_data(self):
         #make a request for the messages
         id = self.__coms.send_request(self.__message_handler_name, ['get_messages']) #send the server the info to display
-        data = None
+        data_obj = None
         #wait for the messages to be returneds
-        while data is None:
-            data = self.__coms.get_return(self.__message_handler_name, id)
-        return render_template('status_report.html', data=data[0])
+        while data_obj is None:
+            data_obj = self.__coms.get_return(self.__message_handler_name, id)
+        if len(data_obj) > 0:data = self.make_web_dto(data_obj[0])
+        else : 
+            data = [{
+            'time' : 'Not avalible',
+            'message':"Loggs Comming online"
+            }]        
+        return data
+    def get_updated_logger_report(self):
+        #make a request for the messages
+        id = self.__coms.send_request(self.__message_handler_name, ['get_messages']) #send the server the info to display
+        data_obj = None
+        #wait for the messages to be returneds
+        while data_obj is None:
+            data_obj = self.__coms.get_return(self.__message_handler_name, id)
+        if len(data_obj) > 0:data = self.make_web_dto(data_obj[0])
+        else : 
+            data = [{
+            'time' : 'Not avalible',
+            'message':"Loggs Comming online"
+            }]
+        return jsonify(logger_report=data)      
+    def get_thread_report(self):
+        #make a request for the messages
+        id = self.__coms.send_request(self.__message_handler_name, ['get_thread_report']) #send the server the info to display
+        data_obj = None
+        #wait for the messages to be returneds
+        while data_obj is None:
+            data_obj = self.__coms.get_return(self.__message_handler_name, id)
+        data = []
+        if len(data_obj[0]) > 0:
+            for report in data_obj[0]:
+                data.append({
+                    'time':report[1].get_time(),
+                    'message':report[1].get_message(),
+                    'name':report[0],
+                    'status':report[2],
+                    }
+                )
+        else : 
+            data.append({
+                'time':"Not avalible",
+                'message':'None',
+                'name':"Loading thread reports",
+                'status':"Loading",
+                }
+            )
+        return data
+    def get_updated_thread_report(self):
+        data = self.get_thread_report()
+        return jsonify(thread_report = data)
+    def get_status_report(self):
+        #make a request for the messages
+        id = self.__coms.send_request(self.__message_handler_name, ['get_report_status']) #send the server the info to display
+        data_obj = None
+        print(id)
+
+        #wait for the messages to be returneds
+        while data_obj is None:
+            data_obj = self.__coms.get_return(self.__message_handler_name, id)
+        data = []
+        for thread_name in data_obj:
+            data.append({
+                'name':thread_name,
+                'message':data_obj[thread_name]
+            })
+        return data
+    
+    
     def run(self):
         self.__log.send_log("Test Server started http://%s:%s" % (self.__hostName, self.__serverPort))
         self.__coms.send_message_prement("Server started http://%s:%s" % (self.__hostName, self.__serverPort), 2)

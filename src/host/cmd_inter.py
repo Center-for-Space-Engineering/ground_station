@@ -7,6 +7,9 @@
 from dinamicImporter import dinamicImporter
 from logging_system_display_python_api.logger import loggerCustom
 
+#print DTO
+from DTOs.print_message_dto import print_message_dto
+
 class cmd_inter():
     '''
         This class takes all the commands that have been dynamically imported and maps them to the server. 
@@ -28,7 +31,8 @@ class cmd_inter():
         '''
         if message[0] in self.__commandDict:
             self.__logger.send_log("Command Action: " + str(self.__commandDict[message[0]]) + str(message))
-            self.__coms.print_message("Command Action: " + str(self.__commandDict[message[0]]) + str(message), 2)
+            dto = print_message_dto("Command Action: " + str(self.__commandDict[message[0]]) + str(message))
+            self.__coms.print_message(dto)
             if len(message) == 1:
                 returnVal = self.__commandDict[message[0]].run()
             else :
@@ -60,4 +64,5 @@ class cmd_inter():
                 _ = obj(self, self.__coms) #the reason why I pass cmd into the new class is so that the class can define its own command names and structures.
             
         self.__logger.send_log("Commands added to the server: " + str(self.__commandDict))
-        self.__coms.print_message(str(self.__commandDict), 8)
+        dto = print_message_dto(str(self.__commandDict))
+        self.__coms.print_message(dto, 8)

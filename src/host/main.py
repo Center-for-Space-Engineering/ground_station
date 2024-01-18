@@ -2,7 +2,7 @@
     This module runs everything, its main job is to create and run all of the 
     system objects and classes. 
 '''
-#These are some Debuggin tools I add, Turning off the display is really useful for seeing erros, because the terminal wont get erased every time.
+#These are some Debuggin tools I add, Turning off the display is really useful for seeing erros, because the terminal wont get erased every few millaseconds with the display on.
 DISPLAY_OFF = True
 NO_SERIAL_LISTENER = True
 
@@ -34,7 +34,7 @@ def main():
     system objects and classes. 
     '''
     #create a server obj, not it will also create the coms object #144.39.167.206
-    coms = messageHandler(DEBUG = DISPLAY_OFF, server_name=server_listener_name)
+    coms = messageHandler(display_off = DISPLAY_OFF, server_name=server_listener_name)
     #make database object 
     dataBase = DataBaseHandler(coms, is_gui=False)
     #now that we have the data base we can collect all of our command handlers.
@@ -81,6 +81,9 @@ def main():
         ser_listener = serialHandler(coms = coms, batch_size=batch_size, thread_name=serial_handler_name)
         threadPool.add_thread(ser_listener.run, serial_handler_name, ser_listener)
         threadPool.start() #start the new task
+
+    #Good line if you need to test a thread chrashing. 
+    # coms.send_request('Data Base', ['save_byte_data', 'NO_TABLE', 0, 'serial listener'])
 
     #keep the main thread alive for use to see things running. 
     running = True

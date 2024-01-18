@@ -1,5 +1,9 @@
 from commandParent import commandParent
 
+#import DTO for comminicating internally
+from DTOs.logger_dto import logger_dto
+from DTOs.print_message_dto import print_message_dto
+
 class cmd_exsample(commandParent):
     """The init function gose to the cmd class and then pouplates its self into its command dict so that it is dynamically added to the command repo"""
     def __init__(self, CMD, coms):
@@ -15,11 +19,13 @@ class cmd_exsample(commandParent):
 
     def run(self):
         print("Ran command")
-        self.__coms.print_message("Ran command", 2)
+        dto  = print_message_dto("Ran command")
+        self.__coms.print_message(dto, 2)
         return f"<p>ran command {self.__comandName}<p>"
     def run_args(self, args):
         print("Ran command w/ args: " + str(args))
-        self.__coms.print_message("Ran command w/ args: " + str(args), 2)
+        dto = print_message_dto("Ran command w/ args: " + str(args))
+        self.__coms.print_message(dto, 2)
         message = f"<p>ran command {self.__comandName} with args {str(args)}<p>"
         try:
             message += self.__args[args[0]](args)
@@ -28,7 +34,8 @@ class cmd_exsample(commandParent):
         return message
     def func1(self, arg):
         print("ran func1")
-        self.__coms.print_message("Ran func1", 2)
+        dto = print_message_dto("Ran func1")
+        self.__coms.print_message(dto, 2)
         return f"<p>Ran function for {arg}</p>"
     def get_args(self):
         message = ""

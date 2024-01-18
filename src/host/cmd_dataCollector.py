@@ -7,6 +7,10 @@ import time
 from commandParent import commandParent
 from logging_system_display_python_api.logger import loggerCustom
 
+#import DTO for comminicating internally
+from DTOs.logger_dto import logger_dto
+from DTOs.print_message_dto import print_message_dto
+
 #pylint disable=c0103
 class cmd_dataCollector(commandParent):
     """
@@ -147,5 +151,6 @@ class cmd_dataCollector(commandParent):
             dto += (str(data_point) + ",")
         dto += f"</data>\n<lastFetchedIndex>{last_db_indx}</lastFetchedIndex>"
         dto += "</body>\n</html>"
-        self.__coms.print_message("DTO returned to requester.")
+        dto_interal = print_message_dto("DTO returned to requester.")
+        self.__coms.print_message(dto_interal)
         return dto
