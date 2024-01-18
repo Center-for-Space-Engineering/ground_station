@@ -101,11 +101,11 @@ function refresh_status_report()
         method: 'GET',
         success: function(data) {
             // Clear existing list items
-            $('#status').empty();
+            $('#status_list').empty();
 
             // Parse and append updated content list
-            data.status.forEach(function(item) {
-                $('#status').append('<li class="white-text"><span class="nice_teal">' + item['name'] + '</span> Reported: <span class="orange-text">' + item['message'] + '</span></li>');
+            data.status_list.forEach(function(item) {
+                $('#status_list').append('<li class="white-text"><span class="nice_teal">' + item['name'] + '</span> Reported: <span class="orange-text">' + item['message'] + '</span></li>');
             });
             },
         error: function(error) {

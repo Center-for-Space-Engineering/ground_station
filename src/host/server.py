@@ -205,7 +205,7 @@ class serverHandler(threadWrapper):
         return data
     def get_update_status_report(self):
         data = self.get_status_report()
-        return jsonify(status = data)  
+        return jsonify(status_list = data)  
     def run(self):
         self.__log.send_log("Test Server started http://%s:%s" % (self.__hostName, self.__serverPort))
         self.__coms.send_message_prement("Server started http://%s:%s" % (self.__hostName, self.__serverPort), 2)

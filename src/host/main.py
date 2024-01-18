@@ -96,9 +96,8 @@ def main():
     while running:
         try:
             threadPool.get_thread_status()
-            dto2 = print_message_dto(f'Main thread Running {i}')
             i += 1
-            coms.report_additional_status('Main', dto2)
+            coms.report_additional_status('Main', f'Main thread Running {i}')
             time.sleep(0.35)
         except KeyboardInterrupt:
             running = False
