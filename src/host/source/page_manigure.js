@@ -123,32 +123,16 @@ function update_run_arg_box(row) {
 }
 
 //This fuction takes an input from the user and then runs 
-function run_command()
-{
-    // var path_box = document.getElementById('commands_args');
-    // var path = path_box.value;
-    // alert(path);
-    
-    // Fetch updated content list from Flask
-    // fetch(path)
-    // .then(response => response.text())
-    // .then(data => {
-    //     // Display the result (you can replace this with your own script)
-    //     alert('Result: ' + data);
-    // })
-    // .catch(error => {
-    //     // Handle errors
-    //     alert('Error making GET request:', error);
-    // });
-    $.ajax({
-        url: '/bad',
-        method: 'GET',
-        success: function(data) {
-            // Clear existing list items
-            alert('got request' + data);
-            },
-        error: function(error) {
-            alert('Error fetching logger updated content:', error);
-        }
-    });
+function send_run_request() {
+    var userInput = document.getElementById('commands_args').value;
+
+    fetch(`${userInput}`)
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('result').innerHTML = data;
+        })
+        .catch(error => {
+            // console.error('Error making GET request:', error);
+            document.getElementById('result').innerHTML = 'Error: ' + error.message;
+        });
 }

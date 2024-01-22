@@ -10,7 +10,7 @@
         body{
             background-color: #050505;
         }
-        form {
+        .box_style {
             background-color: #050505;
             padding: 20px;
             border-radius: 5px;
@@ -143,13 +143,9 @@
     <div>
         <h2 class="green-text"> Run commands interface: </h2>
     </div>
-    <form>
-        <label class = "white-text" for="user_text">Enter args for commands:</label>
-        <input type="text" id="commands_args" placeholder="Type Args...">
-        <button class = "button_formatt" onclick="run_command()">Submit</button>
-    </form>
-    <div>
-        <h3 class="green-text" id="Report">No return val yet.</h3>
-    </div>
+    <label class = "white-text" for="user_text">Enter args for commands:</label>
+    <input type="text" id="commands_args" placeholder="Type Args...">
+    <button class = "button_formatt" onclick="send_run_request()">Submit</button>
+    <div class="green-text" id="result">No return val yet.</div>
 </body>
 </html>

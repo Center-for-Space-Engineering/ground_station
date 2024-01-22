@@ -7,6 +7,8 @@ DISPLAY_OFF = True
 NO_SERIAL_LISTENER = True
 
 import time
+import datetime
+
 from threading_python_api.taskHandler import taskHandler
 from database_python_api.database_control import DataBaseHandler
 from logging_system_display_python_api.messageHandler import messageHandler
@@ -42,7 +44,7 @@ def main():
     #make database object 
     dataBase = DataBaseHandler(coms, is_gui=False)
     #now that we have the data base we can collect all of our command handlers.
-    cmd = cmd_inter(coms, data_base)
+    cmd = cmd_inter(coms, dataBase)
     #now that we have all the commands we can make the server
     #note because the server requires a theard to run, it cant have a dedicated thread to listen to coms like
     #other classes so we need another class object to listen to interal coms for the server.
@@ -96,8 +98,7 @@ def main():
     while running:
         try:
             threadPool.get_thread_status()
-            i += 1
-            coms.report_additional_status('Main', f'Main thread Running {i}')
+            coms.report_additional_status('Main', f'Main thread Running {datetime.datetime.now()}')
             time.sleep(0.35)
         except KeyboardInterrupt:
             running = False

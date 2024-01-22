@@ -52,8 +52,8 @@ class cmd_dataCollector(commandParent):
                 [0] : funciton name
                 [1:] ARGS that the function needs. NOTE: can be blank
         '''
-        message = f"<prunning command {self.__comand_name} with args {str(args)}<p>"
-        message += self.__args[args[0]](args)
+        message = f"<h3>Running command {self.__comand_name} with args {str(args)}</h3>"
+        # message += self.__args[args[0]](args)
         try:
             message += self.__args[args[0]](args) 
             #NOTE to make this work we will always pass args even if we dont use it.

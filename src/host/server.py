@@ -60,19 +60,16 @@ class serverHandler(threadWrapper):
         self.app.route('/get_refresh_status_report', methods=['GET'])(self.get_update_status_report)
 
         #the paths caught by this will connect to the users commands they add
-        self.app.add_url_rule('/<path:unknown_path>', 'handle_unknown_path',  view_func=self.handle_unknown_path, methods=['GET'])
+        self.app.add_url_rule('/<path:unknown_path>', 'handle_unknown_path',  self.handle_unknown_path)
     def handle_unknown_path(self, unknown_path):
-        print('print here')
         path = unknown_path.split("/")
-        
         self.__log.send_log("Message recived: " + str(path))
         dto = print_message_dto("Message recived: " + str(path))
         self.__coms.print_message(dto, 3)
         message = self.__cmd.parse_cmd(path)
-        print(message)
-        # self.__log.send_log("SENT:\n " + message)
+        self.__log.send_log(f"Paht recive {unknown_path}")
         # self.__coms.print_message("Server responed ", 2)
-        return jsonify( data = f'Unknown Path: {unknown_path}')
+        return message
     def serve_page_manigure(self):
         return send_from_directory('source', 'page_manigure.js')
     def status_report(self):
@@ -206,7 +203,7 @@ class serverHandler(threadWrapper):
         return data
     def get_update_status_report(self):
         data = self.get_status_report()
-        return jsonify(status_list = data)  
+        return jsonify(status_list = data)
     def run(self):
         self.__log.send_log("Test Server started http://%s:%s" % (self.__hostName, self.__serverPort))
         self.__coms.send_message_prement("Server started http://%s:%s" % (self.__hostName, self.__serverPort), 2)
