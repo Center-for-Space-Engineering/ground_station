@@ -66,3 +66,12 @@ class cmd_inter():
         self.__logger.send_log("Commands added to the server: " + str(self.__commandDict))
         dto = print_message_dto(str(self.__commandDict))
         self.__coms.print_message(dto, 8)
+    
+    def get_commands_webpage(self):
+        '''
+          This function collects all the commands and how to run them, then returns that infor to the server in a dictionary so that it can be displayed to the user.
+        '''
+        message = []
+        for key in self.__commandDict:
+            message += self.__commandDict[key].get_args_server()
+        return message

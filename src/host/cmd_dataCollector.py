@@ -54,13 +54,13 @@ class cmd_dataCollector(commandParent):
         '''
         message = f"<prunning command {self.__comand_name} with args {str(args)}<p>"
         message += self.__args[args[0]](args)
-        # try:
-        #     message += self.__args[args[0]](args) 
-        #     #NOTE to make this work we will always pass args even if we dont use it.
-        # except : # pylint: disable=w0702
-        #     # the above disable is for the warning for not spesifying the exception type
-        #     message += "<p> Not vaild arg </p>"
-        #     self.__coms.print_message("No valid arg on get request! ", 0)
+        try:
+            message += self.__args[args[0]](args) 
+            #NOTE to make this work we will always pass args even if we dont use it.
+        except : # pylint: disable=w0702
+            # the above disable is for the warning for not spesifying the exception type
+            message += "<p> Not vaild arg </p>"
+            self.__coms.print_message("No valid arg on get request! ", 0)
 
         self.__logger.send_log("Returned to server: " + message)
         return message
@@ -73,6 +73,38 @@ class cmd_dataCollector(commandParent):
             temp = self.__data_base.get_request(request_num)
             time.sleep(0.1) #let other process run
         return temp
+    def get_args_server(self):
+        '''
+            This function returns an html obj that explains the args for all the internal
+            funciton calls. 
+        '''
+        message = []
+        for key in self.__args:
+            if key == "get_data_type":
+                message.append({
+                    'Name' : key,
+                    'Path' : f"/{self.__comand_name}/{key}/-data type-",
+                    'Discription' : 'This command returns the fromat of a data type.',
+                })
+            elif key == "get_data":
+                message.append({
+                    'Name' : key,
+                    'Path' : f"/{self.__comand_name}/{key}/-table name-/-start index-",
+                    'Discription' : 'This command returns ALL the data from the data base from the starting index. A.K.A it is slow.',
+                })
+            elif key == "get_dto":
+                message.append({
+                    'Name' : key,
+                    'Path' : f"/{self.__comand_name}/{key}/-table_name-/-start index-/-feild name-/-Optional max lines-",
+                    'Discription' : 'This command returns data from the data base from a start index to a finishing index. It is built for speed.',
+                })
+            else :
+                message.append({
+                    'Name' : key,
+                    'Path' : f"/{self.__comand_name}/{key}",
+                    'Discription' : 'No discription given for this command.',
+                })
+        return message
     def get_args(self):
         '''
             This function returns an html obj that explains the args for all the internal

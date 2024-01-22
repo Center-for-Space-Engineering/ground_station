@@ -60,10 +60,11 @@ class serverHandler(threadWrapper):
         self.app.route('/get_refresh_status_report', methods=['GET'])(self.get_update_status_report)
 
         #the paths caught by this will connect to the users commands they add
-        self.app.add_url_rule('/<path:unknown_path>', 'handle_unknown_path', self.handle_unknown_path)
+        self.app.add_url_rule('/<path:unknown_path>', 'handle_unknown_path',  view_func=self.handle_unknown_path, methods=['GET'])
     def handle_unknown_path(self, unknown_path):
+        print('print here')
         path = unknown_path.split("/")
-        print(path)
+        
         self.__log.send_log("Message recived: " + str(path))
         dto = print_message_dto("Message recived: " + str(path))
         self.__coms.print_message(dto, 3)
@@ -71,7 +72,7 @@ class serverHandler(threadWrapper):
         print(message)
         # self.__log.send_log("SENT:\n " + message)
         # self.__coms.print_message("Server responed ", 2)
-        return f'Unknown Path: {unknown_path}'
+        return jsonify( data = f'Unknown Path: {unknown_path}')
     def serve_page_manigure(self):
         return send_from_directory('source', 'page_manigure.js')
     def status_report(self):
@@ -224,6 +225,7 @@ class serverHandler(threadWrapper):
     def open_sensor(self):
         return render_template('sensor.html')
     def command(self):
-        return render_template('Command.html')
+        table_data = self.__cmd.get_commands_webpage()
+        return render_template('Command.html', table_data=table_data)
     def get_message_handler(self):
         return self.__message_handler     

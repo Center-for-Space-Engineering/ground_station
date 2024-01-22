@@ -46,3 +46,9 @@ class commandParent():
             class uses. 
         '''
         return "<p>\t No Args implement</p>"
+    def get_args_server(self):
+        return [{ 
+            'Name' : 'No get_args_server implemented',
+            'Path' : 'No path given',
+            'Discription' : 'Please implente the get_args_server function so that the server can run this command.'    
+            }]

@@ -92,7 +92,7 @@ function refresh_thread_report()
         }
     });
 }
-
+//This fuction updates our status report by sending a request to the server and then passing that response back to the webpage
 function refresh_status_report()
 {
     // Fetch updated content list from Flask
@@ -110,6 +110,45 @@ function refresh_status_report()
             },
         error: function(error) {
             console.error('Error fetching logger updated content:', error);
+        }
+    });
+}
+
+// Function to execute action based on what the user clicked on in the table
+function update_run_arg_box(row) {
+    //update the run commands text box
+    var path_name = row.getAttribute('data-path');
+    var input_command_box = document.getElementById('commands_args');
+    input_command_box.value = path_name;
+}
+
+//This fuction takes an input from the user and then runs 
+function run_command()
+{
+    // var path_box = document.getElementById('commands_args');
+    // var path = path_box.value;
+    // alert(path);
+    
+    // Fetch updated content list from Flask
+    // fetch(path)
+    // .then(response => response.text())
+    // .then(data => {
+    //     // Display the result (you can replace this with your own script)
+    //     alert('Result: ' + data);
+    // })
+    // .catch(error => {
+    //     // Handle errors
+    //     alert('Error making GET request:', error);
+    // });
+    $.ajax({
+        url: '/bad',
+        method: 'GET',
+        success: function(data) {
+            // Clear existing list items
+            alert('got request' + data);
+            },
+        error: function(error) {
+            alert('Error fetching logger updated content:', error);
         }
     });
 }
