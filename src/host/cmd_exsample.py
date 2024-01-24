@@ -10,7 +10,7 @@ class cmd_exsample(commandParent):
         #CMD is the cmd class and we are using it to hold all the command class
         self.__comandName = 'exsample'
         self.__args ={
-            "arg1" : self.func1
+            "fun1" : self.func1
         }
         dictCmd = CMD.get_command_dict()
         dictCmd[self.__comandName] = self #this is the name the webserver will see, so to call the command send a request for this command. 
@@ -23,12 +23,11 @@ class cmd_exsample(commandParent):
         self.__coms.print_message(dto, 2)
         return f"<p>ran command {self.__comandName}<p>"
     def run_args(self, args):
-        print("Ran command w/ args: " + str(args))
-        dto = print_message_dto("Ran command w/ args: " + str(args))
-        self.__coms.print_message(dto, 2)
-        message = f"<p>ran command {self.__comandName} with args {str(args)}<p>"
+        print(f"ran command {str(args[0])} with args {str(args[1:])}")
         try:
-            message += self.__args[args[0]](args)
+            message = self.__args[args[0]](args)
+            dto = print_message_dto(message)
+            self.__coms.print_message(dto, 2)
         except :
             message += "<p> Not vaild arg </p>"
         return message
@@ -36,7 +35,7 @@ class cmd_exsample(commandParent):
         print("ran func1")
         dto = print_message_dto("Ran func1")
         self.__coms.print_message(dto, 2)
-        return f"<p>Ran function for {arg}</p>"
+        return f"<p>ran command func1 with args {str(arg)}<p>"
     def get_args(self):
         message = ""
         for key in self.__args:
@@ -45,4 +44,12 @@ class cmd_exsample(commandParent):
 
     def __str__(self):
         return self.__comandName
-
+    def get_args_server(self):
+        message = []
+        for key in self.__args:
+           message.append({ 
+            'Name' : key,
+            'Path' : f'/{self.__comandName}/{key}/-paramerters for the function-',
+            'Discription' : 'Example commands'    
+            })
+        return message

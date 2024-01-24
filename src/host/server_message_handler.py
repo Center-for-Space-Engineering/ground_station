@@ -3,6 +3,7 @@
 '''
 #python imports
 from threading import Lock
+import datetime
 #imports from other folders that are not local
 from logging_system_display_python_api.logger import loggerCustom
 from threading_python_api.threadWrapper import threadWrapper
@@ -18,6 +19,8 @@ class serverMessageHandler(threadWrapper):
             'get_thread_report':self.get_thread_report,
             'report_status': self.report_status,
             'get_report_status':self.get_report_status,
+            'report_byte_status':self.report_byte_status,
+            'get_byte_report':self.get_byte_report,
         }
         super().__init__(self.__function_dict)
         self.__log = loggerCustom("logs/interal_coms_with_server.txt")
@@ -27,12 +30,14 @@ class serverMessageHandler(threadWrapper):
         self.__prem_messages = []
         self.__report = []
         self.__status = {"Not available" : "No reports at this time"}
+        self.__byte_status = []
 
         #threading saftey 
         self.__message_lock = Lock()
         self.__prem_message_lock = Lock()
         self.__thread_report_lock = Lock()
         self.__status_lock = Lock()
+        self.__byte_status_lock = Lock()
 
         #included this because it is standared at this point
         self.__coms = coms
@@ -49,6 +54,9 @@ class serverMessageHandler(threadWrapper):
     def report_status(self, report):
         with self.__status_lock:
            self.__status = report
+    def report_byte_status(self, data):
+        with self.__byte_status_lock:
+            self.__byte_status = data 
     def get_messages(self):
         with self.__message_lock:
             data = self.__messages
@@ -65,5 +73,17 @@ class serverMessageHandler(threadWrapper):
         with self.__status_lock:
             data = self.__status
         return data
+    def get_byte_report(self):
+        with self.__byte_status_lock:
+            if(len(self.__byte_status) <= 0):
+                data = [
+                    {
+                        'time' : datetime.datetime.now(),
+                        'bytes' : 0,
+                    }
+                ]
+            else : data = self.__byte_status
+        return data
+    
     
     

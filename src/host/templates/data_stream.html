@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>https://usu.cse.spacecraftemulator.com</title>
     <script src="page_manigure.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body{
             background-color: #050505;
@@ -94,5 +95,64 @@
         <div class="tab" onclick="open_tab('Command')">Command</div>
         <div class="tab" onclick="open_tab('Sensor')">Sensor</div>
     </div>
+
+    <canvas id="myLineChart" width="400" height="150"></canvas>
+
+    <script>
+        var ctx = document.getElementById('myLineChart').getContext('2d');
+        var lineChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],  // X-axis labels (timestamps)
+                datasets: [{
+                    label: 'Data recived on the serial port (bytes)',
+                    data: [],  // Y-axis data points
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1,
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    x: [{
+                        type: 'linear',
+                        position: 'bottom'
+                    }]
+                }
+            }
+        });
+
+        function updateLineChart(dataList) {
+            var labels = lineChart.data.labels;
+            var datasetData = lineChart.data.datasets[0].data;
+
+            // Assuming data is an array of Y-axis values
+            dataList.forEach(function(data) {
+                datasetData.push(data.bytes);
+
+                // Limit the number of data points to display
+                if (labels.length >= 10) {
+                    labels.shift();  // Remove the oldest label
+                    datasetData.shift();  // Remove the oldest data point
+                }
+
+                labels.push(data.time);  // X-axis label (timestamp)
+            });
+            // Update the chart
+            lineChart.update();
+        }
+
+        // Update the line chart every second
+        setInterval(function() {
+            fetch('/get_serial_info_update')  // Assume a Flask route to get updated data
+                .then(response => response.json())
+                .then(data => {
+                    updateLineChart(data);
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                });
+        }, 2500);  // Update every 1000 milliseconds (1 second)
+    </script>
 </body>
 </html>

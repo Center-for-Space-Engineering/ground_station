@@ -5,6 +5,8 @@
 import logging
 from flask import Flask, render_template, request , send_from_directory, jsonify
 from threading import Lock
+import random
+
 #imports from other folders that are not local
 from logging_system_display_python_api.logger import loggerCustom
 from threading_python_api.threadWrapper import threadWrapper
@@ -58,6 +60,7 @@ class serverHandler(threadWrapper):
         self.app.route('/get_updated_prem_logger_report', methods=['GET'])(self.get_updated_prem_logger_report)
         self.app.route('/get_updated_thread_report', methods=['GET'])(self.get_updated_thread_report)
         self.app.route('/get_refresh_status_report', methods=['GET'])(self.get_update_status_report)
+        self.app.route('/get_serial_info_update')(self.get_serial_info_update)
 
         #the paths caught by this will connect to the users commands they add
         self.app.add_url_rule('/<path:unknown_path>', 'handle_unknown_path',  self.handle_unknown_path)
@@ -204,6 +207,14 @@ class serverHandler(threadWrapper):
     def get_update_status_report(self):
         data = self.get_status_report()
         return jsonify(status_list = data)
+    def get_serial_info_update(self):
+        #make a request for the messages
+        id = self.__coms.send_request(self.__message_handler_name, ['get_byte_report']) #send the server the info to display
+        data_obj = None
+        #wait for the messages to be returneds
+        while data_obj is None:
+            data_obj = self.__coms.get_return(self.__message_handler_name, id)
+        return jsonify(data_obj)
     def run(self):
         self.__log.send_log("Test Server started http://%s:%s" % (self.__hostName, self.__serverPort))
         self.__coms.send_message_prement("Server started http://%s:%s" % (self.__hostName, self.__serverPort), 2)
