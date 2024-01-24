@@ -6,6 +6,7 @@ import logging
 from flask import Flask, render_template, request , send_from_directory, jsonify
 from threading import Lock
 import random
+from datetime import datetime
 
 #imports from other folders that are not local
 from logging_system_display_python_api.logger import loggerCustom
@@ -217,7 +218,8 @@ class serverHandler(threadWrapper):
         return jsonify(data_obj)
     def run(self):
         self.__log.send_log("Test Server started http://%s:%s" % (self.__hostName, self.__serverPort))
-        self.__coms.send_message_prement("Server started http://%s:%s" % (self.__hostName, self.__serverPort), 2)
+        dto = logger_dto(message="Server started http://%s:%s" % (self.__hostName, self.__serverPort), time=str(datetime.now()))
+        self.__coms.send_message_prement(dto, 2)
         super().set_status("Running")
         self.app.run(debug=False, host=self.__hostName, port=self.__serverPort)
     def kill_Task(self):
