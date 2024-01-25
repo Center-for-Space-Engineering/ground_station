@@ -3,8 +3,8 @@
     system objects and classes. 
 '''
 #These are some Debuggin tools I add, Turning off the display is really useful for seeing erros, because the terminal wont get erased every few millaseconds with the display on.
-DISPLAY_OFF = False
-NO_SERIAL_LISTENER = False
+DISPLAY_OFF = True
+NO_SERIAL_LISTENER = True
 
 import time
 import datetime
@@ -26,8 +26,8 @@ from DTOs.print_message_dto import print_message_dto
 
 
 
-hostname = '144.39.167.206' #get this by running hostname -I
-# hostname = '127.0.0.1'
+# hostname = '144.39.167.206' #get this by running hostname -I
+hostname = '127.0.0.1'
 port = 8080
 serial_handler_name = 'serial listener'
 server_listener_name = 'CSE_Server_Listener' #this the name for the interal thread that collect server info 
