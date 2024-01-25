@@ -40,7 +40,7 @@ def main():
     system objects and classes. 
     '''
     #create a server obj, not it will also create the coms object #144.39.167.206
-    coms = messageHandler(display_off = DISPLAY_OFF, server_name=server_listener_name)
+    coms = messageHandler(display_off = DISPLAY_OFF, server_name=server_listener_name, hostname=hostname)
     #make database object 
     dataBase = DataBaseHandler(coms, is_gui=False)
     #now that we have the data base we can collect all of our command handlers.
