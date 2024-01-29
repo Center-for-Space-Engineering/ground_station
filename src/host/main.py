@@ -4,7 +4,8 @@
 '''
 #These are some Debuggin tools I add, Turning off the display is really useful for seeing erros, because the terminal wont get erased every few millaseconds with the display on.
 DISPLAY_OFF = True
-NO_SERIAL_LISTENER = True
+NO_SERIAL_LISTENER = False
+NO_SERIAL_WRITTER = False
 
 import time
 import datetime
@@ -18,6 +19,8 @@ from server_message_handler import serverMessageHandler
 
 if not NO_SERIAL_LISTENER:
     from python_serial_api.serial_listener import serial_listener
+if not NO_SERIAL_WRITTER:
+    from python_serial_api.serial_writter import serial_writter
 
 #import DTO for comminicating internally
 from DTOs.logger_dto import logger_dto
@@ -26,10 +29,11 @@ from DTOs.print_message_dto import print_message_dto
 
 
 
-# hostname = '144.39.167.206' #get this by running hostname -I
-hostname = '127.0.0.1'
+hostname = '144.39.167.206' #get this by running hostname -I
+# hostname = '127.0.0.1'
 port = 8080
-serial_handler_name = 'serial listener'
+serial_listener_name = 'serial listener'
+serial_writter_name = 'serial writter'
 server_listener_name = 'CSE_Server_Listener' #this the name for the interal thread that collect server info 
 server_name_host = 'CSE_Host' #this is the name for the thread that services all the web requests. 
 data_base = 'Data Base'
@@ -49,7 +53,7 @@ def main():
     #note because the server requires a theard to run, it cant have a dedicated thread to listen to coms like
     #other classes so we need another class object to listen to interal coms for the server.
     server_message_handler = serverMessageHandler(coms=coms)
-    server = serverHandler(hostname, port, coms, cmd, serverMessageHandler, server_listener_name)
+    server = serverHandler(hostname, port, coms, cmd, serverMessageHandler, server_listener_name, serial_writter_name)
     
 
     #first start our thread handler and the message haandler (coms) so we can start reporting
@@ -84,8 +88,14 @@ def main():
     
     # create the ser_listener
     if not NO_SERIAL_LISTENER:
-        ser_listener = serial_listener(coms = coms, batch_size=batch_size, thread_name=serial_handler_name)
-        threadPool.add_thread(ser_listener.run, serial_handler_name, ser_listener)
+        ser_listener = serial_listener(coms = coms, batch_size=batch_size, thread_name=serial_listener_name)
+        threadPool.add_thread(ser_listener.run, serial_listener_name, ser_listener)
+        threadPool.start() #start the new task
+
+    # create the ser_writter
+    if not NO_SERIAL_WRITTER:
+        ser_writter = serial_writter(coms = coms, thread_name=serial_writter_name)
+        threadPool.add_thread(ser_writter.run, serial_writter_name, ser_writter)
         threadPool.start() #start the new task
 
     #Good line if you need to test a thread chrashing. 

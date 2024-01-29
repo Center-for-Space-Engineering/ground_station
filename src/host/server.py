@@ -7,6 +7,7 @@ from flask import Flask, render_template, request , send_from_directory, jsonify
 from threading import Lock
 import random
 from datetime import datetime
+import os
 
 #imports from other folders that are not local
 from logging_system_display_python_api.logger import loggerCustom
@@ -18,7 +19,7 @@ from DTOs.logger_dto import logger_dto
 from DTOs.print_message_dto import print_message_dto
 
 class serverHandler(threadWrapper):
-    def __init__(self, hostName, serverPort, coms, cmd, messageHandler:serverMessageHandler, messageHandlerName:str):
+    def __init__(self, hostName, serverPort, coms, cmd, messageHandler:serverMessageHandler, messageHandlerName:str, serial_writter_name:str):
         self.__function_dict = { #NOTE: I am only passing the function that the rest of the system needs 
             'run' : self.run,
             'kill_Task' : self.kill_Task,
@@ -33,6 +34,9 @@ class serverHandler(threadWrapper):
 
         self.__hostName = hostName
         self.__serverPort = serverPort
+
+        #set up coms with the serial port
+        self.__serial_writter_name = serial_writter_name
 
         #these class are used to comminicate with the reset of the cse code
         self.__coms = coms
@@ -49,6 +53,7 @@ class serverHandler(threadWrapper):
 
         # set up the app
         self.app = Flask(__name__)
+        self.__favicon_directory = os.path.join(self.app.root_path, 'static')
         self.setup_routes()     
     def setup_routes(self):
         #Paths that the server will need 
@@ -63,9 +68,12 @@ class serverHandler(threadWrapper):
         self.app.route('/get_refresh_status_report', methods=['GET'])(self.get_update_status_report)
         self.app.route('/get_serial_info_update')(self.get_serial_info_update)
         self.app.route('/serial_run_request')(self.serial_run_request)
+        self.app.route('/favicon.ico')(self.facicon)
 
         #the paths caught by this will connect to the users commands they add
         self.app.add_url_rule('/<path:unknown_path>', 'handle_unknown_path',  self.handle_unknown_path)
+    def facicon(self):
+         return send_from_directory(self.__favicon_directory, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
     def handle_unknown_path(self, unknown_path):
         path = unknown_path.split("/")
         self.__log.send_log("Message recived: " + str(path))
@@ -73,8 +81,9 @@ class serverHandler(threadWrapper):
         dto = print_message_dto("Message recived: " + str(path))
         self.__coms.print_message(dto, 3)
         message = self.__cmd.parse_cmd(path)
-        self.__log.send_log(f"Paht recive {unknown_path}")
-        self.__coms.print_message("Server responed ", 2)
+        self.__log.send_log(f"Path recive {unknown_path}")
+        dto2 = print_message_dto("Server handled request")
+        self.__coms.print_message(dto2, 2)
         return message
     def serve_page_manigure(self):
         return send_from_directory('source', 'page_manigure.js')
@@ -219,13 +228,12 @@ class serverHandler(threadWrapper):
             data_obj = self.__coms.get_return(self.__message_handler_name, id)
         return jsonify(data_obj)
     def serial_run_request(self):
-        print(request.args.get('serial_command'))
         #make a request for the messages
-        id = self.__coms.send_request('serial_writter', ['write_to_serial_port']) #send the server the info to display
+        id = self.__coms.send_request(self.__serial_writter_name, ['write_to_serial_port', request.args.get('serial_command')]) #send the request to the serial writter
         data_obj = None
         #wait for the messages to be returneds
         while data_obj is None:
-            data_obj = self.__coms.get_return(self.__message_handler_name, id)
+            data_obj = self.__coms.get_return(self.__serial_writter_name, id)
         return data_obj
     def run(self):
         self.__log.send_log("Test Server started http://%s:%s" % (self.__hostName, self.__serverPort))

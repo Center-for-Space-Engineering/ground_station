@@ -27,7 +27,7 @@ class cmd_data_publisher(commandParent, threadWrapper):
         self.__server_socket = None
 
         ############ set up the threadWrapper stuff ############
-        # We need the threadWrapper so that we can send a request to start the publisher can send a request to start a new thread.
+        # We need the threadWrapper so that the publisher can send a request to start a new thread.
         self.__function_dict = { #NOTE: I am only passing the function that the rest of the system needs
             #In this case I dont want any other fuctions
         }
@@ -35,7 +35,6 @@ class cmd_data_publisher(commandParent, threadWrapper):
     def run_args(self, args):
         try:
             message = self.__args[args[0]](args[1:])
-            print(f"ran command {str(args[0])} with args {str(args[1:])}")
             dto = print_message_dto(message)
             self.__coms.print_message(dto, 2)
         except :
@@ -43,7 +42,7 @@ class cmd_data_publisher(commandParent, threadWrapper):
         return message
     def start_data_pubisher(self, arg):
         #get the port from args
-        self.__port = arg[0]
+        self.__port = int(arg[0])
 
         #request the host name from the coms
         host = self.__coms.get_host_name()
@@ -58,24 +57,21 @@ class cmd_data_publisher(commandParent, threadWrapper):
         except Exception as e:
             return f"<p>Error {e}<p>"
     def run_publisher(self):
+        count = 0
         try:
             self.__server_socket.listen()
+            # Accept a connection from a client
+            client_socket, client_address = self.__server_socket.accept()
+            dto = logger_dto(message=f"Connection established with {client_address}", time=str(datetime.now()))
+            self.__coms.print_message(dto)
             while True:
-                # Accept a connection from a client
-                client_socket, client_address = self.__server_socket.accept()
-                dto = logger_dto(message=f"Connection established with {client_address}", time=str(datetime.now()))
-                self.__coms.print_message(dto)
-
                 # Send data to the connected client
-                message = "Hello, client! This is a message from the server."
+                message = f"Hello, client! This is a message from the server.{count}"
+                count += 1
                 client_socket.sendall(message.encode('utf-8'))
 
-                # Close the connection with the client
-                client_socket.close()
-                dto = logger_dto(message=f"Connection with {client_address} closed", time=str(datetime.now()))
-                self.__coms.print_message(dto)
         except Exception as e:
-            return f"<p>Error {e}<p>"
+            return f"<p>Error  Server side {e}<p>"
     def get_args(self):
         message = ""
         for key in self.__args:
