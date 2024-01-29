@@ -31,7 +31,7 @@ class cmd_data_publisher(commandParent, threadWrapper):
         self.__function_dict = { #NOTE: I am only passing the function that the rest of the system needs
             #In this case I dont want any other fuctions
         }
-        super(threadWrapper, self).__init__(self.__function_dict)
+        # super(threadWrapper, self).__init__(self.__function_dict)
     def run_args(self, args):
         try:
             message = self.__args[args[0]](args[1:])
