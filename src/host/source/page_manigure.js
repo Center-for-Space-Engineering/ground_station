@@ -136,3 +136,27 @@ function send_run_request() {
             document.getElementById('result').innerHTML = 'Error: ' + error.message;
         });
 }
+
+//This fuction takes an input from the user and then runs 
+function send_serial_request() {
+    var userInput = document.getElementById('user_hex_input').value;
+
+    // Define the data to be sent
+    var data = {
+        serial_command: userInput
+    };
+
+    // Convert the data object to a query string
+    var queryString = Object.keys(data).map(key => key + '=' + data[key]).join('&');
+
+
+    fetch(`/serial_run_request?` + queryString)
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('result_serial').innerHTML = data;
+        })
+        .catch(error => {
+            // console.error('Error making GET request:', error);
+            document.getElementById('result_serial').innerHTML = 'Error: ' + error.message;
+        });
+}

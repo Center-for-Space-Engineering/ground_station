@@ -154,15 +154,21 @@
         <div>
             <div class="box_style">
                 <h2 class="green-text">Send Commands to Serial Line: </h2>
-                <label class = "white-text" for="user_text">Enter hex stream (00001 ...):</label>
-                <input type="text" id="commands_args" placeholder="Type hex...">
-                <button class = "button_formatt" onclick="send_run_request()">Submit</button>
+                <label class = "white-text" for="user_text">Enter hex stream (FF00A122 ...):</label>
+                <input type="text" id="user_hex_input" placeholder="Type hex...">
+                <button class = "button_formatt" onclick="send_serial_request()">Submit</button>
             </div>
         </div>
     </div>
-    <div class="box_style">
-        <h2 class="green-text">What the last command returned:</h2>
-        <div class="green-text" id="result">No return val yet.</div>
+    <div class="container">
+        <div class="box_style">
+            <h2 class="green-text">What the last command returned:</h2>
+            <div class="green-text" id="result">No return val yet.</div>
+        </div>
+        <div class="box_style">
+            <h2 class="green-text">The last serial command exicuted:</h2>
+            <div class="green-text" id="result_serial">No return val yet.</div>
+        </div>
     </div>
 </body>
 </html>

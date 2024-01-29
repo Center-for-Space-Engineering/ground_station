@@ -4,7 +4,7 @@
 '''
 #These are some Debuggin tools I add, Turning off the display is really useful for seeing erros, because the terminal wont get erased every few millaseconds with the display on.
 DISPLAY_OFF = True
-NO_SERIAL_LISTENER = False
+NO_SERIAL_LISTENER = True
 
 import time
 import datetime
@@ -17,7 +17,7 @@ from server import serverHandler
 from server_message_handler import serverMessageHandler
 
 if not NO_SERIAL_LISTENER:
-    from python_serial_api.serialHandler import serialHandler
+    from python_serial_api.serial_listener import serial_listener
 
 #import DTO for comminicating internally
 from DTOs.logger_dto import logger_dto
@@ -26,8 +26,8 @@ from DTOs.print_message_dto import print_message_dto
 
 
 
-hostname = '144.39.167.206' #get this by running hostname -I
-# hostname = '127.0.0.1'
+# hostname = '144.39.167.206' #get this by running hostname -I
+hostname = '127.0.0.1'
 port = 8080
 serial_handler_name = 'serial listener'
 server_listener_name = 'CSE_Server_Listener' #this the name for the interal thread that collect server info 
@@ -84,7 +84,7 @@ def main():
     
     # create the ser_listener
     if not NO_SERIAL_LISTENER:
-        ser_listener = serialHandler(coms = coms, batch_size=batch_size, thread_name=serial_handler_name)
+        ser_listener = serial_listener(coms = coms, batch_size=batch_size, thread_name=serial_handler_name)
         threadPool.add_thread(ser_listener.run, serial_handler_name, ser_listener)
         threadPool.start() #start the new task
 

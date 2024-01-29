@@ -62,17 +62,19 @@ class serverHandler(threadWrapper):
         self.app.route('/get_updated_thread_report', methods=['GET'])(self.get_updated_thread_report)
         self.app.route('/get_refresh_status_report', methods=['GET'])(self.get_update_status_report)
         self.app.route('/get_serial_info_update')(self.get_serial_info_update)
+        self.app.route('/serial_run_request')(self.serial_run_request)
 
         #the paths caught by this will connect to the users commands they add
         self.app.add_url_rule('/<path:unknown_path>', 'handle_unknown_path',  self.handle_unknown_path)
     def handle_unknown_path(self, unknown_path):
         path = unknown_path.split("/")
         self.__log.send_log("Message recived: " + str(path))
+        #this  if statement decides if it is going to run a prebuilt command or run one of the 
         dto = print_message_dto("Message recived: " + str(path))
         self.__coms.print_message(dto, 3)
         message = self.__cmd.parse_cmd(path)
         self.__log.send_log(f"Paht recive {unknown_path}")
-        # self.__coms.print_message("Server responed ", 2)
+        self.__coms.print_message("Server responed ", 2)
         return message
     def serve_page_manigure(self):
         return send_from_directory('source', 'page_manigure.js')
@@ -216,6 +218,15 @@ class serverHandler(threadWrapper):
         while data_obj is None:
             data_obj = self.__coms.get_return(self.__message_handler_name, id)
         return jsonify(data_obj)
+    def serial_run_request(self):
+        print(request.args.get('serial_command'))
+        #make a request for the messages
+        id = self.__coms.send_request('serial_writter', ['write_to_serial_port']) #send the server the info to display
+        data_obj = None
+        #wait for the messages to be returneds
+        while data_obj is None:
+            data_obj = self.__coms.get_return(self.__message_handler_name, id)
+        return data_obj
     def run(self):
         self.__log.send_log("Test Server started http://%s:%s" % (self.__hostName, self.__serverPort))
         dto = logger_dto(message="Server started http://%s:%s" % (self.__hostName, self.__serverPort), time=str(datetime.now()))
