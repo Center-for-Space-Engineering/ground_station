@@ -26,8 +26,8 @@ from DTOs.print_message_dto import print_message_dto
 
 
 
-hostname = '144.39.167.206' #get this by running hostname -I
-# hostname = '127.0.0.1'
+# hostname = '144.39.167.206' #get this by running hostname -I
+hostname = '127.0.0.1'
 port = 8080
 serial_handler_name = 'serial listener'
 server_listener_name = 'CSE_Server_Listener' #this the name for the interal thread that collect server info 
@@ -40,7 +40,7 @@ def main():
     system objects and classes. 
     '''
     #create a server obj, not it will also create the coms object #144.39.167.206
-    coms = messageHandler(display_off = DISPLAY_OFF, server_name=server_listener_name)
+    coms = messageHandler(display_off = DISPLAY_OFF, server_name=server_listener_name, hostname=hostname)
     #make database object 
     dataBase = DataBaseHandler(coms, is_gui=False)
     #now that we have the data base we can collect all of our command handlers.

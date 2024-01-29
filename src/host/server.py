@@ -239,4 +239,4 @@ class serverHandler(threadWrapper):
         table_data = self.__cmd.get_commands_webpage()
         return render_template('Command.html', table_data=table_data)
     def get_message_handler(self):
-        return self.__message_handler     
+        return self.__message_handler

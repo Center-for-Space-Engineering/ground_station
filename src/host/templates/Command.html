@@ -13,10 +13,12 @@
         .box_style {
             background-color: #050505;
             padding: 20px;
+            margin-left: 20px;
             border-radius: 5px;
-            box-shadow: 0 0 10px rgb(255, 254, 254);
+            box-shadow: 0 0 5px rgb(255, 254, 254);
             width: 80%;
-            max-width: 400px;
+            max-width: 600px;
+            min-width: 500px;
         }
         label {
             display: block;
@@ -59,6 +61,13 @@
         .tab-container {
             display: flex;
         }
+        .container {
+            display: flex;
+            margin-bottom: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            justify-content: left;
+        }
 
         /* Style for the individual tabs */
         .tab {
@@ -83,11 +92,6 @@
         .tab-content.active {
             display: block;
         }
-        /* Style for the container div */
-        .horizontal-container {
-            display: flex; /* Use flexbox layout */
-        }
-
         /* Style for individual items within the container */
         .item {
             margin-right: 10px; /* Optional: Add margin between items */
@@ -140,12 +144,25 @@
             </tbody>
         </thead>
     </table>
-    <div>
-        <h2 class="green-text"> Run commands interface: </h2>
+    <div class="container">
+        <div class="box_style">
+            <h2 class="green-text"> Run commands interface: </h2>
+            <label class = "white-text" for="user_text">Enter args for commands (click on command in table):</label>
+            <input type="text" id="commands_args" placeholder="Type Args...">
+            <button class = "button_formatt" onclick="send_run_request()">Submit</button>
+        </div>
+        <div>
+            <div class="box_style">
+                <h2 class="green-text">Send Commands to Serial Line: </h2>
+                <label class = "white-text" for="user_text">Enter hex stream (00001 ...):</label>
+                <input type="text" id="commands_args" placeholder="Type hex...">
+                <button class = "button_formatt" onclick="send_run_request()">Submit</button>
+            </div>
+        </div>
     </div>
-    <label class = "white-text" for="user_text">Enter args for commands:</label>
-    <input type="text" id="commands_args" placeholder="Type Args...">
-    <button class = "button_formatt" onclick="send_run_request()">Submit</button>
-    <div class="green-text" id="result">No return val yet.</div>
+    <div class="box_style">
+        <h2 class="green-text">What the last command returned:</h2>
+        <div class="green-text" id="result">No return val yet.</div>
+    </div>
 </body>
 </html>

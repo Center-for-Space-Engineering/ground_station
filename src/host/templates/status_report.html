@@ -160,14 +160,6 @@
             {% endfor %}
         </ul>
     </div>
-    <div>
-        <h2 class="green-text">Send Commands to Serial Line</h3>
-    </div>
-    <form action="/process_text" method="post">
-        <label class = "white-text" for="user_text">Enter Command To post to Serial Line:</label>
-        <input type="text" id="user_text" name="user_text" placeholder="Type Command...">
-        <input type="submit" value="Submit">
-    </form>
     <script>
         setInterval(refresh_logger_report, 500);
         setInterval(refresh_prem_logger_report, 500);
