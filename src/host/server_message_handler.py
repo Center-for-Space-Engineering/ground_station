@@ -83,6 +83,7 @@ class serverMessageHandler(threadWrapper):
                     }
                 ]
             else : data = self.__byte_status
+            self.__byte_status = {}
         return data
     
     

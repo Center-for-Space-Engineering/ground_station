@@ -3,7 +3,7 @@
     system objects and classes. 
 '''
 #These are some Debuggin tools I add, Turning off the display is really useful for seeing erros, because the terminal wont get erased every few millaseconds with the display on.
-DISPLAY_OFF = False
+DISPLAY_OFF = True
 NO_SERIAL_LISTENER = False
 
 import time

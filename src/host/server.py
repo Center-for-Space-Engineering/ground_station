@@ -215,6 +215,7 @@ class serverHandler(threadWrapper):
         #wait for the messages to be returneds
         while data_obj is None:
             data_obj = self.__coms.get_return(self.__message_handler_name, id)
+        print(data_obj)
         return jsonify(data_obj)
     def run(self):
         self.__log.send_log("Test Server started http://%s:%s" % (self.__hostName, self.__serverPort))
