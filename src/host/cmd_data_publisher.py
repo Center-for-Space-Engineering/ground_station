@@ -1,6 +1,7 @@
 #imports for python
 import socket
 from datetime import datetime
+import time
 
 #custom python imports
 from commandParent import commandParent
@@ -13,6 +14,14 @@ from DTOs.print_message_dto import print_message_dto
 class cmd_data_publisher(commandParent, threadWrapper):
     """The init function gose to the cmd class and then pouplates its self into its command dict so that it is dynamically added to the command repo"""
     def __init__(self, CMD, coms):
+        ############ set up the threadWrapper stuff ############
+        # We need the threadWrapper so that the publisher can send a request to start a new thread.
+        self.__function_dict = { #NOTE: I am only passing the function that the rest of the system needs
+            #In this case I dont want any other fuctions
+        }
+        # super(threadWrapper, self).__init__(self.__function_dict)
+        threadWrapper.__init__(self, self.__function_dict)
+        
         ############ set up the commandParent stuff ############
         #CMD is the cmd class and we are using it to hold all the command class
         self.__comandName = 'data_publisher'
@@ -26,12 +35,6 @@ class cmd_data_publisher(commandParent, threadWrapper):
         self.__port = -1
         self.__server_socket = None
 
-        ############ set up the threadWrapper stuff ############
-        # We need the threadWrapper so that the publisher can send a request to start a new thread.
-        self.__function_dict = { #NOTE: I am only passing the function that the rest of the system needs
-            #In this case I dont want any other fuctions
-        }
-        # super(threadWrapper, self).__init__(self.__function_dict)
     def run_args(self, args):
         try:
             message = self.__args[args[0]](args[1:])
@@ -57,18 +60,26 @@ class cmd_data_publisher(commandParent, threadWrapper):
         except Exception as e:
             return f"<p>Error {e}<p>"
     def run_publisher(self):
-        count = 0
         try:
-            self.__server_socket.listen()
-            # Accept a connection from a client
-            client_socket, client_address = self.__server_socket.accept()
-            dto = logger_dto(message=f"Connection established with {client_address}", time=str(datetime.now()))
-            self.__coms.print_message(dto)
             while True:
-                # Send data to the connected client
-                message = f"Hello, client! This is a message from the server.{count}"
-                count += 1
-                client_socket.sendall(message.encode('utf-8'))
+                try:
+                    # Send data to the connected client
+                    message = file.read(4120)
+                    print(message)
+                    client_socket.sendall(message)
+                    time.sleep(10)
+                except Exception as e:
+                    print("Waiting for connection")
+                    print(f"What happen  {e}")
+                    self.__server_socket.listen()
+                    # Accept a connection from a client
+                    client_socket, client_address = self.__server_socket.accept()
+                    dto = logger_dto(message=f"Connection established with {client_address}", time=str(datetime.now()))
+                    self.__coms.print_message(dto)
+
+                    file_path = 'synthetic_data_profiles/SyntheticFPP2_2.bin'
+                    file = open(file_path, 'rb')
+
 
         except Exception as e:
             return f"<p>Error  Server side {e}<p>"

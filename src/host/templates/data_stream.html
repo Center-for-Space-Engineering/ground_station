@@ -10,13 +10,22 @@
         body{
             background-color: #050505;
         }
-        form {
+        .container {
+            display: flex;
+            margin-bottom: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            justify-content: left;
+        }
+        .box_style {
             background-color: #050505;
             padding: 20px;
+            margin-left: 20px;
             border-radius: 5px;
-            box-shadow: 0 0 10px rgb(255, 254, 254);
+            box-shadow: 0 0 5px rgb(255, 254, 254);
             width: 80%;
-            max-width: 400px;
+            max-width: 600px;
+            min-width: 500px;
         }
         label {
             display: block;
@@ -43,6 +52,14 @@
 
         input[type="submit"]:hover {
             background-color: #45a049;
+        }
+        .button_formatt {
+            background-color: #4caf50;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
         .white-text{
             color: #ccc;
@@ -84,6 +101,27 @@
         .item {
             margin-right: 10px; /* Optional: Add margin between items */
         }
+        .green-text{
+            color: green;
+        }
+        .status-circle {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .status-green {
+            background-color: green;
+        }
+
+        .status-red {
+            background-color: red;
+        }
+        .red-text{
+            color: red;
+        }
     </style>
 </head>
 <body>
@@ -94,6 +132,27 @@
         <div class="tab" onclick="open_tab('Status Report')">Status Report</div>
         <div class="tab" onclick="open_tab('Command')">Command</div>
         <div class="tab" onclick="open_tab('Sensor')">Sensor</div>
+    </div>
+    <h2 class="green-text"> Configure the serial port: </h2>
+    <div class="container">
+        <div class="box_style">
+            <label class = "white-text" for="user_text">Enter boud_rate: </label>
+            <input type="text" id="boud_rate" placeholder="EX: 9600">
+        </div>
+        <div class="box_style">
+            <label class = "white-text" for="user_text">Parity? </label>
+            <input type="text" id="parity" placeholder="t/f">
+        </div>
+        <div class="box_style">
+            <label class = "white-text" for="user_text">Enter stop bits: </label>
+            <input type="text" id="stop_bit" placeholder="EX: 1">
+        </div>
+    </div>
+    <button class = "button_formatt" onclick="send_run_request()">Submit</button>
+
+    <div class="container">
+        <div class="status-circle status-red"></div>
+        <span class="red-text">Offline</span>
     </div>
 
     <canvas id="myLineChart" width="400" height="150"></canvas>

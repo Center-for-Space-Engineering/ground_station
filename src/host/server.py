@@ -69,6 +69,7 @@ class serverHandler(threadWrapper):
         self.app.route('/get_serial_info_update')(self.get_serial_info_update)
         self.app.route('/serial_run_request')(self.serial_run_request)
         self.app.route('/favicon.ico')(self.facicon)
+        # self.app.route('/start_serial')(self.start_serial)
 
         #the paths caught by this will connect to the users commands they add
         self.app.add_url_rule('/<path:unknown_path>', 'handle_unknown_path',  self.handle_unknown_path)
@@ -235,6 +236,8 @@ class serverHandler(threadWrapper):
         while data_obj is None:
             data_obj = self.__coms.get_return(self.__serial_writter_name, id)
         return data_obj
+    # def start_serial(self):
+
     def run(self):
         self.__log.send_log("Test Server started http://%s:%s" % (self.__hostName, self.__serverPort))
         dto = logger_dto(message="Server started http://%s:%s" % (self.__hostName, self.__serverPort), time=str(datetime.now()))

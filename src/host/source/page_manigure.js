@@ -137,7 +137,7 @@ function send_run_request() {
         });
 }
 
-//This fuction takes an input from the user and then runs 
+//This fuction takes an input from the user and then sends a command
 function send_serial_request() {
     var userInput = document.getElementById('user_hex_input').value;
 
@@ -158,5 +158,33 @@ function send_serial_request() {
         .catch(error => {
             // console.error('Error making GET request:', error);
             document.getElementById('result_serial').innerHTML = 'Error: ' + error.message;
+        });
+}
+
+//This fuction takes an input from the user and then sends a request
+function send_serial_request() {
+    var boud_rate = document.getElementById('boud_rate').value;
+    var parity = document.getElementById('parity').value;
+    var stop_bit = document.getElementById('stop_bit').value;
+
+    // Define the data to be sent
+    var data = {
+        boud_rate:boud_rate,
+        parity:parity,
+        stop_bit: stop_bit
+    };
+
+    // Convert the data object to a query string
+    var queryString = Object.keys(data).map(key => key + '=' + data[key]).join('&');
+
+
+    fetch(`/start_serial?` + queryString)
+        .then(response => response.text())
+        .then(data => {
+            // document.getElementById('result_serial').innerHTML = data;
+        })
+        .catch(error => {
+            // console.error('Error making GET request:', error);
+            // document.getElementById('result_serial').innerHTML = 'Error: ' + error.message;
         });
 }
