@@ -241,40 +241,39 @@ class serverHandler(threadWrapper):
         return data_obj
     def start_serial(self):
         boud_rate = request.args.get('boud_rate')
-        parity = request.args.get('parity')
         stop_bit = request.args.get('stop_bit')
 
         #make a request to switch the serial port to new configurations, for the serial writter
-        id_writter = self.__coms.send_request(self.__serial_writter_name, ['config_port', boud_rate, parity, stop_bit]) #send the request to the serial writter
+        id_writter = self.__coms.send_request(self.__serial_writter_name, ['config_port', boud_rate, stop_bit]) #send the request to the serial writter
         data_obj_writter = None
         #wait for the messages to be returneds
         while data_obj_writter is None:
             data_obj_writter = self.__coms.get_return(self.__serial_writter_name, id_writter)
         #make a request to switch the serial port to new configurations, for the serial listener
-        id_listener = self.__coms.send_request(self.__serial_listener_name, ['config_port', boud_rate, parity, stop_bit]) #send the request to the serial writter
+        id_listener = self.__coms.send_request(self.__serial_listener_name, ['config_port', boud_rate, stop_bit]) #send the request to the serial writter
         data_obj_listerner = None
         while data_obj_listerner is None:
             data_obj_listerner = self.__coms.get_return(self.__serial_listener_name, id_listener)
         data_obj = data_obj_listerner + data_obj_writter
         return data_obj
     def serial_running_writter(self):
-        print("HERE status")
         id_writter = self.__coms.send_request(self.__serial_writter_name, ['get_connected']) #send the request to the serial writter
         data_obj_writter = None
         #wait for the messages to be returneds
         while data_obj_writter is None:
             data_obj_writter = self.__coms.get_return(self.__serial_writter_name, id_writter)
-        data_obj = "Online" if data_obj_writter else "Not Online"
+        if type(data_obj_writter) is bool: data_obj = "Online" if data_obj_writter else "Not Online"
+        else : data_obj = "Not Online"
         return data_obj
     def serial_running_listener(self):
         id_listener = self.__coms.send_request(self.__serial_listener_name, ['get_connected']) #send the request to the serial writter
         data_obj_listen = None
         #wait for the messages to be returneds
         while data_obj_listen is None:
-            data_obj_listen = self.__coms.get_return(self.__serial_writter_name, id_listener)
-        data_obj = "Online" if data_obj_listen else "Not Online"
+            data_obj_listen = self.__coms.get_return(self.__serial_listener_name, id_listener)
+        if type(data_obj_listen) is bool: data_obj = "Online" if data_obj_listen else "Not Online"
+        else : data_obj = "Not Online"
         return data_obj
-
     def run(self):
         self.__log.send_log("Test Server started http://%s:%s" % (self.__hostName, self.__serverPort))
         dto = logger_dto(message="Server started http://%s:%s" % (self.__hostName, self.__serverPort), time=str(datetime.now()))

@@ -162,15 +162,13 @@ function send_serial_request() {
 }
 
 //This fuction takes an input from the user and then sends a request
-function send_serial_request() {
+function send_serial_reconfig_request() {
     var boud_rate = document.getElementById('boud_rate').value;
-    var parity = document.getElementById('parity').value;
     var stop_bit = document.getElementById('stop_bit').value;
 
     // Define the data to be sent
     var data = {
         boud_rate:boud_rate,
-        parity:parity,
         stop_bit: stop_bit
     };
 
