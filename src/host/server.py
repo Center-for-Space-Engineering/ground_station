@@ -19,7 +19,7 @@ from DTOs.logger_dto import logger_dto
 from DTOs.print_message_dto import print_message_dto
 
 class serverHandler(threadWrapper):
-    def __init__(self, hostName, serverPort, coms, cmd, messageHandler:serverMessageHandler, messageHandlerName:str, serial_writter_name:str):
+    def __init__(self, hostName, serverPort, coms, cmd, messageHandler:serverMessageHandler, messageHandlerName:str, serial_writter_name:str, serial_listener_name:str):
         self.__function_dict = { #NOTE: I am only passing the function that the rest of the system needs 
             'run' : self.run,
             'kill_Task' : self.kill_Task,
@@ -37,6 +37,7 @@ class serverHandler(threadWrapper):
 
         #set up coms with the serial port
         self.__serial_writter_name = serial_writter_name
+        self.__serial_listener_name = serial_listener_name
 
         #these class are used to comminicate with the reset of the cse code
         self.__coms = coms
@@ -69,7 +70,9 @@ class serverHandler(threadWrapper):
         self.app.route('/get_serial_info_update')(self.get_serial_info_update)
         self.app.route('/serial_run_request')(self.serial_run_request)
         self.app.route('/favicon.ico')(self.facicon)
-        # self.app.route('/start_serial')(self.start_serial)
+        self.app.route('/start_serial')(self.start_serial)
+        self.app.route('/serial_running_listener')(self.serial_running_listener)
+        self.app.route('/serial_running_writter')(self.serial_running_writter)
 
         #the paths caught by this will connect to the users commands they add
         self.app.add_url_rule('/<path:unknown_path>', 'handle_unknown_path',  self.handle_unknown_path)
@@ -236,7 +239,41 @@ class serverHandler(threadWrapper):
         while data_obj is None:
             data_obj = self.__coms.get_return(self.__serial_writter_name, id)
         return data_obj
-    # def start_serial(self):
+    def start_serial(self):
+        boud_rate = request.args.get('boud_rate')
+        parity = request.args.get('parity')
+        stop_bit = request.args.get('stop_bit')
+
+        #make a request to switch the serial port to new configurations, for the serial writter
+        id_writter = self.__coms.send_request(self.__serial_writter_name, ['config_port', boud_rate, parity, stop_bit]) #send the request to the serial writter
+        data_obj_writter = None
+        #wait for the messages to be returneds
+        while data_obj_writter is None:
+            data_obj_writter = self.__coms.get_return(self.__serial_writter_name, id_writter)
+        #make a request to switch the serial port to new configurations, for the serial listener
+        id_listener = self.__coms.send_request(self.__serial_listener_name, ['config_port', boud_rate, parity, stop_bit]) #send the request to the serial writter
+        data_obj_listerner = None
+        while data_obj_listerner is None:
+            data_obj_listerner = self.__coms.get_return(self.__serial_listener_name, id_listener)
+        data_obj = data_obj_listerner + data_obj_writter
+        return data_obj
+    def serial_running_writter(self):
+        print("HERE status")
+        id_writter = self.__coms.send_request(self.__serial_writter_name, ['get_connected']) #send the request to the serial writter
+        data_obj_writter = None
+        #wait for the messages to be returneds
+        while data_obj_writter is None:
+            data_obj_writter = self.__coms.get_return(self.__serial_writter_name, id_writter)
+        data_obj = "Online" if data_obj_writter else "Not Online"
+        return data_obj
+    def serial_running_listener(self):
+        id_listener = self.__coms.send_request(self.__serial_listener_name, ['get_connected']) #send the request to the serial writter
+        data_obj_listen = None
+        #wait for the messages to be returneds
+        while data_obj_listen is None:
+            data_obj_listen = self.__coms.get_return(self.__serial_writter_name, id_listener)
+        data_obj = "Online" if data_obj_listen else "Not Online"
+        return data_obj
 
     def run(self):
         self.__log.send_log("Test Server started http://%s:%s" % (self.__hostName, self.__serverPort))

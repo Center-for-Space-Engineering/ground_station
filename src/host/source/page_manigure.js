@@ -38,7 +38,7 @@ function refresh_logger_report()
             });
         },
         error: function(error) {
-            console.error('Error fetching logger updated content:', error);
+            // console.error('Error fetching logger updated content:', error);
         }
     });
 }
@@ -59,7 +59,7 @@ function refresh_prem_logger_report()
             });
         },
         error: function(error) {
-            console.error('Error fetching logger updated content:', error);
+            // console.error('Error fetching logger updated content:', error);
         }
     });
 }
@@ -88,7 +88,7 @@ function refresh_thread_report()
             });
         },
         error: function(error) {
-            console.error('Error fetching logger updated content:', error);
+            // console.error('Error fetching logger updated content:', error);
         }
     });
 }
@@ -109,7 +109,7 @@ function refresh_status_report()
             });
             },
         error: function(error) {
-            console.error('Error fetching logger updated content:', error);
+            // console.error('Error fetching logger updated content:', error);
         }
     });
 }
@@ -181,10 +181,10 @@ function send_serial_request() {
     fetch(`/start_serial?` + queryString)
         .then(response => response.text())
         .then(data => {
-            // document.getElementById('result_serial').innerHTML = data;
+            document.getElementById('result_serial_config').innerHTML = data;
         })
         .catch(error => {
             // console.error('Error making GET request:', error);
-            // document.getElementById('result_serial').innerHTML = 'Error: ' + error.message;
+            document.getElementById('result_serial_config').innerHTML = 'Error: ' + error.message;
         });
 }

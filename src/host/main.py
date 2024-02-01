@@ -31,7 +31,7 @@ from DTOs.print_message_dto import print_message_dto
 
 hostname = '144.39.167.206' #get this by running hostname -I
 # hostname = '127.0.0.1'
-port = 5000
+port = 8080
 serial_listener_name = 'serial listener'
 serial_writter_name = 'serial writter'
 server_listener_name = 'CSE_Server_Listener' #this the name for the interal thread that collect server info 
@@ -53,7 +53,7 @@ def main():
     #note because the server requires a theard to run, it cant have a dedicated thread to listen to coms like
     #other classes so we need another class object to listen to interal coms for the server.
     server_message_handler = serverMessageHandler(coms=coms)
-    server = serverHandler(hostname, port, coms, cmd, serverMessageHandler, server_listener_name, serial_writter_name)
+    server = serverHandler(hostname, port, coms, cmd, serverMessageHandler, server_listener_name, serial_writter_name, serial_listener_name)
     
 
     #first start our thread handler and the message haandler (coms) so we can start reporting

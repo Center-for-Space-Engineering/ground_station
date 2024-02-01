@@ -141,18 +141,26 @@
         </div>
         <div class="box_style">
             <label class = "white-text" for="user_text">Parity? </label>
-            <input type="text" id="parity" placeholder="t/f">
+            <input type="text" id="parity" placeholder="Even/Odd/None">
         </div>
         <div class="box_style">
             <label class = "white-text" for="user_text">Enter stop bits: </label>
             <input type="text" id="stop_bit" placeholder="EX: 1">
         </div>
     </div>
-    <button class = "button_formatt" onclick="send_run_request()">Submit</button>
-
     <div class="container">
-        <div class="status-circle status-red"></div>
-        <span class="red-text">Offline</span>
+        <button class = "button_formatt" onclick="send_serial_request()">Submit</button>
+        <div class="box_style">
+            <div class="green-text" id="result_serial_config">Serial Report</div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="status-circle status-red" id = "reader_status"></div>
+        <span class="red-text" id = "reader_status_text">Reader Offline</span>
+    </div>
+    <div class="container">
+        <div class="status-circle status-red" id="writter_status"></div>
+        <span class="red-text" id="writter_status_text">Writter Offline</span>
     </div>
 
     <canvas id="myLineChart" width="400" height="150"></canvas>
@@ -203,6 +211,34 @@
 
         // Update the line chart every second
         setInterval(function() {
+            // fetch('/serial_running_listener')
+            //     .then(response => response.text())
+            //     .then(dat => {
+            //         if (data == 'Online')
+            //         {
+            //             var status = document.getElementById('reader_status');
+            //             status.classList.remove('status-red');
+            //             status.classList.add('status-green');
+            //             document.getElementById('reader_status_text').inenrText = "Reader Online";   
+            //         }
+            //     })
+            //     .catch(error => {
+            //         document.getElementById('reader_status_text').inenrText = "Error getting report for reader";   
+            //     });
+            // fetch('/serial_running_writter')
+            //     .then(response => response.text())
+            //     .then(dat => {
+            //         if (data == 'Online')
+            //         {
+            //             var status = document.getElementById('writter_status');
+            //             status.classList.remove('status-red');
+            //             status.classList.add('status-green');
+            //             document.getElementById('writter_status_text').inenrText = "Writter Online";   
+            //         }
+            //     })
+            //     .catch(error => {
+            //         document.getElementById('writter_status_text').inenrText = "Error getting report for writter";   
+            //     });
             fetch('/get_serial_info_update')  // Assume a Flask route to get updated data
                 .then(response => response.json())
                 .then(data => {
@@ -211,7 +247,7 @@
                 .catch(error => {
                     console.error('Error fetching data:', error);
                 });
-        }, 2500);  // Update every 1000 milliseconds (1 second)
+        }, 1000);  // Update every 1000 milliseconds (1 second)
     </script>
 </body>
 </html>
