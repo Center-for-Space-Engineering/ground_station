@@ -4,7 +4,6 @@
 from commandParent import commandParent
 
 #import DTO for comminicating internally
-from DTOs.logger_dto import logger_dto
 from DTOs.print_message_dto import print_message_dto
 
 class cmd_exsample(commandParent):
@@ -36,10 +35,13 @@ class cmd_exsample(commandParent):
             message = self.__args[args[0]](args)
             dto = print_message_dto(message)
             self.__coms.print_message(dto, 2)
-        except Exception as e: #
+        except Exception as e: # pylint: disable=w0718
             message += f"<p> Not vaild arg Error {e}</p>"
         return message
     def func1(self, arg):
+        '''
+            Example function that can be called from the server. 
+        '''
         print("ran func1")
         dto = print_message_dto("Ran func1")
         self.__coms.print_message(dto, 2)

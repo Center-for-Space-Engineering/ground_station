@@ -7,6 +7,8 @@ DISPLAY_OFF = True
 NO_SERIAL_LISTENER = False
 NO_SERIAL_WRITTER = False
 
+# pylint: disable=c0413
+
 import time
 import datetime
 
@@ -23,7 +25,6 @@ if not NO_SERIAL_WRITTER:
     from python_serial_api.serial_writter import serial_writter
 
 #import DTO for comminicating internally
-from DTOs.logger_dto import logger_dto
 from DTOs.print_message_dto import print_message_dto
 
 
@@ -84,6 +85,8 @@ def main():
         batch_size = int (serial_data_type.get_fields()['batch_sample'][0])
     except Exception as e :
         print(e)
+        # pylint: disable=w0707
+        # pylint: disable=w0719
         raise Exception("No serial interface defined in dataTypes.dtobj file.\nExample: serial_feed\n\tbatch_sample:1024 > byte\nMust have serial_feed and batch_sample\n")
     
     # create the ser_listener
@@ -104,7 +107,6 @@ def main():
 
     #keep the main thread alive for use to see things running. 
     running = True
-    i = 0
     while running:
         try:
             threadPool.get_thread_status()
