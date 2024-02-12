@@ -4,11 +4,11 @@
     and give controll of the module to the server. 
 '''
 
-from dinamicImporter import dinamicImporter
-from logging_system_display_python_api.logger import loggerCustom
+from dinamicImporter import dinamicImporter # pylint: disable=e0401
+from logging_system_display_python_api.logger import loggerCustom # pylint: disable=e0401
 
 #print DTO
-from DTOs.print_message_dto import print_message_dto
+from DTOs.print_message_dto import print_message_dto # pylint: disable=e0401
 
 class cmd_inter():
     '''

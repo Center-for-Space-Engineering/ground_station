@@ -94,10 +94,10 @@ class cmd_data_publisher(commandParent, threadWrapper):
     def get_args_server(self):
         message = []
         for key in self.__args:
-           if key == "start_data_pubisher":
-            message.append({ 
-                'Name' : key,
-                'Path' : f'/{self.__comandName}/{key}/-port number-',
-                'Discription' : 'This command starts a publisher on the port that is given to it. Should be above 5000 and cann\'t be in use.'    
-                })
+            if key == "start_data_pubisher":
+                message.append({ 
+                    'Name' : key,
+                    'Path' : f'/{self.__comandName}/{key}/-port number-',
+                    'Discription' : 'This command starts a publisher on the port that is given to it. Should be above 5000 and cann\'t be in use.'    
+                    })
         return message

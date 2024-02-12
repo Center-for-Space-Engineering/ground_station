@@ -2,19 +2,19 @@
     This modules handles request from both the web and other threads. It starts the server then servers requests. 
 '''
 #python imports
-import logging
+import logging 
 from flask import Flask, render_template, request , send_from_directory, jsonify
 from datetime import datetime
 import os
 
 #imports from other folders that are not local
-from logging_system_display_python_api.logger import loggerCustom
-from threading_python_api.threadWrapper import threadWrapper
-from server_message_handler import serverMessageHandler
+from logging_system_display_python_api.logger import loggerCustom # pylint: disable=e0401
+from threading_python_api.threadWrapper import threadWrapper # pylint: disable=e0401
+from server_message_handler import serverMessageHandler # pylint: disable=e0401
 
 #import DTO for comminicating internally
-from DTOs.logger_dto import logger_dto
-from DTOs.print_message_dto import print_message_dto
+from DTOs.logger_dto import logger_dto # pylint: disable=e0401
+from DTOs.print_message_dto import print_message_dto # pylint: disable=e0401
 
 class serverHandler(threadWrapper):
     '''

@@ -2,31 +2,30 @@
     This module runs everything, its main job is to create and run all of the 
     system objects and classes. 
 '''
+#python built in imports
+import time
+import datetime
+
+#python custom imports
+from threading_python_api.taskHandler import taskHandler # pylint: disable=e0401 
+from database_python_api.database_control import DataBaseHandler # pylint: disable=e0401
+from logging_system_display_python_api.messageHandler import messageHandler # pylint: disable=e0401
+from cmd_inter import cmd_inter # pylint: disable=e0401
+from server import serverHandler # pylint: disable=e0401
+from server_message_handler import serverMessageHandler # pylint: disable=e0401
+
+#import DTO for comminicating internally
+from DTOs.print_message_dto import print_message_dto # pylint: disable=e0401
+
 #These are some Debuggin tools I add, Turning off the display is really useful for seeing erros, because the terminal wont get erased every few millaseconds with the display on.
 DISPLAY_OFF = True
 NO_SERIAL_LISTENER = False
 NO_SERIAL_WRITTER = False
 
-import time
-import datetime
-
-from threading_python_api.taskHandler import taskHandler
-from database_python_api.database_control import DataBaseHandler
-from logging_system_display_python_api.messageHandler import messageHandler
-from cmd_inter import cmd_inter
-from server import serverHandler
-from server_message_handler import serverMessageHandler
-
 if not NO_SERIAL_LISTENER:
-    from python_serial_api.serial_listener import serial_listener
+    from python_serial_api.serial_listener import serial_listener # pylint: disable=e0401
 if not NO_SERIAL_WRITTER:
-    from python_serial_api.serial_writter import serial_writter
-
-#import DTO for comminicating internally
-from DTOs.logger_dto import logger_dto
-from DTOs.print_message_dto import print_message_dto
-
-
+    from python_serial_api.serial_writter import serial_writter # pylint: disable=e0401
 
 
 hostname = '144.39.167.206' #get this by running hostname -I
@@ -82,9 +81,11 @@ def main():
             return_val = dataBase.get_request(requestNum=requst_num)
         serial_data_type = return_val #did this just to make the code easier to read
         batch_size = int (serial_data_type.get_fields()['batch_sample'][0])
-    except Exception as e :
+    except Exception as e : #pylint: disable=w0719
         print(e)
-        raise Exception("No serial interface defined in dataTypes.dtobj file.\nExample: serial_feed\n\tbatch_sample:1024 > byte\nMust have serial_feed and batch_sample\n")
+        #pylint: disable=w0719
+        #pylint: disable=w0707
+        raise Exception("No serial interface defined in dataTypes.dtobj file.\nExample: serial_feed\n\tbatch_sample:1024 > byte\nMust have serial_feed and batch_sample\n") 
     
     # create the ser_listener
     if not NO_SERIAL_LISTENER:
@@ -104,7 +105,6 @@ def main():
 
     #keep the main thread alive for use to see things running. 
     running = True
-    i = 0
     while running:
         try:
             threadPool.get_thread_status()
