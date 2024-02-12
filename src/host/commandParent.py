@@ -47,6 +47,10 @@ class commandParent():
         '''
         return "<p>\t No Args implement</p>"
     def get_args_server(self):
+        '''
+            This function is used to make a dto for the server. It is so the server can take the information about this class and
+            then put it into the commands table. 
+        '''
         return [{ 
             'Name' : 'No get_args_server implemented',
             'Path' : 'No path given',

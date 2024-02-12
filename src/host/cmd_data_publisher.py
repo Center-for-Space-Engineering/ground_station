@@ -1,19 +1,26 @@
+'''
+    This command is tasked with collecting data and then publishing it to port.
+'''
 #imports for python
 import socket
 from datetime import datetime
 import time
 
 #custom python imports
-from commandParent import commandParent
-from threading_python_api.threadWrapper import threadWrapper
+from commandParent import commandParent # pylint: disable=e0401
+from threading_python_api.threadWrapper import threadWrapper # pylint: disable=e0401
 
 #import DTO for comminicating internally
-from DTOs.logger_dto import logger_dto
-from DTOs.print_message_dto import print_message_dto
+from DTOs.logger_dto import logger_dto # pylint: disable=e0401
+from DTOs.print_message_dto import print_message_dto # pylint: disable=e0401
 
 class cmd_data_publisher(commandParent, threadWrapper):
-    """The init function gose to the cmd class and then pouplates its self into its command dict so that it is dynamically added to the command repo"""
+    '''
+        This module collects data and then publishes it ever so often to a port. 
+    '''
     def __init__(self, CMD, coms):
+        #call parent __init__
+        super().__init__(CMD, coms)
         ############ set up the threadWrapper stuff ############
         # We need the threadWrapper so that the publisher can send a request to start a new thread.
         self.__function_dict = { #NOTE: I am only passing the function that the rest of the system needs
@@ -36,14 +43,23 @@ class cmd_data_publisher(commandParent, threadWrapper):
         self.__server_socket = None
 
     def run_args(self, args):
+        '''
+            This function is what allows the server to call function in this class
+            ARGS:
+                [0] : funciton name
+                [1:] ARGS that the function needs. NOTE: can be blank
+        '''
         try:
             message = self.__args[args[0]](args[1:])
             dto = print_message_dto(message)
             self.__coms.print_message(dto, 2)
-        except :
-            message += "<p> Not vaild arg </p>"
+        except Exception as e: # pylint: disable=w0718
+            message += f"<p> Not vaild arg Error {e}</p>"
         return message
     def start_data_pubisher(self, arg):
+        '''
+            Creates a pip object then asks the thread handler to start the pip on its own thread. 
+        '''
         #get the port from args
         self.__port = int(arg[0])
 
@@ -57,41 +73,9 @@ class cmd_data_publisher(commandParent, threadWrapper):
             self.__server_socket.bind((host, self.__port))
             self.__coms.send_request('task_handler', ['add_thread_request_func', self.run_publisher ,'publisher', self])
             return f"<h3> Started data publisher on port:{self.__port} </h3>"
-        except Exception as e:
+        except Exception as e: # pylint: disable=w0718
             return f"<p>Error {e}<p>"
-    # def run_publisher(self):
-    #     try:
-    #         while True:
-    #             try:
-    #                 # Send data to the connected client
-    #                 byte_message = file.read()
-    #                 if len(byte_message) == 0:
-    #                     file.close()
-    #                     file_path = 'synthetic_data_profiles/test.bin'
-    #                     file = open(file_path, 'rb')
-    #                 else : 
-    #                     print(f"Readed from file {byte_message}")
-    #                     message = ''
-    #                     for i in range(0, len(byte_message), 8):
-    #                         message += chr(int(byte_message[i:i+8], 2))
-    #                     print(f"Encoded message: {message.encode('utf-8')}")
-    #                     client_socket.sendall(message.encode('utf-8'))
-    #                     time.sleep(10)
-    #             except Exception as e:
-    #                 print("Waiting for connection")
-    #                 print(f"What happen  {e}")
-    #                 self.__server_socket.listen()
-    #                 # Accept a connection from a client
-    #                 client_socket, client_address = self.__server_socket.accept()
-    #                 dto = logger_dto(message=f"Connection established with {client_address}", time=str(datetime.now()))
-    #                 self.__coms.print_message(dto)
 
-    #                 file_path = 'synthetic_data_profiles/test.bin'
-    #                 file = open(file_path, 'rb')
-
-
-    #     except Exception as e:
-    #         return f"<p>Error  Server side {e}<p>"
     def run_publisher(self):
         '''
             This is the function the runs the pipe on its own thread. 
@@ -134,6 +118,10 @@ class cmd_data_publisher(commandParent, threadWrapper):
         except Exception as e: # pylint: disable=w0718
             return f"<p>Error  Server side {e}<p>"
     def get_args(self):
+        '''
+            This function returns an html obj that explains the args for all the internal
+            funciton calls. 
+        '''
         message = ""
         for key in self.__args:
             if key == "start_data_pubisher":
@@ -142,12 +130,16 @@ class cmd_data_publisher(commandParent, threadWrapper):
     def __str__(self):
         return self.__comandName
     def get_args_server(self):
+        '''
+            This function returns an html obj that explains the args for all the internal
+            funciton calls. 
+        '''
         message = []
         for key in self.__args:
-           if key == "start_data_pubisher":
-            message.append({ 
-                'Name' : key,
-                'Path' : f'/{self.__comandName}/{key}/-port number-',
-                'Discription' : 'This command starts a publisher on the port that is given to it. Should be above 5000 and cann\'t be in use.'    
-                })
+            if key == "start_data_pubisher":
+                message.append({ 
+                    'Name' : key,
+                    'Path' : f'/{self.__comandName}/{key}/-port number-',
+                    'Discription' : 'This command starts a publisher on the port that is given to it. Should be above 5000 and cann\'t be in use.'    
+                    })
         return message
