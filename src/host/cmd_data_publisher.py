@@ -7,12 +7,12 @@ from datetime import datetime
 import time
 
 #custom python imports
-from commandParent import commandParent
-from threading_python_api.threadWrapper import threadWrapper
+from commandParent import commandParent # pylint: disable=e0401
+from threading_python_api.threadWrapper import threadWrapper # pylint: disable=e0401
 
 #import DTO for comminicating internally
-from DTOs.logger_dto import logger_dto
-from DTOs.print_message_dto import print_message_dto
+from DTOs.logger_dto import logger_dto # pylint: disable=e0401
+from DTOs.print_message_dto import print_message_dto # pylint: disable=e0401
 
 class cmd_data_publisher(commandParent, threadWrapper):
     '''
@@ -43,6 +43,12 @@ class cmd_data_publisher(commandParent, threadWrapper):
         self.__server_socket = None
 
     def run_args(self, args):
+        '''
+            This function is what allows the server to call function in this class
+            ARGS:
+                [0] : funciton name
+                [1:] ARGS that the function needs. NOTE: can be blank
+        '''
         try:
             message = self.__args[args[0]](args[1:])
             dto = print_message_dto(message)
@@ -107,6 +113,10 @@ class cmd_data_publisher(commandParent, threadWrapper):
         except Exception as e: # pylint: disable=w0718
             return f"<p>Error  Server side {e}<p>"
     def get_args(self):
+        '''
+            This function returns an html obj that explains the args for all the internal
+            funciton calls. 
+        '''
         message = ""
         for key in self.__args:
             if key == "start_data_pubisher":
@@ -115,6 +125,10 @@ class cmd_data_publisher(commandParent, threadWrapper):
     def __str__(self):
         return self.__comandName
     def get_args_server(self):
+        '''
+            This function returns an html obj that explains the args for all the internal
+            funciton calls. 
+        '''
         message = []
         for key in self.__args:
             if key == "start_data_pubisher":

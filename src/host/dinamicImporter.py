@@ -1,11 +1,14 @@
 '''
     This class finds the user defined commands (cmd) then gives those to the server. 
 '''
+#python imports
 import os
-from logging_system_display_python_api.logger import loggerCustom
+
+#custom python imports
+from logging_system_display_python_api.logger import loggerCustom # pylint: disable=e0401
 
 #import DTO for comminicating internally
-from DTOs.print_message_dto import print_message_dto
+from DTOs.print_message_dto import print_message_dto # pylint: disable=e0401
 
 class dinamicImporter:
     '''

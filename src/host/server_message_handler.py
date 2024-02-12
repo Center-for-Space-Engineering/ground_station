@@ -4,9 +4,10 @@
 #python imports
 from threading import Lock
 import datetime
+
 #imports from other folders that are not local
-from logging_system_display_python_api.logger import loggerCustom
-from threading_python_api.threadWrapper import threadWrapper
+from logging_system_display_python_api.logger import loggerCustom # pylint: disable=e0401
+from threading_python_api.threadWrapper import threadWrapper # pylint: disable=e0401
 
 class serverMessageHandler(threadWrapper):
     '''

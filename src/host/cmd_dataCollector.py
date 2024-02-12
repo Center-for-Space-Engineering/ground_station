@@ -4,11 +4,11 @@
     It also routs commands from the server to the data base
 '''
 import time
-from commandParent import commandParent
-from logging_system_display_python_api.logger import loggerCustom
+from commandParent import commandParent # pylint: disable=e0401
+from logging_system_display_python_api.logger import loggerCustom # pylint: disable=e0401
 
 #import DTO for comminicating internally
-from DTOs.print_message_dto import print_message_dto
+from DTOs.print_message_dto import print_message_dto # pylint: disable=e0401
 
 #pylint disable=c0103
 class cmd_dataCollector(commandParent):

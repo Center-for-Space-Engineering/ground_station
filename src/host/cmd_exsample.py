@@ -1,10 +1,10 @@
 '''
     This class shows and example of how to implement a command on the server. 
 '''
-from commandParent import commandParent
+from commandParent import commandParent # pylint: disable=e0401
 
 #import DTO for comminicating internally
-from DTOs.print_message_dto import print_message_dto
+from DTOs.print_message_dto import print_message_dto # pylint: disable=e0401
 
 class cmd_exsample(commandParent):
     '''
@@ -25,11 +25,20 @@ class cmd_exsample(commandParent):
         self.__coms = coms
 
     def run(self):
+        '''
+            Runs a call from the server, with no args!
+        '''
         print("Ran command")
         dto  = print_message_dto("Ran command")
         self.__coms.print_message(dto, 2)
         return f"<p>ran command {self.__comandName}<p>"
     def run_args(self, args):
+        '''
+            This function is what allows the server to call function in this class
+            ARGS:
+                [0] : funciton name
+                [1:] ARGS that the function needs. NOTE: can be blank
+        '''
         print(f"ran command {str(args[0])} with args {str(args[1:])}")
         try:
             message = self.__args[args[0]](args)
@@ -47,6 +56,10 @@ class cmd_exsample(commandParent):
         self.__coms.print_message(dto, 2)
         return f"<p>ran command func1 with args {str(arg)}<p>"
     def get_args(self):
+        '''
+            This function returns an html obj that explains the args for all the internal
+            funciton calls. 
+        '''
         message = ""
         for key in self.__args:
             message += f"<url>/{self.__comandName}/{key}</url><p></p>" #NOTE: by adding the url tag, the client knows this is a something it can call, the <p></p> is basically a new line for html
@@ -55,6 +68,10 @@ class cmd_exsample(commandParent):
     def __str__(self):
         return self.__comandName
     def get_args_server(self):
+        '''
+            This function returns an html obj that explains the args for all the internal
+            funciton calls. 
+        '''
         message = []
         for key in self.__args:
             message.append({ 

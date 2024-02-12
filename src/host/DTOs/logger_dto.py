@@ -25,4 +25,4 @@ class logger_dto():
         '''
             to string over load
         '''
-        return "[" + colored(self.__time, 'blue') + "]: " + str(self.__message) 
+        return "[" + colored(self.__time, 'blue') + "]: " + str(self.__message)
