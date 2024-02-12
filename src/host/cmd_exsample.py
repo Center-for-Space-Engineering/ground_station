@@ -1,12 +1,19 @@
+'''
+    This class shows and example of how to implement a command on the server. 
+'''
 from commandParent import commandParent
 
 #import DTO for comminicating internally
-from DTOs.logger_dto import logger_dto
 from DTOs.print_message_dto import print_message_dto
 
 class cmd_exsample(commandParent):
-    """The init function gose to the cmd class and then pouplates its self into its command dict so that it is dynamically added to the command repo"""
+    '''
+        The init function gose to the cmd class and then pouplates its 
+        self into its command dict so that it is dynamically added to the command repo
+    '''
     def __init__(self, CMD, coms):
+        # init the parent
+        super().__init__(CMD, coms=coms)
         #CMD is the cmd class and we are using it to hold all the command class
         self.__comandName = 'exsample'
         self.__args ={
@@ -28,10 +35,13 @@ class cmd_exsample(commandParent):
             message = self.__args[args[0]](args)
             dto = print_message_dto(message)
             self.__coms.print_message(dto, 2)
-        except :
-            message += "<p> Not vaild arg </p>"
+        except Exception as e: # pylint: disable=w0718
+            message += f"<p> Not vaild arg Error {e}</p>"
         return message
     def func1(self, arg):
+        '''
+            Example function that can be called from the server. 
+        '''
         print("ran func1")
         dto = print_message_dto("Ran func1")
         self.__coms.print_message(dto, 2)
@@ -47,7 +57,7 @@ class cmd_exsample(commandParent):
     def get_args_server(self):
         message = []
         for key in self.__args:
-           message.append({ 
+            message.append({ 
             'Name' : key,
             'Path' : f'/{self.__comandName}/{key}/-paramerters for the function-',
             'Discription' : 'Example commands'    

@@ -9,6 +9,11 @@ from logging_system_display_python_api.logger import loggerCustom
 from threading_python_api.threadWrapper import threadWrapper
 
 class serverMessageHandler(threadWrapper):
+    '''
+        This class is tasked with handling messages sent to the server, because the server is 
+        already busy, and there is a high volume of messages that need to go to the server. Thus we 
+        have a class that runs on its own thread tasked with collecting the information for the server. 
+    '''
     def __init__(self, coms):
         self.__function_dict = { #NOTE: I am only passing the function that the rest of the system needs
             'write_message_log' : self.write_message_log,
@@ -23,7 +28,7 @@ class serverMessageHandler(threadWrapper):
             'get_byte_report':self.get_byte_report,
         }
         super().__init__(self.__function_dict)
-        self.__log = loggerCustom("logs/interal_coms_with_server.txt")
+        _ = loggerCustom("logs/interal_coms_with_server.txt") # Not used at this time
 
         #data structs for storing messages
         self.__messages = []
@@ -40,42 +45,72 @@ class serverMessageHandler(threadWrapper):
         self.__byte_status_lock = Lock()
 
         #included this because it is standared at this point
-        self.__coms = coms
+        _= coms # Not used at this time
 
     def write_message_log(self, message):
+        '''
+            this function adds a message to the log that the server will then display.
+        '''
         with self.__message_lock:
             self.__messages = message
     def write_prem_message_log(self, message):
+        '''
+            this function adds a message to the prement log that the server will then display.
+        '''
         with self.__prem_message_lock:
             self.__prem_messages = message
     def thread_report(self, report):
+        '''
+            this function adds a message to the threading report that the server will then display.
+        '''
         with self.__thread_report_lock:
             self.__report = report
     def report_status(self, report):
+        '''
+            this function adds a message the status report that the server will then display.
+        '''
         with self.__status_lock:
-           self.__status = report
+            self.__status = report
     def report_byte_status(self, data):
+        '''
+            this function adds a message to the log that contains the number of bytes recived that the server will then display.
+        '''
         with self.__byte_status_lock:
             self.__byte_status = data 
     def get_messages(self):
+        '''
+            Server uses this functino to pull the message log.
+        '''
         with self.__message_lock:
             data = self.__messages
         return data
     def get_prem_message_log(self):
+        '''
+            Server uses this functino to pull the prem message log.
+        '''
         with self.__prem_message_lock:
             data = self.__prem_messages 
         return data
     def get_thread_report(self):
+        '''
+            Server uses this functino to pull the threading report log.
+        '''
         with self.__thread_report_lock:
             data = self.__report
         return data
     def get_report_status(self):
+        '''
+            Server uses this functino to pull the status message log.
+        '''
         with self.__status_lock:
             data = self.__status
         return data
     def get_byte_report(self):
+        '''
+            Server uses this functino to pull byte report log.
+        '''
         with self.__byte_status_lock:
-            if(len(self.__byte_status) <= 0):
+            if len(self.__byte_status) <= 0:
                 data = [
                     {
                         'time' : datetime.datetime.now(),

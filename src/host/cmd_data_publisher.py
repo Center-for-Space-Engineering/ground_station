@@ -1,3 +1,6 @@
+'''
+    This command is tasked with collecting data and then publishing it to port.
+'''
 #imports for python
 import socket
 from datetime import datetime
@@ -12,8 +15,12 @@ from DTOs.logger_dto import logger_dto
 from DTOs.print_message_dto import print_message_dto
 
 class cmd_data_publisher(commandParent, threadWrapper):
-    """The init function gose to the cmd class and then pouplates its self into its command dict so that it is dynamically added to the command repo"""
+    '''
+        This module collects data and then publishes it ever so often to a port. 
+    '''
     def __init__(self, CMD, coms):
+        #call parent __init__
+        super().__init__(CMD, coms)
         ############ set up the threadWrapper stuff ############
         # We need the threadWrapper so that the publisher can send a request to start a new thread.
         self.__function_dict = { #NOTE: I am only passing the function that the rest of the system needs
@@ -40,10 +47,13 @@ class cmd_data_publisher(commandParent, threadWrapper):
             message = self.__args[args[0]](args[1:])
             dto = print_message_dto(message)
             self.__coms.print_message(dto, 2)
-        except :
-            message += "<p> Not vaild arg </p>"
+        except Exception as e: # pylint: disable=w0718
+            message += f"<p> Not vaild arg Error {e}</p>"
         return message
     def start_data_pubisher(self, arg):
+        '''
+            Creates a pip object then asks the thread handler to start the pip on its own thread. 
+        '''
         #get the port from args
         self.__port = int(arg[0])
 
@@ -57,9 +67,23 @@ class cmd_data_publisher(commandParent, threadWrapper):
             self.__server_socket.bind((host, self.__port))
             self.__coms.send_request('task_handler', ['add_thread_request_func', self.run_publisher ,'publisher', self])
             return f"<h3> Started data publisher on port:{self.__port} </h3>"
-        except Exception as e:
+        except Exception as e: # pylint: disable=w0718
             return f"<p>Error {e}<p>"
     def run_publisher(self):
+        '''
+            This is the function the runs the pipe on its own thread. 
+        '''
+        #wait for clinet to subscribe.
+        self.__server_socket.listen()
+        # Accept a connection from a client
+        client_socket, client_address = self.__server_socket.accept()
+        
+        file_path = 'synthetic_data_profiles/SyntheticFPP2_2.bin'
+        try :
+            file = open(file_path, 'rb') # pylint: disable=R1732
+        except Exception as e: # pylint: disable=w0718
+            print(f'Failed to open file {e}')
+
         try:
             while True:
                 try:
@@ -68,20 +92,19 @@ class cmd_data_publisher(commandParent, threadWrapper):
                     print(message)
                     client_socket.sendall(message)
                     time.sleep(10)
-                except Exception as e:
+                except Exception as e: # pylint: disable=w0718
                     print("Waiting for connection")
-                    print(f"What happen  {e}")
+                    print(f"Error {e}")
                     self.__server_socket.listen()
                     # Accept a connection from a client
                     client_socket, client_address = self.__server_socket.accept()
                     dto = logger_dto(message=f"Connection established with {client_address}", time=str(datetime.now()))
                     self.__coms.print_message(dto)
+                    #repone file
+                    file = open(file_path, 'rb') # pylint: disable=R1732
 
-                    file_path = 'synthetic_data_profiles/SyntheticFPP2_2.bin'
-                    file = open(file_path, 'rb')
 
-
-        except Exception as e:
+        except Exception as e: # pylint: disable=w0718
             return f"<p>Error  Server side {e}<p>"
     def get_args(self):
         message = ""

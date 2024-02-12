@@ -8,7 +8,6 @@ from commandParent import commandParent
 from logging_system_display_python_api.logger import loggerCustom
 
 #import DTO for comminicating internally
-from DTOs.logger_dto import logger_dto
 from DTOs.print_message_dto import print_message_dto
 
 #pylint disable=c0103
@@ -161,7 +160,7 @@ class cmd_dataCollector(commandParent):
         #see if we have a new max row
         try :
             self.__max_rows = int(args[4])
-        except :
+        except : # pylint: disable=w0702
             pass
         #make the data request to the database.
         request_num = self.__data_base.make_request('get_data_large', [args[1], args[2], self.__max_rows])
@@ -172,8 +171,10 @@ class cmd_dataCollector(commandParent):
             temp = self.__data_base.get_request(request_num)
             time.sleep(0.1) #let other process run
         #if the database returns a string it is an error
-        if isinstance(temp, str) : return temp
-        if temp.empty: return  "<! DOCTYPE html>\n<html>\n<body>\n<h1><strong>dto (data transfer object): No saved data</strong></h1>\n</body>\n</html>"
+        if isinstance(temp, str) : 
+            return temp
+        if temp.empty: 
+            return  "<! DOCTYPE html>\n<html>\n<body>\n<h1><strong>dto (data transfer object): No saved data</strong></h1>\n</body>\n</html>"
         data = temp[args[3]] #sperate data out
         last_db_indx = temp['Table Index'].tail(1).iat[0] #get the last row in the dto
         #make dto
