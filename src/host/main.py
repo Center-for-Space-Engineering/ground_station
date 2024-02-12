@@ -31,7 +31,7 @@ from DTOs.print_message_dto import print_message_dto
 
 hostname = '144.39.167.206' #get this by running hostname -I
 # hostname = '127.0.0.1'
-port = 8080
+port = 5000
 serial_listener_name = 'serial listener'
 serial_writter_name = 'serial writter'
 server_listener_name = 'CSE_Server_Listener' #this the name for the interal thread that collect server info 

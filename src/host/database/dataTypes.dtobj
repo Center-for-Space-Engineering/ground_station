@@ -1,5 +1,5 @@
 serial_feed
-    batch_sample:1024 > byte
+    batch_sample:8 > byte
 test_table1
     norealdata:32 > int
 test_table2
