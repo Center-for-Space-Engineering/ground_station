@@ -12,11 +12,12 @@ class commandParent():
         they need to add to there class. Python is not a strongly typed language, this is the best I can do to try and make it more
         strongly typed. 
     """
-    def __init__(self, cmd, coms):
-        errorRed = Fore.RED + "ERROR: " + Fore.WHITE
-        _ = cmd # I dont actually need these varible here, it is jsut to inforce structure.
-        _ = coms # I dont actually need these varible here, it is jsut to inforce structure.
-        print(errorRed + "No init func")
+    def __init__(self, cmd, coms, called_by_child = False):
+        if not called_by_child:
+            errorRed = Fore.RED + "ERROR: " + Fore.WHITE
+            _ = cmd # I dont actually need these varible here, it is jsut to inforce structure.
+            _ = coms # I dont actually need these varible here, it is jsut to inforce structure.
+            print(errorRed + "No init func")
     def run(self):
         '''
             This is how the server calls the command with out args

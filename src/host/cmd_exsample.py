@@ -13,7 +13,7 @@ class cmd_exsample(commandParent):
     '''
     def __init__(self, CMD, coms):
         # init the parent
-        super().__init__(CMD, coms=coms)
+        super().__init__(CMD, coms=coms, called_by_child=True)
         #CMD is the cmd class and we are using it to hold all the command class
         self.__comandName = 'exsample'
         self.__args ={

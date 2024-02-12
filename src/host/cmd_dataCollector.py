@@ -25,6 +25,9 @@ class cmd_dataCollector(commandParent):
                     other class in the program
                 db: This is the data base
         '''
+        # init the parent
+        super().__init__(CMD, coms=coms, called_by_child=True)
+        
         # pylint: disable=w0231
         # the above pylint disable turns off the warning for not calling the parent constructor.
         self.__comand_name = 'data_Collector'
