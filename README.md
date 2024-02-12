@@ -11,17 +11,24 @@ Handles starting and running the server. It also creates an object for `server`,
 ![class structure](ground_station_sserver.png)
 
 ## `Server`
-This class handles all incoming request and routes them to `cmd` returns any html that `cmd` returns to the server.
+This class handles all incoming request and routes them to `cmd_inter` returns the html page and what ever `cmd_inter` returns to the webpage.
 
 ### functions:
 1. `__init__ `: this is pythons constructor. It builds the basic varibles needed for the class.
+2. `setup_routes`: this sets up and get rounts that can be requested.
+3. `run` : this function starts the server. It request the port and if it can access it then it starts the server up.
+4. Other functions not listed: These functions are call backs that tie into the get requests. Basically when the users makes a git request one these function is called.
 
-2. `run` : this function starts the server. It request the port and if it can access it then it starts the server up.
+## `Server_messaage_handler`
+This class handles all interal messaging to the server. The server has a very high load, so this class handles collecting and storing messages to the server class. 
 
-3. `do_get` : any request that comes into the server gets routed though this function. Then it handles writing any html back to the requester. 
+### functions:
+1. `write_` or `report`: These functions are requested by other threads. They take a messages and store it for the server.
+2. `get_`: These functions are called by the server and return the stored messages. 
 
 
-## `Cmd`
+
+## `cmd_inter`
 This class handles any incoming commands. It has one very important varible and 3 member functions. 
 
 ### Varibles:
@@ -73,7 +80,7 @@ NOTE: I STRONGLY recomend having an `__int__` and `__str__` function dispite the
 This clas is meant to be a helpo for the user as it provides an exsample of how to implement a `cmd_` class. 
 
 ### functions
-1. `__init__`: this funct does sever imporant things. First it taks in the CMD arg. This is a refrence to the `Cmd` class. it will add its self to the command dictionary in that class with the flowing code
+1. `__init__`: this funct does sever imporant things. First it taks in the CMD arg. This is a refrence to the `cmd_inter` class. it will add its self to the command dictionary in that class with the flowing code
 
     ```python 
     dictCmd = CMD.getCommandDict()
@@ -95,7 +102,7 @@ This clas is meant to be a helpo for the user as it provides an exsample of how 
 
 2. `run` : This  func gets called if no args are passed on the get request.
 
-3. `renArgs` : this func gets called if args are passed on the get request. 
+3. `runArgs` : this func gets called if args are passed on the get request. 
 
     ```python
     try:
@@ -112,7 +119,7 @@ This clas is meant to be a helpo for the user as it provides an exsample of how 
 4. `func1` : is an interal class function.
 5. `getArgs` : is a getter used by the server to determin what argums the class suports. 
 6. `__str__` : this is a function that other class relay on to determin the how to call this class. It returns the `self.__commandName` 
-
+7. `get_args_server`: returns the args for the class in a format the server can understand. (The return value is mapped to a table that is displayed on the web page.)
 ## `cmd_dataCollection`
 This class is the connection between the data base and the server. It follows the `cmd_` format explained above.
 
@@ -149,6 +156,32 @@ EX: exsample call : `http://127.0.0.1:5000/data_Collector/getDataType/exsample`\
 EX: exsample call : `http://127.0.0.1:5000/data_Collector/getData/exsample/0` returns all saved rows in the data base. \
 EX: exsample call : `http://127.0.0.1:5000/data_Collector/getData/exsample/1694027663.3701735` returns all saved rows in the data base after and including time 1694027663.3701735. 
 8. `__str__` : Follows the same format as `esample`.
+9. `get_args_server`: returns the args for the class in a format the server can understand. (The return value is mapped to a table that is displayed on the web page.)
+
+## `cmd_data_publisher`
+This class is tasked with creating the pipe that is used by `Cosmos` for listing to our data. Basically it recives a command fro the server to start and then makes a request to start a new thread with the  `run_publisher` as the function running on the thread. 
+
+## `templates\`
+This folder holds the html templates the the server uses to create the web page. 
+
+## `synthetic_data_profilies\`
+This folder is for storing know data profiles that can be piped out to `Comos`. This is for testing purpusos. 
+
+## `static\`
+Holds static images used by the webpage.
+
+## `source\`
+Any `Java script` need to run the web page is stored in this folder. It is then served to the webpage after the server is started. 
+
+## `logs\`
+Stores the logs created during run time by the program. 
+
+## `DTOs\`
+This file holds the definition of how interal messges are structured.
+
+## `database\`
+Hold the actual data base and the database definition file. 
+
 
 ## running main
 The command to run main is `python3 main.py` from the host folder. Main also is a meenting point for all the other `api`'s being used. NOTE: for easy of use it is best if all the other `api`'s are in the same folder as `main.py`
