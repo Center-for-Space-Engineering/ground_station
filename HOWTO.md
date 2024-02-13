@@ -3,18 +3,19 @@ In this document I will set though a few examples on how to add functionality to
 - Adding commands to the server. 
 - Sending request to threads.
 - Creating a new process and then running it with the parrallel architecture. 
-- Requesting data from the Data Base.  
+- Requesting and Inserting data to the Data Base.  
 
 # How to add new commands to the server. 
 ## Architecture Discription:
 In side the host folder you will see python that files that start with `cmd_`. This prefix tells the server that this is a command and needs to be added into the Architecture at run time. The python class should inherrit from the `commandParent.py`. This class as all the basic functions that a command class needs. It is left up to the user to implement these functions. However the `commandParent.py` will help the user structure their code in the correct way. 
 
 ## Steps:
-1. First I recomend copying the `cmd_exsample.py` file. You do not have to do this, but I belive it is easier to start from here. 
+1. First create a file that follows the correct format `cmd__name_of_new_class`. Make sure you class decleartion matches the name of the file with out the `cmd_` prefix. 
+Note: I recomend copying the `cmd_exsample.py` file. You do not have to do this, but I belive it is easier to start from here. 
 2. The `__init__` function: 
  - CMD: This is the object that ties everything to the server.
  - coms: This object handles all the internal comuntations. 
- - This function gets called when the class is created. First you need to call the `super().__init__(cmd=CMD, coms=coms)` this creates the parent class. 
+ - This function gets called when the class is created. First you need to call the `super().__init__(cmd=CMD, coms=coms, called_by_child=True)` this creates the parent class. 
  - Create a varible called `self.__comandName`, this tells the server what to call this command. 
  - Create an `self.__args = {}`: This is a dictionary of functions you want the server to be able to calls. The key in the dictionary is what the server calls. The value for that key should be a function pointer. Note: this is the function the server will call. 
  - The following lines are manditory. They are what actually tie things to the server. 
@@ -110,3 +111,94 @@ Note: If you need to inherrit from multiple classes then the class would look li
 5. There are two ways to start your thread at run time after you have built the class. The first way is to call it from `main.py`. This is relatively simple. It consists of a 3 main calls. 
     - Create your class object. 
     - call `threadPool.add_thread(-the run function -, class object name, class object. )`
+    Note: the class object name, is the name that you use to make request. In other words it is what name the system calls that thread. 
+    - call `threadPool.start()`. This function can be called multiply times, in multiple places. It just checks all the threads it knows about and if they havent been started it starts them. 
+
+## How to request and insert data to the Data Base
+## Architecture Discription: 
+The Data Base is ment to be as easy to use as possible. If you want to create a new table in the Data Base all you have to do is eddit the `src\host\database\dataTypes.dtobj` file. The format is as follows. 
+### RULES:
+
+1. Any line holding // is ignored. (basically this is how you comment)
+2. Any line WITHOUT a tab is consider a data group name, and will be stored into the data base as that name.
+3. Any line with a TABS will be consider a data type of the data group above it. These type of lines must have a : and >. \
+ The format is `<name of data feild> : <number of bits> > <data type>`. \
+ This format is used to collected data from the bit stream then store it into the database.\
+ Data feild is the name of the data row to be added to the data base. \
+ Number of bits is how many bits are in the bit stream from the sensor. \
+ data type is the type that the collected data should be converted to.  
+4. any line with # is ignored bits. This is inteded for a header or footer. These lines have the following format. 
+ `# : <number of bits igrnored>`.
+5. lines that contain the @ are for discontinuos bit streams. This means that bits somewhere else in the bit stream
+ that need to be added to this feild. The syntax is: \
+ `<name of data feild> : <number of bits> > <data type> @ <MSB feild> < <LSB feild>`\
+ `<name of data feild> : <number of bits>` \
+NOTE: the first feild in the file can be the MSB or the LSB. \
+NOTE: this is consider the same rule 3, it just tells the bit map the bits out of order. \
+NOTE: if you are going to do mulpile discontinuos types mapping to the same elment then the intermediate types must have a type cast of NONE. 
+6. Data feilds are collected in the order that they appear in the data group. 
+7. All feild names in a data group MUST BE unique. 
+8. NO inline comments are allowed. 
+
+After that file has been updated to the new Data Base will be created at run time. (It may be nessary to delete the old Data Base fie.)
+
+## Insert Data
+To insert data into the data base you only need to make a single call to the data base. There are three calls you can make 
+1. `insert_data` this is the slowest of the calls, but is also the esiest to use. If you have a very low data rate, this call will work well your needs. Here is the function docer string.
+```
+    This func takes in the table_name to insert and a list of data,
+    the list must be in the same order that is defined in the .dtobj file.
+    args is a list were the fist index is the table name and 
+    the second is the data
+    Args:
+        [0] : table name
+        [1] : list of data
+```
+Note: This call is for inserting a single row of data.
+2. `save_data_group`:  this function is for inserting large amounts of data. It is faster than `insert_data` but is more difficult to use. It is ment to be used in batch, in other words collect serveral lines of data then insert them all at once.  Here is the function docer string. 
+```
+   This function takes in a list of group to store as a group
+
+            ARGS:
+                args[0] : table name
+                args[1] : dict of data to store
+                args[2] : threaad id (used for reporting) 
+```
+3. `save_byte_data`: This function is for saving raw binary data. Here is the function docer string.
+```
+    This function is in charge of saving byte data (VARBINARY)
+
+            NOTE: This is not a genreal save like the insert data, it is use case spesific. 
+
+            args:
+                [0] : table name
+                [1] : list of bytes
+                [2] : caller thread name
+```
+## Request Data
+There are two function to call for requesting data. 
+1. `get_data`: This is a slow function. It takes a starting index and request EVERYTHING after that. I would recomend only using this for debugging. Here is the function docer string.
+```
+    args is a list where the fist index is the table name 
+    and the second is the start time for collecting the data
+    ARGS:
+        [0] table name
+        [1] table_idx (starting indx)
+    RETURNS:
+        html string with data
+    NOTE: This function is NOT meant for larg amouts of data! Make request small request to this function of it will take a long time. 
+```
+2. `get_data_large`: This function runs much faster than the previous and is ment for getting large amounts of data from the Data Base. It returns a pands data frame. Here is the function docer string.
+```
+    args is a list where the fist index is the table name 
+    and the second is the start time for collecting the data
+    ARGS:
+        [0] table name
+        [1] table_idx (starting indx)
+        [2] Max rows allowed to be fecthed at one time
+    RETURNS:
+        pandas data obj
+    NOTE: This function IS for larg amouts of data! 
+```
+
+Note: All these function should be called by sending a thread request. See the `How to send a request to threads.` example. 

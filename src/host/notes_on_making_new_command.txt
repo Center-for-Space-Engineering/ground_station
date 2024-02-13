@@ -1,6 +1,0 @@
-1. make create a python file with cmd_<name of class>.py
-2. make sure the name of the class is cmd_<name of class> NOTE: Must match the python file name. 
-3. make sure to change the self.__commandName to something unqine for EVERY COMMAND.
-4. add any function  that you want to run to the self.__args dictionary 
-5. make sure to implment the get_args_server and get_args function. (MATCH the formatt for each!)
-6. Should be good to go. 
