@@ -86,7 +86,8 @@ class cmd_data_publisher(commandParent, threadWrapper):
         # Accept a connection from a client
         client_socket, client_address = self.__server_socket.accept()
         
-        file_path = 'synthetic_data_profiles/TestAAFF00BB.bin'
+        #file_path = 'synthetic_data_profiles/TestAAFF00BB.bin'
+        file_path = 'synthetic_data_profiles/SyntheticFPP2_1000packets_CSEkw.bin'
         try :
             file = open(file_path, 'rb') # pylint: disable=R1732
         except Exception as e: # pylint: disable=w0718
@@ -96,14 +97,15 @@ class cmd_data_publisher(commandParent, threadWrapper):
             while True:
                 try:
                     # Send data to the connected client
-                    message = file.read(4)
+                    message = file.read(519)
                     if len(message) == 0:
                         file.close()
+                        time.sleep(30)
                         file = open(file_path, 'rb')
                     else :
                         print(message)
                         client_socket.sendall(message)
-                        time.sleep(10)
+                        #time.sleep(10)
                 except Exception as e: # pylint: disable=w0718
                     print("Waiting for connection")
                     print(f"Error {e}")
