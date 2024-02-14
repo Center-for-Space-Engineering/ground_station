@@ -5,6 +5,7 @@
 import socket
 from datetime import datetime
 import time
+import threading
 
 #custom python imports
 from commandParent import commandParent # pylint: disable=e0401
@@ -34,7 +35,8 @@ class cmd_data_publisher(commandParent, threadWrapper):
         #CMD is the cmd class and we are using it to hold all the command class
         self.__comandName = 'data_publisher'
         self.__args ={
-            "start_data_pubisher" : self.start_data_pubisher
+            "start_data_pubisher" : self.start_data_pubisher,
+            "kill_data_pubisher" : self.kill_data_pubisher
         }
         dictCmd = CMD.get_command_dict()
         dictCmd[self.__comandName] = self #this is the name the webserver will see, so to call the command send a request for this command. 
@@ -42,6 +44,8 @@ class cmd_data_publisher(commandParent, threadWrapper):
         self.__coms = coms
         self.__port = -1
         self.__server_socket = None
+        self.__Running = True
+        self.__Running_lock = threading.Lock()
 
     def run_args(self, args):
         '''
@@ -61,6 +65,9 @@ class cmd_data_publisher(commandParent, threadWrapper):
         '''
             Creates a pip object then asks the thread handler to start the pip on its own thread. 
         '''
+        self.__Running = True
+        threadWrapper.set_status(self, 'Running')
+
         #get the port from args
         self.__port = int(arg[0])
 
@@ -70,12 +77,21 @@ class cmd_data_publisher(commandParent, threadWrapper):
         #create a socket object
         self.__server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+        # Set the SO_REUSEADDR option
+        self.__server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
         try:
             self.__server_socket.bind((host, self.__port))
             self.__coms.send_request('task_handler', ['add_thread_request_func', self.run_publisher ,'publisher', self])
             return f"<h3> Started data publisher on port:{self.__port} </h3>"
         except Exception as e: # pylint: disable=w0718
             return f"<p>Error {e}<p>"
+        
+    def kill_data_pubisher(self,arg):
+        with self.__Running_lock:
+            self.__Running = False
+        return f"<p>Commanded publisher to terminate.<p>"
+        
 
     def run_publisher(self):
         '''
@@ -87,14 +103,15 @@ class cmd_data_publisher(commandParent, threadWrapper):
         client_socket, client_address = self.__server_socket.accept()
         
         #file_path = 'synthetic_data_profiles/TestAAFF00BB.bin'
-        file_path = 'synthetic_data_profiles/SyntheticFPP2_1000packets_CSEkw.bin'
+        file_path = 'synthetic_data_profiles/SyntheticFPP2_1000packets_CSEkw_with_garbage.bin'
         try :
             file = open(file_path, 'rb') # pylint: disable=R1732
         except Exception as e: # pylint: disable=w0718
             print(f'Failed to open file {e}')
 
         try:
-            while True:
+            running = True
+            while running:
                 try:
                     # Send data to the connected client
                     message = file.read(519)
@@ -116,7 +133,16 @@ class cmd_data_publisher(commandParent, threadWrapper):
                     self.__coms.print_message(dto)
                     #repone file
                     file = open(file_path, 'rb') # pylint: disable=R1732
-
+                with self.__Running_lock:
+                    running = self.__Running
+            try :
+                self.__server_socket.close()
+                threadWrapper.set_status(self, 'Complete')
+                dto = logger_dto(message=f"Socket Closed", time=str(datetime.now()))
+                self.__coms.print_message(dto)
+            except Exception as e: # pylint: disable=w0718
+                print("Waiting for connection")
+                print(f"Error {e}")
 
         except Exception as e: # pylint: disable=w0718
             return f"<p>Error  Server side {e}<p>"
@@ -129,6 +155,8 @@ class cmd_data_publisher(commandParent, threadWrapper):
         for key in self.__args:
             if key == "start_data_pubisher":
                 message += f"<url>/{self.__comandName}/{key}/-port-</url><p></p>" #NOTE: by adding the url tag, the client knows this is a something it can call, the <p></p> is basically a new line for html
+            else:
+                message += f"<url>/{self.__comandName}/{key}"
         return message
     def __str__(self):
         return self.__comandName
@@ -144,5 +172,11 @@ class cmd_data_publisher(commandParent, threadWrapper):
                     'Name' : key,
                     'Path' : f'/{self.__comandName}/{key}/-port number-',
                     'Discription' : 'This command starts a publisher on the port that is given to it. Should be above 5000 and cann\'t be in use.'    
+                    })
+            if key == "kill_data_pubisher":
+                message.append({ 
+                    'Name' : key,
+                    'Path' : f'/{self.__comandName}/{key}',
+                    'Discription' : 'This command kills the publisher.'    
                     })
         return message
