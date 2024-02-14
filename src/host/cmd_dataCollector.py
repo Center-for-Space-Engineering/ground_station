@@ -30,12 +30,12 @@ class cmd_dataCollector(commandParent):
         
         # pylint: disable=w0231
         # the above pylint disable turns off the warning for not calling the parent constructor.
-        self.__comand_name = 'data_Collector'
+        self.__command_name = 'data_Collector'
         self.__data_base = db
         dict_cmd = CMD.get_command_dict()
         #this is the name the webserver will see, 
         # so to call the command send a request for this command.
-        dict_cmd[self.__comand_name] = self
+        dict_cmd[self.__command_name] = self
         CMD.setCommandDict(dict_cmd)
         self.__args ={
             "tables" : self.get_table_html_collector,
@@ -51,10 +51,10 @@ class cmd_dataCollector(commandParent):
         '''
             This function is what allows the server to call function in this class
             ARGS:
-                [0] : funciton name
+                [0] : function name
                 [1:] ARGS that the function needs. NOTE: can be blank
         '''
-        message = f"<h3>Running command {self.__comand_name} with args {str(args)}</h3>"
+        message = f"<h3>Running command {self.__command_name} with args {str(args)}</h3>"
         # message += self.__args[args[0]](args)
         try:
             message += self.__args[args[0]](args) 
@@ -85,25 +85,25 @@ class cmd_dataCollector(commandParent):
             if key == "get_data_type":
                 message.append({
                     'Name' : key,
-                    'Path' : f"/{self.__comand_name}/{key}/-data type-",
+                    'Path' : f"/{self.__command_name}/{key}/-data type-",
                     'Discription' : 'This command returns the fromat of a data type.',
                 })
             elif key == "get_data":
                 message.append({
                     'Name' : key,
-                    'Path' : f"/{self.__comand_name}/{key}/-table name-/-start index-",
+                    'Path' : f"/{self.__command_name}/{key}/-table name-/-start index-",
                     'Discription' : 'This command returns ALL the data from the data base from the starting index. A.K.A it is slow.',
                 })
             elif key == "get_dto":
                 message.append({
                     'Name' : key,
-                    'Path' : f"/{self.__comand_name}/{key}/-table_name-/-start index-/-feild name-/-Optional max lines-",
+                    'Path' : f"/{self.__command_name}/{key}/-table_name-/-start index-/-feild name-/-Optional max lines-",
                     'Discription' : 'This command returns data from the data base from a start index to a finishing index. It is built for speed.',
                 })
             else :
                 message.append({
                     'Name' : key,
-                    'Path' : f"/{self.__comand_name}/{key}",
+                    'Path' : f"/{self.__command_name}/{key}",
                     'Discription' : 'No discription given for this command.',
                 })
         return message
@@ -115,13 +115,13 @@ class cmd_dataCollector(commandParent):
         message = "<p></p>"
         for key in self.__args:
             if key == "get_data_type":
-                message += f"<url>/{self.__comand_name}/{key}/<arg>-data type-</arg></url><p></p>"
+                message += f"<url>/{self.__command_name}/{key}/<arg>-data type-</arg></url><p></p>"
             elif key == "get_data":
-                message += f"<url>/{self.__comand_name}/{key}/<arg>-table name-</arg>/<arg>-start index-</arg></url><p></p>"
+                message += f"<url>/{self.__command_name}/{key}/<arg>-table name-</arg>/<arg>-start index-</arg></url><p></p>"
             elif key == "get_dto":
-                message += f"<url>/{self.__comand_name}/{key}/<arg>-table_name-</arg>/<arg>-start index-</arg>/<arg>-feild name-</arg>/<arg>-Optional max lines-</arg></url></url><p></p>"
+                message += f"<url>/{self.__command_name}/{key}/<arg>-table_name-</arg>/<arg>-start index-</arg>/<arg>-feild name-</arg>/<arg>-Optional max lines-</arg></url></url><p></p>"
             else :
-                message += f"<url>/{self.__comand_name}/{key}</url><p></p>"
+                message += f"<url>/{self.__command_name}/{key}</url><p></p>"
         self.__logger.send_log("Returned to server: " + message)
         return message
     def get_data_type(self, args):
@@ -148,7 +148,7 @@ class cmd_dataCollector(commandParent):
             time.sleep(0.1) #let other process run
         return temp
     def __str__(self):
-        return self.__comand_name
+        return self.__command_name
     def get_dto(self, args):
         '''
             Gets data from the data base, then convert it to a dto (Data transfer Object)
