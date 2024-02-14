@@ -57,7 +57,8 @@ class serverHandler(threadWrapper):
         # set up the app
         self.app = Flask(__name__)
         self.__favicon_directory = os.path.join(self.app.root_path, 'static')
-        self.setup_routes()     
+        self.setup_routes()
+        print(f'Server started at http://{self.__hostName}:{self.__serverPort}')  
     def setup_routes(self):
         '''
             This function sets up all the git reqest that can be accessed by the webpage.

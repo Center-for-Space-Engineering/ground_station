@@ -90,7 +90,7 @@ class serverMessageHandler(threadWrapper):
             Server uses this functino to pull the prem message log.
         '''
         with self.__prem_message_lock:
-            data = self.__prem_messages 
+            data = self.__prem_messages
         return data
     def get_thread_report(self):
         '''
