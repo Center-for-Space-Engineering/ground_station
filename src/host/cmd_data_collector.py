@@ -155,44 +155,6 @@ class cmd_data_collector(commandParent):
         return temp
     def __str__(self):
         return self.__command_name
-    def get_dto(self, args):
-        '''
-            Gets data from the data base, then convert it to a dto (Data transfer Object)
-            Args:
-                args[0] is not used in this function, 
-                    it is used by the caller function, it should be the function name
-                args[1] is the table name
-                args[2] is the start index
-                args[3] is the field in the dto to fetch
-                args[4] is optional but if passed it will set the max number of rows per dto to the new value
-        '''
-        #see if we have a new max row
-        try :
-            self.__max_rows = int(args[4])
-        except : # pylint: disable=w0702
-            pass
-        #make the data request to the database.
-        request_num = self.__data_base.make_request('get_data_large', [args[1], args[2], self.__max_rows])
-        temp = self.__data_base.get_request(request_num)
-
-        #wait for the database to return the data
-        while temp is None: #wait until we get a return value
-            temp = self.__data_base.get_request(request_num)
-            time.sleep(0.1) #let other process run
-        #if the database returns a string it is an error
-        if isinstance(temp, str) : 
-            return temp
-        if temp.empty: 
-            return  "<! DOCTYPE html>\n<html>\n<body>\n<h1><strong>dto (data transfer object): No saved data</strong></h1>\n</body>\n</html>"
-        with open('temp_files/data_file.txt', "w+") as file:
-            data = temp[args[3]] #septate data out
-            # last_db_index = temp['Table Index'].tail(1).iat[0] #get the last row in the dto
-            #make dto
-            for data_point in data:
-                file.write(str(data_point))
-            dto_internal = print_message_dto("DTO returned to requester.")
-            self.__coms.print_message(dto_internal)
-        return ('temp_files/data_file.txt', 'data_file.txt')
     # def get_dto(self, args):
     #     '''
     #         Gets data from the data base, then convert it to a dto (Data transfer Object)
@@ -222,17 +184,55 @@ class cmd_data_collector(commandParent):
     #         return temp
     #     if temp.empty: 
     #         return  "<! DOCTYPE html>\n<html>\n<body>\n<h1><strong>dto (data transfer object): No saved data</strong></h1>\n</body>\n</html>"
-    #     data = temp[args[3]] #septate data out
-    #     last_db_index = temp['Table Index'].tail(1).iat[0] #get the last row in the dto
-    #     #make dto
-    #     dto = "<! DOCTYPE html>\n<html>\n<body>\n<h1><strong>dto (data transfer object):</strong></h1>\n"
-    #     dto += f"<h1><strong>Data fetched {args[3]}:</strong></h1>\n<data>"
-    #     for data_point in data:
-    #         dto += (str(data_point) + ",")
-    #     dto += f"</data>\n<lastFetchedIndex>{last_db_index}</lastFetchedIndex>"
-    #     dto += "</body>\n</html>"
-    #     dto_internal = print_message_dto("DTO returned to requester.")
-    #     self.__coms.print_message(dto_internal)
-    #     return dto
+    #     with open('temp_files/data_file.txt', "w+") as file:
+    #         data = temp[args[3]] #septate data out
+    #         # last_db_index = temp['Table Index'].tail(1).iat[0] #get the last row in the dto
+    #         #make dto
+    #         for data_point in data:
+    #             file.write(str(data_point))
+    #         dto_internal = print_message_dto("DTO returned to requester.")
+    #         self.__coms.print_message(dto_internal)
+    #     return ('temp_files/data_file.txt', 'data_file.txt')
+    def get_dto(self, args):
+        '''
+            Gets data from the data base, then convert it to a dto (Data transfer Object)
+            Args:
+                args[0] is not used in this function, 
+                    it is used by the caller function, it should be the function name
+                args[1] is the table name
+                args[2] is the start index
+                args[3] is the field in the dto to fetch
+                args[4] is optional but if passed it will set the max number of rows per dto to the new value
+        '''
+        #see if we have a new max row
+        try :
+            self.__max_rows = int(args[4])
+        except : # pylint: disable=w0702
+            pass
+        #make the data request to the database.
+        request_num = self.__data_base.make_request('get_data_large', [args[1], args[2], self.__max_rows])
+        temp = self.__data_base.get_request(request_num)
 
+        #wait for the database to return the data
+        while temp is None: #wait until we get a return value
+            temp = self.__data_base.get_request(request_num)
+            time.sleep(0.1) #let other process run
+        #if the database returns a string it is an error
+        if isinstance(temp, str) : 
+            return temp
+        if temp.empty: 
+            return  "<! DOCTYPE html>\n<html>\n<body>\n<h1><strong>dto (data transfer object): No saved data</strong></h1>\n</body>\n</html>"
+        data = temp[args[3]] #septate data out
+        last_db_index = temp['Table Index'].tail(1).iat[0] #get the last row in the dto
+        #make dto
+        dto = ""
+        for data_point in data:
+            dto += (str(data_point))
+        dto_internal = print_message_dto("DTO returned to requester.")
+        self.__coms.print_message(dto_internal)
+        return {
+            'text_data': f'The last line fetched was {last_db_index}',
+            'file_data': dto,
+            'download': 'yes',
+        }
         

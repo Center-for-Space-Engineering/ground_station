@@ -68,7 +68,7 @@ class serverHandler(threadWrapper):
         self.app.route('/open_data_stream')(self.open_data_stream)
         self.app.route('/Sensor')(self.open_sensor)
         self.app.route('/Command')(self.command)
-        self.app.route('/page_manigure.js')(self.serve_page_manigure)
+        self.app.route('/page_manigure.js')(self.serve_page_mangier)
         self.app.route('/get_updated_logger_report', methods=['GET'])(self.get_updated_logger_report)
         self.app.route('/get_updated_prem_logger_report', methods=['GET'])(self.get_updated_prem_logger_report)
         self.app.route('/get_updated_thread_report', methods=['GET'])(self.get_updated_thread_report)
@@ -102,17 +102,13 @@ class serverHandler(threadWrapper):
         self.__coms.print_message(dto2, 2)
         if isinstance(message, str):
             data_dict = {
-                'data' : message,
+                'text_data' : message,
                 'download' : False,
             }
-            return message
+            return jsonify(data_dict)
         else : 
-            data_dict = {
-                'data' : message[0],
-                'download' : False,
-            }
-            return send_file(, as_attachment=True)
-    def serve_page_manigure(self):
+            return jsonify(message)
+    def serve_page_mangier(self):
         '''
             Returns java script to the browser. So that it can be run in browser. 
         '''

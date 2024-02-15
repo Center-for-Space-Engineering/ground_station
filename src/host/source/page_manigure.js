@@ -114,6 +114,14 @@ function refresh_status_report()
     });
 }
 
+// Function to execute action based on what the user clicked on in the table
+function update_run_arg_box(row) {
+    //update the run commands text box
+    var path_name = row.getAttribute('data-path');
+    var input_command_box = document.getElementById('commands_args');
+    input_command_box.value = path_name;
+}
+
 function downloadFileFromResponse(text, file) {
     //creating an invisible element
  
@@ -128,23 +136,15 @@ function downloadFileFromResponse(text, file) {
     document.body.removeChild(element);
 }
 
-// Function to execute action based on what the user clicked on in the table
-function update_run_arg_box(row) {
-    //update the run commands text box
-    var path_name = row.getAttribute('data-path');
-    var input_command_box = document.getElementById('commands_args');
-    input_command_box.value = path_name;
-}
-
 //This function takes an input from the user and then runs 
 function send_run_request() {
     var userInput = document.getElementById('commands_args').value;
 
     fetch(`${userInput}`)
-        .then(response => response.text())
+        .then(response => response.json())
         .then(data => {
-            document.getElementById('result').innerHTML = data;
-            downloadFileFromResponse(data, 'data_download.txt');
+            document.getElementById('result').innerHTML = data.text_data;
+            if(data.download == 'yes') downloadFileFromResponse(data.file_data, 'data_download.txt');
         })
         .catch(error => {
             // console.error('Error making GET request:', error);
