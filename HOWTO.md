@@ -1,19 +1,28 @@
 # How to work with the CSE simulator code
-In this document I will set through a few examples on how to add functionality to the CSE simulator. The following examples will be covered.
+In this document I will go through a few examples on how to add functionality to the CSE simulator. The following examples will be covered.
 - Adding commands to the server.
 - Sending requests to threads.
 - Creating a new process and then running it with the parallel architecture.
-- Requesting and Inserting data to the Database.
+- Requesting and Inserting data in to the Database.
 - Working with the logging system.
+
+Note: When ever you are adding code to the CSE simulator, please make sure to lint your code. All of the `README.md` have instructions for doing this. By doing this you will help future developers be able to read your code. This is not consider optional for CSE coding standers, and must be complete before you push your code to `git`. 
 
 # How to add new commands to the server.
 ## Architecture Description:
-Inside the host folder you will see python files that start with `cmd_`. This prefix tells the server that this is a command and needs to be added into the Architecture at run time. The python class should inherit from the `commandParent.py`. This class has all the basic functions that a command class needs. It is left up to the user to implement these functions. However the `commandParent.py` will help the user structure their code in the correct way.
+Inside the host folder you will see python files that start with `cmd_`. This prefix tells the server that this is a command and needs to be added into the Architecture at run time. These python class should inherit from the `commandParent.py`. This class has all the basic functions that a command class needs. It is left up to the user to implement these functions. However the `commandParent.py` will help the user structure their code in the correct way.
 
 
 ## Steps:
-1. First create a file that follows the correct format `cmd__name_of_new_class`. Make sure you class declaration matches the name of the file without the `cmd_` prefix.
-Note: I recommend copying the `cmd_example.py` file. You do not have to do this, but I believe it is easier to start from here.
+1. First create a file that follows the correct format `cmd__name_of_new_class`. Make sure you class declaration matches the name of the file.
+Note: I recommend copying the `cmd_example.py` file. You do not have to do this, but I believe it is easier to start from here. Consider the following example. \
+File name: `cmd_example.py`
+```python
+    from commandParent import commandParent # pylint: disable=e0401
+
+    class cmd_example(commandParent):
+        ...
+```
 2. The `__init__` function:
  - CMD: This is the object that ties everything to the server.
  - coms: This object handles all the internal communications.
