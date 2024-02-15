@@ -159,7 +159,7 @@
     </div>
     <div class="container">
         <div class="orange-text" id="writer_status_text">Writer Status: </div>
-        <div class="status-circle status-red" id="writter_status"></div>
+        <div class="status-circle status-red" id="writer_status"></div>
     </div>
 
     <canvas id="myLineChart" width="400" height="100"></canvas>
@@ -236,7 +236,7 @@
                         status.classList.remove('status-red');
                         status.classList.add('status-green');
 
-                        fetch('/get_serial_info_update')  // Assume a Flask route to get updated data
+                        fetch('/get_serial_info_update') 
                             .then(response => response.json())
                             .then(data => {
                                 updateLineChart(data);

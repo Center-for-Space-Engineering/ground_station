@@ -19,8 +19,8 @@ from DTOs.print_message_dto import print_message_dto # pylint: disable=e0401
 
 #These are some Debugging tools I add, Turning off the display is really useful for seeing errors, because the terminal wont get erased every few milliseconds with the display on.
 DISPLAY_OFF = True
-NO_SERIAL_LISTENER = True
-NO_SERIAL_WRITER = True
+NO_SERIAL_LISTENER = False
+NO_SERIAL_WRITER = False
 
 if not NO_SERIAL_LISTENER:
     from python_serial_api.serial_listener import serial_listener # pylint: disable=e0401
@@ -28,8 +28,8 @@ if not NO_SERIAL_WRITER:
     from python_serial_api.serial_writer import serial_writer # pylint: disable=e0401
 
 
-# hostname = '144.39.167.206' #get this by running hostname -I
-hostname = '127.0.0.1'
+hostname = '144.39.167.206' #get this by running hostname -I
+# hostname = '127.0.0.1'
 port = 5000
 serial_listener_name = 'serial listener'
 serial_writer_name = 'serial writer'

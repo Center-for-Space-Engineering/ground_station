@@ -80,6 +80,9 @@ class cmd_data_publisher(commandParent, threadWrapper):
         # Set the SO_REUSEADDR option
         self.__server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
+        #set a time out
+        self.__server_socket.settimeout(30)  # Set timeout to 30 seconds 
+
         try:
             self.__server_socket.bind((host, self.__port))
             self.__coms.send_request('task_handler', ['add_thread_request_func', self.run_publisher ,'publisher', self])
@@ -101,10 +104,17 @@ class cmd_data_publisher(commandParent, threadWrapper):
         '''
             This is the function the runs the pipe on its own thread. 
         '''
-        #wait for client to subscribe.
-        self.__server_socket.listen()
-        # Accept a connection from a client
-        client_socket, client_address = self.__server_socket.accept()
+        connected = False
+        try :
+            #wait for client to subscribe.
+            self.__server_socket.listen()
+            # Accept a connection from a client
+            client_socket, client_address = self.__server_socket.accept()
+            connected = True
+        except socket.timeout:
+            dto = logger_dto(message="Timeout occurred while waiting for a connection.", time=str(datetime.now()))
+            self.__coms.print_message(dto)
+            connected = False
         
         #file_path = 'synthetic_data_profiles/TestAAFF00BB.bin'
         file_path = 'synthetic_data_profiles/SyntheticFPP2_1000packets_CSEkw_with_garbage.bin'
@@ -116,27 +126,35 @@ class cmd_data_publisher(commandParent, threadWrapper):
         try:
             running = True
             while running:
-                try:
-                    # Send data to the connected client
-                    message = file.read(519)
-                    if len(message) == 0:
-                        file.close()
-                        time.sleep(30)
-                        file = open(file_path, 'rb')
-                    else :
-                        print(message)
-                        client_socket.sendall(message)
-                        #time.sleep(10)
-                except Exception as e: # pylint: disable=w0718
-                    print("Waiting for connection")
-                    print(f"Error {e}")
-                    self.__server_socket.listen()
-                    # Accept a connection from a client
-                    client_socket, client_address = self.__server_socket.accept()
-                    dto = logger_dto(message=f"Connection established with {client_address}", time=str(datetime.now()))
-                    self.__coms.print_message(dto)
-                    #reopen file
-                    file = open(file_path, 'rb') # pylint: disable=R1732
+                if connected:
+                    try:
+                        # Send data to the connected client
+                        message = file.read(519)
+                        if len(message) == 0:
+                            file.close()
+                            time.sleep(30)
+                            file = open(file_path, 'rb')
+                        else :
+                            print(message)
+                            client_socket.sendall(message)
+                            #time.sleep(10)
+                    except Exception as e: # pylint: disable=w0718
+                        print("Waiting for connection")
+                        print(f"Error {e}")
+
+                        #try and reconnect
+                        try :
+                            #wait for client to subscribe.
+                            self.__server_socket.listen()
+                            # Accept a connection from a client
+                            client_socket, client_address = self.__server_socket.accept()
+                            dto = logger_dto(message=f"Connection established with {client_address}", time=str(datetime.now()))
+                            self.__coms.print_message(dto)
+                            connected = True
+                        except socket.timeout:
+                            dto = logger_dto(message="Timeout occurred while waiting for a connection.", time=str(datetime.now()))
+                            self.__coms.print_message(dto)
+                            connected = False
                 with self.__Running_lock:
                     running = self.__Running
             try :
