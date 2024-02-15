@@ -3,8 +3,8 @@ In this document I will set through a few examples on how to add functionality t
 - Adding commands to the server.
 - Sending requests to threads.
 - Creating a new process and then running it with the parallel architecture.
-- Requesting and Inserting data to the Database.  
-
+- Requesting and Inserting data to the Database.
+- Working with the logging system.
 
 # How to add new commands to the server.
 ## Architecture Description:
@@ -13,24 +13,24 @@ Inside the host folder you will see python files that start with `cmd_`. This pr
 
 ## Steps:
 1. First create a file that follows the correct format `cmd__name_of_new_class`. Make sure you class declaration matches the name of the file without the `cmd_` prefix.
-Note: I recommend copying the `cmd_exsample.py` file. You do not have to do this, but I believe it is easier to start from here.
+Note: I recommend copying the `cmd_example.py` file. You do not have to do this, but I believe it is easier to start from here.
 2. The `__init__` function:
  - CMD: This is the object that ties everything to the server.
  - coms: This object handles all the internal communications.
  - This function gets called when the class is created. First you need to call the `super().__init__(cmd=CMD, coms=coms, called_by_child=True)` this creates the parent class.
- - Create a variable called `self.__comandName`, this tells the server what to call this command.
+ - Create a variable called `self.__commandName`, this tells the server what to call this command.
  - Create an `self.__args = {}`: This is a dictionary of functions you want the server to be able to call. The key in the dictionary is what the server calls. The value for that key should be a function pointer. Note: this is the function the server will call.
  - The following lines are mandatory. They are what actually tie things to the server.
     ```python
         dictCmd = CMD.get_command_dict()
-        dictCmd[self.__comandName] = self
+        dictCmd[self.__commandName] = self
         CMD.setCommandDict(dictCmd)
     ```
  - Save the coms object. Do something like the following `self.__coms = coms`.
 
 
 3. Create the run functions:
-  - In most cases the same implementations of `run` and `run_args` in the `cmd_exsample.py` will work. If you need to customize these further it is left up to the user to do that. However I will give a quick description of the functions.
+  - In most cases the same implementations of `run` and `run_args` in the `cmd_example.py` will work. If you need to customize these further it is left up to the user to do that. However I will give a quick description of the functions.
   - Description: The basic architecture of the `run` functions is simple: it just gets called if no arguments are passed to the server call. The `run_args` calls a function name given to it, and then passes args into that function. It uses the `self.__args` variable to call the functions.
   Note: In most cases the `run_args` is what you want. The `run` function is meant for commands that should be executed right away with not arguments.
 4. In this step the user should define their own functions. Each of these functions should be added to the `self.__args` dictionary when it is created in the `__init__` function.
@@ -54,9 +54,9 @@ Note: In some cases you will not want to pass any arguments to your function. Th
         message = ""
         for key in self.__args:
             if key == 'some key':
-                message += f"<url>/{self.__comandName}/{key}/-add your args here-</url><p></p>"
+                message += f"<url>/{self.__commandName}/{key}/-add your args here-</url><p></p>"
             else :
-                message += f"<url>/{self.__comandName}/{key}</url><p></p>"
+                message += f"<url>/{self.__commandName}/{key}</url><p></p>"
         return message
     ```
     Note: I have been putting args in between `-` as a way to show to the user that these are args.
@@ -68,13 +68,13 @@ Note: In some cases you will not want to pass any arguments to your function. Th
             if key == 'some key':
                 message.append({
                 'Name' : key,
-                'Path' : f'/{self.__comandName}/{key}/-add your args here-',
+                'Path' : f'/{self.__commandName}/{key}/-add your args here-',
                 'Description' : 'Add description of the function here'    
                 })
             else :
                 message.append({
                 'Name' : key,
-                'Path' : f'/{self.__comandName}/{key}',
+                'Path' : f'/{self.__commandName}/{key}',
                 'Description' : 'Add description of the function here'    
                 })
         return message
@@ -82,11 +82,11 @@ Note: In some cases you will not want to pass any arguments to your function. Th
 6. Finally implement a to string function. In most cases the following implementation will be sufficient.
     ```python
     def __str__(self):
-        return self.__comandName
+        return self.__commandName
     ```
 # How to send a request to threads.
 ## Architecture Description:
-The general structure of the code is as follows. `taskHandler.py` holds and maintains every thread in the system. The `messageHandler.py` in incharge of routing messages from every class to the `taskHandler.py`. Thus when a request is made, it goes to the `messageHandler.py` class, which then sends it to the `taskHandler.py` class which then calls the function on the corresponding thread. In short, what this means is that your class needs to have access to the `messageHandler.py` class in order to send requests to other threads.
+The general structure of the code is as follows. `taskHandler.py` holds and maintains every thread in the system. The `messageHandler.py` in charge of routing messages from every class to the `taskHandler.py`. Thus when a request is made, it goes to the `messageHandler.py` class, which then sends it to the `taskHandler.py` class which then calls the function on the corresponding thread. In short, what this means is that your class needs to have access to the `messageHandler.py` class in order to send requests to other threads.
 
 
 Note: in many cases the `messageHandler.py` is called `coms` or `self.__coms`.
@@ -113,7 +113,7 @@ Note: In some cases you may need to rewrite the `run` function. You can see an e
 1. Create the `__init__(self, coms, ... )` function.  It is required to pass in the `coms` object. This is the `messageHandler.py` class. It handles all internal communications.
 2. Create a `self.__function_dict = {}`: This dictionary should contain any function you want to be called by other threads. If the function is not called by other threads it should not go in the function. Consider the following example:
 ```python
-self.__fuction_dict = {
+self.__function_dict = {
     "function_name" : self.function_name
 }
 ```
@@ -211,7 +211,7 @@ There are two function to call for requesting data.
         html string with data
     NOTE: This function is NOT meant for large amounts of data! Making a small request to this function will take a long time.
 ```
-2. `get_data_large`: This function runs much faster than the previous and is ment for getting large amounts of data from the Database. It returns a pandas data frame. Here is the function docer string.
+2. `get_data_large`: This function runs much faster than the previous and is meant for getting large amounts of data from the Database. It returns a pandas data frame. Here is the function docer string.
 ```
     args is a list where the fist index is the table name
     and the second is the start time for collecting the data
@@ -226,4 +226,43 @@ There are two function to call for requesting data.
 
 
 Note: All these functions should be called by sending a thread request. See the `How to send a request to threads.` example.
+
+## Working with the logging system.
+## Architecture Description:
+The logging system has different logs that you can pass, that will then auto populate on the webpage.To pass an object you need to use one of the defined `DTOs` (Data  Transfer Object) in the `src\host\DTOs` folder. The `DTOs` are structured to be python classes so they can be easily imported and used. Consider the following example.  
+```python
+    import datetime
+
+    from DTOs.logger_dto import logger_dto # pylint: disable=e0401
+    from DTOs.print_message_dto import print_message_dto # pylint: disable=e0401
+     
+    ...
+
+    dto = logger_dto(message="Some logging message here", time=str(datetime.now()))
+    dto2 = print_message_dto("Some Message here")
+```
+To then send the message to the logging system you can simply call the log level you want in with the `coms` (`messageHandler.py`) object. 
+```python
+    self.__coms.send_message_permanent(dto)
+    self.__coms.print_message(dto2)
+```
+There are a number of different logs you can send, here is a list. 
+1. `send_message_permanent` : Theses logs persist through run time. USE SPARINGLY. 
+2. `print_message` : Send a log. These logs have a FIFO queue, so the logs will only persist for a short time.  
+3. `Report_thread` : This logging is for `taskHandler.py`, the user shouldn't have to use it. 
+4. `report_bytes` : This is called by the `serial_listener.py` it is how the system knows how many bytes have been received in a second. Here is an example of reporting a byte count ever second.
+```python
+    ### Reporting ###
+    if time.time() - start > 1: #check to see if it has been one second
+        # Report the how many bytes we have received
+        self.__coms.report_bytes(self.__byte_count_received)
+        self.__byte_count_received = 0
+        start = time.time() # set start to the new starting point
+```
+5. `report_additional_status` : This is for threads or task that  need to report something. Like say if they are connected to the serial port. Or if they are running. Here is an example of how to call this logger.
+```python
+    self.__coms.report_additional_status(self.__thread_name, " Not Connected!")
+```
+- Note: In this case no `DTO` is needed. This is an effort to keep things simpler for the user. 
+Note: Not all `DTO` types work with all the logger types. Please take care what you pass to the logger. 
 
