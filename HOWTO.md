@@ -12,6 +12,7 @@ Note: When ever you are adding code to the CSE simulator, please make sure to li
 ## Architecture Description:
 Inside the host folder you will see python files that start with `cmd_`. This prefix tells the server that this is a command and needs to be added into the Architecture at run time. These python class should inherit from the `commandParent.py`. This class has all the basic functions that a command class needs. It is left up to the user to implement these functions. However the `commandParent.py` will help the user structure their code in the correct way.
 
+Note: This example is best understood if you are looking at `src\host\cmd_example.py` while reading though it. 
 
 ## Steps:
 1. First create a file that follows the correct format `cmd__name_of_new_class`. Make sure you class declaration matches the name of the file.
@@ -24,9 +25,14 @@ File name: `cmd_example.py`
         ...
 ```
 2. The `__init__` function:
+```python
+       def __init__(self, CMD, coms):
+            ...
+```
  - CMD: This is the object that ties everything to the server.
  - coms: This object handles all the internal communications.
- - This function gets called when the class is created. First you need to call the `super().__init__(cmd=CMD, coms=coms, called_by_child=True)` this creates the parent class.
+ - The `__init__` function gets called when the class is created. 
+ - First you need to call the `super().__init__(cmd=CMD, coms=coms, called_by_child=True)` this creates the parent class.
  - Create a variable called `self.__commandName`, this tells the server what to call this command.
  - Create an `self.__args = {}`: This is a dictionary of functions you want the server to be able to call. The key in the dictionary is what the server calls. The value for that key should be a function pointer. Note: this is the function the server will call.
  - The following lines are mandatory. They are what actually tie things to the server.
