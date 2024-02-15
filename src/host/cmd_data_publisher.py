@@ -11,7 +11,7 @@ import threading
 from commandParent import commandParent # pylint: disable=e0401
 from threading_python_api.threadWrapper import threadWrapper # pylint: disable=e0401
 
-#import DTO for comminicating internally
+#import DTO for communicating internally
 from DTOs.logger_dto import logger_dto # pylint: disable=e0401
 from DTOs.print_message_dto import print_message_dto # pylint: disable=e0401
 
@@ -26,20 +26,20 @@ class cmd_data_publisher(commandParent, threadWrapper):
         ############ set up the threadWrapper stuff ############
         # We need the threadWrapper so that the publisher can send a request to start a new thread.
         self.__function_dict = { #NOTE: I am only passing the function that the rest of the system needs
-            #In this case I dont want any other fuctions
+            #In this case I dont want any other functions
         }
         # super(threadWrapper, self).__init__(self.__function_dict)
         threadWrapper.__init__(self, self.__function_dict)
         
         ############ set up the commandParent stuff ############
         #CMD is the cmd class and we are using it to hold all the command class
-        self.__comandName = 'data_publisher'
+        self.__commandName = 'data_publisher'
         self.__args ={
-            "start_data_pubisher" : self.start_data_pubisher,
-            "kill_data_pubisher" : self.kill_data_pubisher
+            "start_data_publisher" : self.start_data_publisher,
+            "kill_data_publisher" : self.kill_data_publisher
         }
         dictCmd = CMD.get_command_dict()
-        dictCmd[self.__comandName] = self #this is the name the webserver will see, so to call the command send a request for this command. 
+        dictCmd[self.__commandName] = self #this is the name the web server will see, so to call the command send a request for this command. 
         CMD.setCommandDict(dictCmd)
         self.__coms = coms
         self.__port = -1
@@ -51,7 +51,7 @@ class cmd_data_publisher(commandParent, threadWrapper):
         '''
             This function is what allows the server to call function in this class
             ARGS:
-                [0] : funciton name
+                [0] : function name
                 [1:] ARGS that the function needs. NOTE: can be blank
         '''
         try:
@@ -59,9 +59,9 @@ class cmd_data_publisher(commandParent, threadWrapper):
             dto = print_message_dto(message)
             self.__coms.print_message(dto, 2)
         except Exception as e: # pylint: disable=w0718
-            message += f"<p> Not vaild arg Error {e}</p>"
+            message += f"<p> Not valid arg Error {e}</p>"
         return message
-    def start_data_pubisher(self, arg):
+    def start_data_publisher(self, arg):
         '''
             Creates a pip object then asks the thread handler to start the pip on its own thread. 
         '''
@@ -83,21 +83,25 @@ class cmd_data_publisher(commandParent, threadWrapper):
         try:
             self.__server_socket.bind((host, self.__port))
             self.__coms.send_request('task_handler', ['add_thread_request_func', self.run_publisher ,'publisher', self])
-            return f"<h3> Started data publisher on port:{self.__port} </h3>"
+            return f"Started data publisher on port:{self.__port}"
         except Exception as e: # pylint: disable=w0718
             return f"<p>Error {e}<p>"
         
-    def kill_data_pubisher(self,arg):
+    def kill_data_publisher(self, _): #the args is not used here so we use the _ indicator. 
+        '''
+            This function simply tells the data publisher to shut down. 
+            It does this by setting the self.__Running variable to false. 
+        '''
         with self.__Running_lock:
             self.__Running = False
-        return f"<p>Commanded publisher to terminate.<p>"
+        return "Commanded publisher to terminate."
         
 
     def run_publisher(self):
         '''
             This is the function the runs the pipe on its own thread. 
         '''
-        #wait for clinet to subscribe.
+        #wait for client to subscribe.
         self.__server_socket.listen()
         # Accept a connection from a client
         client_socket, client_address = self.__server_socket.accept()
@@ -131,52 +135,52 @@ class cmd_data_publisher(commandParent, threadWrapper):
                     client_socket, client_address = self.__server_socket.accept()
                     dto = logger_dto(message=f"Connection established with {client_address}", time=str(datetime.now()))
                     self.__coms.print_message(dto)
-                    #repone file
+                    #reopen file
                     file = open(file_path, 'rb') # pylint: disable=R1732
                 with self.__Running_lock:
                     running = self.__Running
             try :
                 self.__server_socket.close()
                 threadWrapper.set_status(self, 'Complete')
-                dto = logger_dto(message=f"Socket Closed", time=str(datetime.now()))
+                dto = logger_dto(message="Socket Closed", time=str(datetime.now()))
                 self.__coms.print_message(dto)
             except Exception as e: # pylint: disable=w0718
                 print("Waiting for connection")
                 print(f"Error {e}")
-
+            return "<p>Pip closed <p>"
         except Exception as e: # pylint: disable=w0718
             return f"<p>Error  Server side {e}<p>"
     def get_args(self):
         '''
             This function returns an html obj that explains the args for all the internal
-            funciton calls. 
+            function calls. 
         '''
         message = ""
         for key in self.__args:
-            if key == "start_data_pubisher":
-                message += f"<url>/{self.__comandName}/{key}/-port-</url><p></p>" #NOTE: by adding the url tag, the client knows this is a something it can call, the <p></p> is basically a new line for html
+            if key == "start_data_publisher":
+                message += f"<url>/{self.__commandName}/{key}/-port-</url><p></p>" #NOTE: by adding the url tag, the client knows this is a something it can call, the <p></p> is basically a new line for html
             else:
-                message += f"<url>/{self.__comandName}/{key}"
+                message += f"<url>/{self.__commandName}/{key}"
         return message
     def __str__(self):
-        return self.__comandName
+        return self.__commandName
     def get_args_server(self):
         '''
             This function returns an html obj that explains the args for all the internal
-            funciton calls. 
+            function calls. 
         '''
         message = []
         for key in self.__args:
-            if key == "start_data_pubisher":
+            if key == "start_data_publisher":
                 message.append({ 
                     'Name' : key,
-                    'Path' : f'/{self.__comandName}/{key}/-port number-',
-                    'Discription' : 'This command starts a publisher on the port that is given to it. Should be above 5000 and cann\'t be in use.'    
+                    'Path' : f'/{self.__commandName}/{key}/-port number-',
+                    'Description' : 'This command starts a publisher on the port that is given to it. Should be above 5000 and cann\'t be in use.'    
                     })
-            if key == "kill_data_pubisher":
+            if key == "kill_data_publisher":
                 message.append({ 
                     'Name' : key,
-                    'Path' : f'/{self.__comandName}/{key}',
-                    'Discription' : 'This command kills the publisher.'    
+                    'Path' : f'/{self.__commandName}/{key}',
+                    'Description' : 'This command kills the publisher.'    
                     })
         return message

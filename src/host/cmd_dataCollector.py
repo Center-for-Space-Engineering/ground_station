@@ -1,19 +1,19 @@
 '''
-    This class is incharge of collecting and adding all the data 
-    types dynamically. Then addes them to the server. 
+    This class is tasked of collecting and adding all the data 
+    types dynamically. Then adds them to the server. 
     It also routs commands from the server to the data base
 '''
 import time
 from commandParent import commandParent # pylint: disable=e0401
 from logging_system_display_python_api.logger import loggerCustom # pylint: disable=e0401
 
-#import DTO for comminicating internally
+#import DTO for communicating internally
 from DTOs.print_message_dto import print_message_dto # pylint: disable=e0401
 
 #pylint disable=c0103
 class cmd_dataCollector(commandParent):
     """
-        This class goes and dynamcal addes all the data types and then ties them to the server, 
+        This class goes and dynamical adds all the data types and then ties them to the server, 
         so that they can be requested by the subscriber.
         In addition it handles all the commands going to the data base
     """
@@ -21,7 +21,7 @@ class cmd_dataCollector(commandParent):
         '''
             ARGS:
                 CMD: this is our command handler class 
-                COMS: Message handler class, this is incharge of passing messages to all 
+                COMS: Message handler class, this is tasked of passing messages to all 
                     other class in the program
                 db: This is the data base
         '''
@@ -33,7 +33,7 @@ class cmd_dataCollector(commandParent):
         self.__command_name = 'data_Collector'
         self.__data_base = db
         dict_cmd = CMD.get_command_dict()
-        #this is the name the webserver will see, 
+        #this is the name the web server will see, 
         # so to call the command send a request for this command.
         dict_cmd[self.__command_name] = self
         CMD.setCommandDict(dict_cmd)
@@ -60,13 +60,13 @@ class cmd_dataCollector(commandParent):
             message += self.__args[args[0]](args) 
             #NOTE to make this work we will always pass args even if we dont use it.
         except : # pylint: disable=w0702
-            # the above disable is for the warning for not spesifying the exception type
-            message += "<p> Not vaild arg </p>"
+            # the above disable is for the warning for not specifying the exception type
+            message += "<p> Not valid arg </p>"
             self.__coms.print_message("No valid arg on get request! ", 0)
 
         self.__logger.send_log("Returned to server: " + message)
         return message
-    #NOTE: we add the dont care varible (_) just to make things eaiser to call dynamically
+    #NOTE: we add the dont care variable (_) just to make things easier to call dynamically
     def get_table_html_collector(self, _): 
         # pylint: disable=missing-function-docstring
         request_num = self.__data_base.make_request('get_tables_html')
@@ -78,7 +78,7 @@ class cmd_dataCollector(commandParent):
     def get_args_server(self):
         '''
             This function returns an html obj that explains the args for all the internal
-            funciton calls. 
+            function calls. 
         '''
         message = []
         for key in self.__args:
@@ -86,31 +86,31 @@ class cmd_dataCollector(commandParent):
                 message.append({
                     'Name' : key,
                     'Path' : f"/{self.__command_name}/{key}/-data type-",
-                    'Discription' : 'This command returns the fromat of a data type.',
+                    'Description' : 'This command returns the format of a data type.',
                 })
             elif key == "get_data":
                 message.append({
                     'Name' : key,
                     'Path' : f"/{self.__command_name}/{key}/-table name-/-start index-",
-                    'Discription' : 'This command returns ALL the data from the data base from the starting index. A.K.A it is slow.',
+                    'Description' : 'This command returns ALL the data from the data base from the starting index. A.K.A it is slow.',
                 })
             elif key == "get_dto":
                 message.append({
                     'Name' : key,
-                    'Path' : f"/{self.__command_name}/{key}/-table_name-/-start index-/-feild name-/-Optional max lines-",
-                    'Discription' : 'This command returns data from the data base from a start index to a finishing index. It is built for speed.',
+                    'Path' : f"/{self.__command_name}/{key}/-table_name-/-start index-/-field name-/-Optional max lines-",
+                    'Description' : 'This command returns data from the data base from a start index to a finishing index. It is built for speed.',
                 })
             else :
                 message.append({
                     'Name' : key,
                     'Path' : f"/{self.__command_name}/{key}",
-                    'Discription' : 'No discription given for this command.',
+                    'Description' : 'This command returns all the tables in the data base.',
                 })
         return message
     def get_args(self):
         '''
             This function returns an html obj that explains the args for all the internal
-            funciton calls. 
+            function calls. 
         '''
         message = "<p></p>"
         for key in self.__args:
@@ -119,7 +119,7 @@ class cmd_dataCollector(commandParent):
             elif key == "get_data":
                 message += f"<url>/{self.__command_name}/{key}/<arg>-table name-</arg>/<arg>-start index-</arg></url><p></p>"
             elif key == "get_dto":
-                message += f"<url>/{self.__command_name}/{key}/<arg>-table_name-</arg>/<arg>-start index-</arg>/<arg>-feild name-</arg>/<arg>-Optional max lines-</arg></url></url><p></p>"
+                message += f"<url>/{self.__command_name}/{key}/<arg>-table_name-</arg>/<arg>-start index-</arg>/<arg>-field name-</arg>/<arg>-Optional max lines-</arg></url></url><p></p>"
             else :
                 message += f"<url>/{self.__command_name}/{key}</url><p></p>"
         self.__logger.send_log("Returned to server: " + message)
@@ -157,7 +157,7 @@ class cmd_dataCollector(commandParent):
                     it is used by the caller function, it should be the function name
                 args[1] is the table name
                 args[2] is the start index
-                args[3] is the feild in the dto to fetch
+                args[3] is the field in the dto to fetch
                 args[4] is optional but if passed it will set the max number of rows per dto to the new value
         '''
         #see if we have a new max row
@@ -178,15 +178,15 @@ class cmd_dataCollector(commandParent):
             return temp
         if temp.empty: 
             return  "<! DOCTYPE html>\n<html>\n<body>\n<h1><strong>dto (data transfer object): No saved data</strong></h1>\n</body>\n</html>"
-        data = temp[args[3]] #sperate data out
-        last_db_indx = temp['Table Index'].tail(1).iat[0] #get the last row in the dto
+        data = temp[args[3]] #septate data out
+        last_db_index = temp['Table Index'].tail(1).iat[0] #get the last row in the dto
         #make dto
         dto = "<! DOCTYPE html>\n<html>\n<body>\n<h1><strong>dto (data transfer object):</strong></h1>\n"
         dto += f"<h1><strong>Data fetched {args[3]}:</strong></h1>\n<data>"
         for data_point in data:
             dto += (str(data_point) + ",")
-        dto += f"</data>\n<lastFetchedIndex>{last_db_indx}</lastFetchedIndex>"
+        dto += f"</data>\n<lastFetchedIndex>{last_db_index}</lastFetchedIndex>"
         dto += "</body>\n</html>"
-        dto_interal = print_message_dto("DTO returned to requester.")
-        self.__coms.print_message(dto_interal)
+        dto_internal = print_message_dto("DTO returned to requester.")
+        self.__coms.print_message(dto_internal)
         return dto

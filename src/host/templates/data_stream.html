@@ -53,7 +53,7 @@
         input[type="submit"]:hover {
             background-color: #45a049;
         }
-        .button_formatt {
+        .button_format {
             background-color: #4caf50;
             color: #fff;
             padding: 10px 20px;
@@ -139,8 +139,8 @@
     <h2 class="green-text"> Configure the serial port: </h2>
     <div class="container">
         <div class="box_style">
-            <label class = "white-text" for="user_text">Enter boud_rate: </label>
-            <input type="text" id="boud_rate" placeholder="EX: 9600">
+            <label class = "white-text" for="user_text">Enter baud_rate: </label>
+            <input type="text" id="baud_rate" placeholder="EX: 9600">
         </div>
         <div class="box_style">
             <label class = "white-text" for="user_text">Enter stop bits: </label>
@@ -148,7 +148,7 @@
         </div>
     </div>
     <div class="container">
-        <button class = "button_formatt" onclick="send_serial_reconfig_request()">Submit</button>
+        <button class = "button_format" onclick="send_serial_reconfig_request()">Submit</button>
         <div class="box_style">
             <div class="green-text" id="result_serial_config">Serial Report</div>
         </div>
@@ -158,7 +158,7 @@
         <div class="status-circle status-red" id = "reader_status"></div>
     </div>
     <div class="container">
-        <div class="orange-text" id="writter_status_text">Writter Status: </div>
+        <div class="orange-text" id="writer_status_text">Writer Status: </div>
         <div class="status-circle status-red" id="writter_status"></div>
     </div>
 
@@ -171,7 +171,7 @@
             data: {
                 labels: [],  // X-axis labels (timestamps)
                 datasets: [{
-                    label: 'Data recived on the serial port (bytes)',
+                    label: 'Data received on the serial port (bytes)',
                     data: [],  // Y-axis data points
                     borderColor: 'rgba(75, 192, 192, 1)',
                     borderWidth: 1,
@@ -218,7 +218,7 @@
                         var status = document.getElementById('reader_status');
                         status.classList.remove('status-red');
                         status.classList.add('status-green');
-                        document.getElementById('reader_status_text').inenrText = "Reader Online";   
+                        document.getElementById('reader_status_text').innerText = "Reader Online";   
                     }
                     else
                     {
@@ -227,12 +227,12 @@
                         status.classList.add('status-red');
                     }
                 });
-            fetch('/serial_running_writter')
+            fetch('/serial_running_writer')
                 .then(response => response.text())
                 .then(data => {
                     if (data == 'Online')
                     {
-                        var status = document.getElementById('writter_status');
+                        var status = document.getElementById('writer_status');
                         status.classList.remove('status-red');
                         status.classList.add('status-green');
 
@@ -247,7 +247,7 @@
                     }
                     else
                     {
-                        var status = document.getElementById('writter_status');
+                        var status = document.getElementById('writer_status');
                         status.classList.remove('status-green');
                         status.classList.add('status-red');
                     }

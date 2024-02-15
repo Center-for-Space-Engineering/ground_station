@@ -6,7 +6,7 @@ from termcolor import colored
 
 class logger_dto():
     '''
-        Just give it a time stamp and messgae
+        Just give it a time stamp and message
     '''
     def __init__(self, time:str, message:str):
         self.__time = time

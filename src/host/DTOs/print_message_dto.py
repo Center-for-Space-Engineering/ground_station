@@ -3,7 +3,7 @@
 '''
 class print_message_dto():
     '''
-        Just give it a time messgae
+        Just give it a time message
     '''
     def __init__(self, message:str):
         self.__message = message

@@ -6,12 +6,6 @@
     <title>https://usu.cse.spacecraftemulator.com</title>
     <script src="page_manigure.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <!-- <script src="log_report_manigure.js"></script> -->
-    <script>
-        $(function() {
-           $("#includeHtml").load("mesage_box.html");
-        });
-     </script>
 
     <style>
         body{
@@ -129,7 +123,7 @@
     </div>
     <div class="horizontal-container"></div>
         <h2 class="white-text">Status Report From Space craft Emulator</h2>
-        <h3 class="green-text">Preminate Logging Report</h3>
+        <h3 class="green-text">Permanent Logging Report</h3>
         <ul id="prem_logger_report">
             {% for item in prem_data %}
                 <li class="white-text"><span class="green-text">Log:</span> [<span class="blue-text">{{ item['time'] }}</span>] : {{item['message']}}</li>

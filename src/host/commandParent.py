@@ -1,22 +1,22 @@
 '''
-    This module defines the structer for classes that can be imported and used by the server. 
-    It is not strictly requried that you  inharriete from this class when useing the server,
-    however it is strongly recomened and will keep your code safe. 
+    This module defines the structure for classes that can be imported and used by the server. 
+    It is not strictly required that you  inharriete from this class when using the server,
+    however it is strongly recommend and will keep your code safe. 
 '''
 from colorama import Fore
 
 class commandParent():
     """
         This is the parent class of all commands. It implements all the function that the child commands should have. 
-        That way if the child class is missing a func it wont crash the server, and will be appernt to the user there is something 
+        That way if the child class is missing a func it wont crash the server, and will be apparent to the user there is something 
         they need to add to there class. Python is not a strongly typed language, this is the best I can do to try and make it more
         strongly typed. 
     """
     def __init__(self, cmd, coms, called_by_child = False):
         if not called_by_child:
             errorRed = Fore.RED + "ERROR: " + Fore.WHITE
-            _ = cmd # I dont actually need these varible here, it is jsut to inforce structure.
-            _ = coms # I dont actually need these varible here, it is jsut to inforce structure.
+            _ = cmd # I dont actually need these variable here, it is just to maintain structure.
+            _ = coms # I dont actually need these variable here, it is just to maintain structure.
             print(errorRed + "No init func")
     def run(self):
         '''
@@ -55,5 +55,5 @@ class commandParent():
         return [{ 
             'Name' : 'No get_args_server implemented',
             'Path' : 'No path given',
-            'Discription' : 'Please implente the get_args_server function so that the server can run this command.'    
+            'Description' : 'Please implement the get_args_server function so that the server can run this command.'    
             }]

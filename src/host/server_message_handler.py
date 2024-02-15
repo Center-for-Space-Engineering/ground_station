@@ -29,7 +29,7 @@ class serverMessageHandler(threadWrapper):
             'get_byte_report':self.get_byte_report,
         }
         super().__init__(self.__function_dict)
-        _ = loggerCustom("logs/interal_coms_with_server.txt") # Not used at this time
+        _ = loggerCustom("logs/internal_coms_with_server.txt") # Not used at this time
 
         #data structs for storing messages
         self.__messages = []
@@ -38,14 +38,14 @@ class serverMessageHandler(threadWrapper):
         self.__status = {"Not available" : "No reports at this time"}
         self.__byte_status = []
 
-        #threading saftey 
+        #threading safety 
         self.__message_lock = Lock()
         self.__prem_message_lock = Lock()
         self.__thread_report_lock = Lock()
         self.__status_lock = Lock()
         self.__byte_status_lock = Lock()
 
-        #included this because it is standared at this point
+        #included this because it is standard at this point
         _= coms # Not used at this time
 
     def write_message_log(self, message):
@@ -56,7 +56,7 @@ class serverMessageHandler(threadWrapper):
             self.__messages = message
     def write_prem_message_log(self, message):
         '''
-            this function adds a message to the prement log that the server will then display.
+            this function adds a message to the permanent log that the server will then display.
         '''
         with self.__prem_message_lock:
             self.__prem_messages = message
@@ -74,41 +74,41 @@ class serverMessageHandler(threadWrapper):
             self.__status = report
     def report_byte_status(self, data):
         '''
-            this function adds a message to the log that contains the number of bytes recived that the server will then display.
+            this function adds a message to the log that contains the number of bytes received that the server will then display.
         '''
         with self.__byte_status_lock:
             self.__byte_status = data 
     def get_messages(self):
         '''
-            Server uses this functino to pull the message log.
+            Server uses this function to pull the message log.
         '''
         with self.__message_lock:
             data = self.__messages
         return data
     def get_prem_message_log(self):
         '''
-            Server uses this functino to pull the prem message log.
+            Server uses this Function to pull the prem message log.
         '''
         with self.__prem_message_lock:
             data = self.__prem_messages
         return data
     def get_thread_report(self):
         '''
-            Server uses this functino to pull the threading report log.
+            Server uses this Function to pull the threading report log.
         '''
         with self.__thread_report_lock:
             data = self.__report
         return data
     def get_report_status(self):
         '''
-            Server uses this functino to pull the status message log.
+            Server uses this function to pull the status message log.
         '''
         with self.__status_lock:
             data = self.__status
         return data
     def get_byte_report(self):
         '''
-            Server uses this functino to pull byte report log.
+            Server uses this function to pull byte report log.
         '''
         with self.__byte_status_lock:
             if len(self.__byte_status) <= 0:

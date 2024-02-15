@@ -1,10 +1,10 @@
 '''
     This Modules job is to go and get all the class that are named cmd_<name> and turn 
     them into code that can be used by the server. It is a way to dynamically import modules
-    and give controll of the module to the server. 
+    and give control of the module to the server. 
 '''
 
-from dinamicImporter import dinamicImporter # pylint: disable=e0401
+from dynamicImporter import dynamicImporter # pylint: disable=e0401
 from logging_system_display_python_api.logger import loggerCustom # pylint: disable=e0401
 
 #print DTO
@@ -13,11 +13,11 @@ from DTOs.print_message_dto import print_message_dto # pylint: disable=e0401
 class cmd_inter():
     '''
         This class takes all the commands that have been dynamically imported and maps them to the server. 
-        NOTE: every command must have a unqie name.
+        NOTE: every command must have a unique name.
     '''
     def __init__(self, coms, db):
         '''
-            args: coms is the message handeler class
+            args: coms is the message handler class
         '''
         self.__logger = loggerCustom("logs/cmd_inter_log.txt")
         self.__commandDict = {}
@@ -39,7 +39,7 @@ class cmd_inter():
                 returnVal = self.__commandDict[message[0]].run_args(message[1:])
             return returnVal
             
-        #if no command recived return list of commands that can be run
+        #if no command received return list of commands that can be run
         message = "<h1> <strong>Supported Commands</strong></h1>"
         for key in self.__commandDict:
             message += f"{self.__commandDict[key].get_args()}"            
@@ -52,14 +52,14 @@ class cmd_inter():
         self.__commandDict = new
     def collect_commands(self, db):
         '''
-            This fuc creats the dynamicImporter (spelled wrong, call it my programing style), after the dynamicImporter goes through the folder searching for any extra commands it adds them into the __commandDict so that the server can levrage them.
+            This fuc creates the dynamicImporter (spelled wrong, call it my programming style), after the dynamicImporter goes through the folder searching for any extra commands it adds them into the __commandDict so that the server can leverage them.
         '''
-        x = dinamicImporter(self.__coms)
+        x = dynamicImporter(self.__coms)
         moduleList = x.get_mod_list()
 
-        for obj in moduleList: #if you want to add any args to the __init__ function other than cmd you will have to change the code in this for loop. I recomend you just use setters. Or find a way not to use them at all.  
+        for obj in moduleList: #if you want to add any args to the __init__ function other than cmd you will have to change the code in this for loop. I recommend you just use setters. Or find a way not to use them at all.  
             if 'cmd_dataCollector' in str(obj):
-                _ = obj(self, self.__coms, db) #Here I need the data base refrance for the data base collector class
+                _ = obj(self, self.__coms, db) #Here I need the data base reference for the data base collector class
             else :
                 _ = obj(self, self.__coms) #the reason why I pass cmd into the new class is so that the class can define its own command names and structures.
             
@@ -69,7 +69,7 @@ class cmd_inter():
     
     def get_commands_webpage(self):
         '''
-          This function collects all the commands and how to run them, then returns that infor to the server in a dictionary so that it can be displayed to the user.
+          This function collects all the commands and how to run them, then returns that info to the server in a dictionary so that it can be displayed to the user.
         '''
         message = []
         for key in self.__commandDict:

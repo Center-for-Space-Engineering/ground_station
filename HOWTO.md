@@ -41,7 +41,13 @@ Note: If the function has arguments, the server will pass the argument to your f
         argument2 = args[2]
         argument3 = args[3]
 ```
-In this example you can see how you can extract arguments passed by the server. Note: that `args[0]` is not used because it is the function name.
+In this example you can see how you can extract arguments passed by the server. Note: that `args[0]` is not used because it is the function name.\
+Note: In some cases you will not want to pass any arguments to your function. The server will still pass an list with only the function name to your function. Therefore you should add the `_` to your function call to avoid a runtime crash. Consider the following example. 
+```python
+ def my_func_with_no_args(self, _):
+    ...
+```
+
 5. Implement the `get_args`, this function loops through each key in the `self.__args` dictionary.
  - Note: In many cases your functions will need arguments. I recommend adding something like the following. To convey to the user what the args are.
     ```python
@@ -111,7 +117,9 @@ self.__fuction_dict = {
     "function_name" : self.function_name
 }
 ```
+
 Note: You should have the key and the function name be the same. There is nothing to force you to do this. However it will make things much easier for people who are reading your code in the future.
+
 3. Then call `super().__init__(self, self.__function_dict)`. This will set up the `threadWrapper.py` class.
 Note: If you need to inherit from multiple classes then the class would look like this `threadWrapper.__init__(self, self.__function_dict)`. You can see an example of a class that inherits multiple classes in the `cmd_data_publisher.py`. In this example it is both a thread, and a server command.
 4. At this point the user should build the implementation of what they wish to build.
@@ -121,6 +129,7 @@ Note: If you need to inherit from multiple classes then the class would look lik
     Note: the class object name is the name that you use to make requests. In other words it is what name the system calls that thread.
     - call `threadPool.start()`. This function can be called multiple times, in multiple places. It just checks all the threads it knows about and if they have not been started it starts them.
 
+### Note: The task Handler will want you to sent your thread status. Just call the `set_status` on the parent `threadWrapper` class. You can set it to `Running` or `Complete`. Anything else is consider an error, and the thread status will report on that. 
 
 ## How to request and insert data to the Data Base
 ## Architecture Description:

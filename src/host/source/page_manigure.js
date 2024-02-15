@@ -92,7 +92,7 @@ function refresh_thread_report()
         }
     });
 }
-//This fuction updates our status report by sending a request to the server and then passing that response back to the webpage
+//This function updates our status report by sending a request to the server and then passing that response back to the webpage
 function refresh_status_report()
 {
     // Fetch updated content list from Flask
@@ -122,7 +122,7 @@ function update_run_arg_box(row) {
     input_command_box.value = path_name;
 }
 
-//This fuction takes an input from the user and then runs 
+//This function takes an input from the user and then runs 
 function send_run_request() {
     var userInput = document.getElementById('commands_args').value;
 
@@ -137,7 +137,7 @@ function send_run_request() {
         });
 }
 
-//This fuction takes an input from the user and then sends a command
+//This function takes an input from the user and then sends a command
 function send_serial_request() {
     var userInput = document.getElementById('user_hex_input').value;
 
@@ -161,14 +161,14 @@ function send_serial_request() {
         });
 }
 
-//This fuction takes an input from the user and then sends a request
+//This function takes an input from the user and then sends a request
 function send_serial_reconfig_request() {
-    var boud_rate = document.getElementById('boud_rate').value;
+    var baud_rate = document.getElementById('baud_rate').value;
     var stop_bit = document.getElementById('stop_bit').value;
 
     // Define the data to be sent
     var data = {
-        boud_rate:boud_rate,
+        baud_rate:baud_rate,
         stop_bit: stop_bit
     };
 

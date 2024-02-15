@@ -14,26 +14,26 @@ from cmd_inter import cmd_inter # pylint: disable=e0401
 from server import serverHandler # pylint: disable=e0401
 from server_message_handler import serverMessageHandler # pylint: disable=e0401
 
-#import DTO for comminicating internally
+#import DTO for communicating internally
 from DTOs.print_message_dto import print_message_dto # pylint: disable=e0401
 
-#These are some Debuggin tools I add, Turning off the display is really useful for seeing erros, because the terminal wont get erased every few millaseconds with the display on.
+#These are some Debugging tools I add, Turning off the display is really useful for seeing errors, because the terminal wont get erased every few milliseconds with the display on.
 DISPLAY_OFF = True
-NO_SERIAL_LISTENER = False
-NO_SERIAL_WRITTER = False
+NO_SERIAL_LISTENER = True
+NO_SERIAL_WRITER = True
 
 if not NO_SERIAL_LISTENER:
     from python_serial_api.serial_listener import serial_listener # pylint: disable=e0401
-if not NO_SERIAL_WRITTER:
-    from python_serial_api.serial_writter import serial_writter # pylint: disable=e0401
+if not NO_SERIAL_WRITER:
+    from python_serial_api.serial_writer import serial_writer # pylint: disable=e0401
 
 
-hostname = '144.39.167.206' #get this by running hostname -I
-# hostname = '127.0.0.1'
+# hostname = '144.39.167.206' #get this by running hostname -I
+hostname = '127.0.0.1'
 port = 5000
 serial_listener_name = 'serial listener'
-serial_writter_name = 'serial writter'
-server_listener_name = 'CSE_Server_Listener' #this the name for the interal thread that collect server info 
+serial_writer_name = 'serial writer'
+server_listener_name = 'CSE_Server_Listener' #this the name for the internal thread that collect server info 
 server_name_host = 'CSE_Host' #this is the name for the thread that services all the web requests. 
 data_base = 'Data Base'
 
@@ -49,13 +49,13 @@ def main():
     #now that we have the data base we can collect all of our command handlers.
     cmd = cmd_inter(coms, dataBase)
     #now that we have all the commands we can make the server
-    #note because the server requires a theard to run, it cant have a dedicated thread to listen to coms like
-    #other classes so we need another class object to listen to interal coms for the server.
+    #note because the server requires a thread to run, it cant have a dedicated thread to listen to coms like
+    #other classes so we need another class object to listen to internal coms for the server.
     server_message_handler = serverMessageHandler(coms=coms)
-    server = serverHandler(hostname, port, coms, cmd, serverMessageHandler, server_listener_name, serial_writter_name, serial_listener_name)
+    server = serverHandler(hostname, port, coms, cmd, serverMessageHandler, server_listener_name, serial_writer_name, serial_listener_name)
     
 
-    #first start our thread handler and the message haandler (coms) so we can start reporting
+    #first start our thread handler and the message handler (coms) so we can start reporting
     threadPool = taskHandler(coms) # NOTE: we dont need to add a coms task because it add automatically.
 
     #Make sure to add the  thread handler to coms so that we can send threading requests
@@ -74,11 +74,11 @@ def main():
     #collect the data for the serial monitor
     try :
         #first get the data type out of the database 
-        #NOTE: Do NOT change the object you get out, it is only a copy and will not change anythin on the datebase end
-        requst_num = dataBase.make_request('get_data_type', ['serial_feed'])
+        #NOTE: Do NOT change the object you get out, it is only a copy and will not change anything on the database end
+        request_num = dataBase.make_request('get_data_type', ['serial_feed'])
         return_val = None
         while return_val is None :
-            return_val = dataBase.get_request(requestNum=requst_num)
+            return_val = dataBase.get_request(requestNum=request_num)
         serial_data_type = return_val #did this just to make the code easier to read
         batch_size = int (serial_data_type.get_fields()['batch_sample'][0])
     except Exception as e : #pylint: disable=w0719
@@ -93,13 +93,13 @@ def main():
         threadPool.add_thread(ser_listener.run, serial_listener_name, ser_listener)
         threadPool.start() #start the new task
 
-    # create the ser_writter
-    if not NO_SERIAL_WRITTER:
-        ser_writter = serial_writter(coms = coms, thread_name=serial_writter_name)
-        threadPool.add_thread(ser_writter.run, serial_writter_name, ser_writter)
+    # create the ser_writer
+    if not NO_SERIAL_WRITER:
+        ser_writer = serial_writer(coms = coms, thread_name=serial_writer_name)
+        threadPool.add_thread(ser_writer.run, serial_writer_name, ser_writer)
         threadPool.start() #start the new task
 
-    #Good line if you need to test a thread chrashing. 
+    #Good line if you need to test a thread crashing. 
     # coms.send_request('Data Base', ['save_byte_data', 'NO_TABLE', 0, 'serial listener'])
     
 
