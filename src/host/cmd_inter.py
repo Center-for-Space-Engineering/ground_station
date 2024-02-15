@@ -58,7 +58,7 @@ class cmd_inter():
         moduleList = x.get_mod_list()
 
         for obj in moduleList: #if you want to add any args to the __init__ function other than cmd you will have to change the code in this for loop. I recommend you just use setters. Or find a way not to use them at all.  
-            if 'cmd_dataCollector' in str(obj):
+            if 'cmd_data_collector' in str(obj):
                 _ = obj(self, self.__coms, db) #Here I need the data base reference for the data base collector class
             else :
                 _ = obj(self, self.__coms) #the reason why I pass cmd into the new class is so that the class can define its own command names and structures.

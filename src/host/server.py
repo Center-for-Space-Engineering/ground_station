@@ -3,7 +3,7 @@
 '''
 #python imports
 import logging 
-from flask import Flask, render_template, request , send_from_directory, jsonify
+from flask import Flask, render_template, request , send_from_directory, jsonify, send_file
 from datetime import datetime
 import os
 
@@ -100,7 +100,18 @@ class serverHandler(threadWrapper):
         self.__log.send_log(f"Path receive {unknown_path}")
         dto2 = print_message_dto("Server handled request")
         self.__coms.print_message(dto2, 2)
-        return message
+        if isinstance(message, str):
+            data_dict = {
+                'data' : message,
+                'download' : False,
+            }
+            return message
+        else : 
+            data_dict = {
+                'data' : message[0],
+                'download' : False,
+            }
+            return send_file(, as_attachment=True)
     def serve_page_manigure(self):
         '''
             Returns java script to the browser. So that it can be run in browser. 

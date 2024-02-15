@@ -114,6 +114,20 @@ function refresh_status_report()
     });
 }
 
+function downloadFileFromResponse(text, file) {
+    //creating an invisible element
+ 
+    var element = document.createElement('a');
+    element.setAttribute('href',
+        'data:text/plain;charset=utf-8, '
+        + encodeURIComponent(text));
+    element.setAttribute('download', file);
+    document.body.appendChild(element);
+    element.click();
+
+    document.body.removeChild(element);
+}
+
 // Function to execute action based on what the user clicked on in the table
 function update_run_arg_box(row) {
     //update the run commands text box
@@ -130,6 +144,7 @@ function send_run_request() {
         .then(response => response.text())
         .then(data => {
             document.getElementById('result').innerHTML = data;
+            downloadFileFromResponse(data, 'data_download.txt');
         })
         .catch(error => {
             // console.error('Error making GET request:', error);
