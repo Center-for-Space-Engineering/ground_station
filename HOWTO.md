@@ -81,6 +81,18 @@ Note: In some cases you will not want to pass any arguments to your function. Th
  def my_func_with_no_args(self, _):
     ...
 ```
+Note: In most cases all your functions will only need to return a string. 
+Note: If the user wishes to download a file as part of the function this can be done simply but settting some arguments on the return value. Consider the following example. 
+```python
+return {
+        'text_data': f'The last line fetched was {last_db_index}',
+        'file_data': dto,
+        'download': 'yes',
+    }
+```
+- `text_data`: This argument is what shows up on webpage as what the command returns. 
+- `file_data`: This argument is the data that will be downloaded to the users computer. 
+- `download` : if the arg is `yes` this tells the web page to download the information. 
 
 5. Implement the `get_args`, this function loops through each key in the `self.__args` dictionary.
  - Note: In many cases your functions will need arguments. I recommend adding something like the following. To convey to the user what the args are.
