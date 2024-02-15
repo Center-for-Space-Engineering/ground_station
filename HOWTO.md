@@ -43,6 +43,25 @@ File name: `cmd_example.py`
     ```
  - Save the coms object. Do something like the following `self.__coms = coms`.
 
+- Note: Sometimes the user may want to have a class that has more args on its `__init__` function. This is possible if the user simply edits the `cmd_inter.py` class. Here is an example. \
+The `cmd_data_collector.py` wants the database as an argument as well. Here is how we add that functionality to the server. 
+    ```python
+        def collect_commands(self, db):
+            '''
+                This fuc creates the dynamicImporter (spelled wrong, call it my programming style), after the dynamicImporter goes through the folder searching for any extra commands it adds them into the __commandDict so that the server can leverage them.
+            '''
+            x = dynamicImporter(self.__coms)
+            moduleList = x.get_mod_list()
+
+            for obj in moduleList: #if you want to add any args to the __init__ function other than cmd you will have to change the code in this for loop. I recommend you just use setters. Or find a way not to use them at all.  
+                if 'cmd_data_collector' in str(obj):
+                    _ = obj(self, self.__coms, db) #Here I need the data base reference for the data base collector class
+                else :
+                    _ = obj(self, self.__coms) #the reason why I pass cmd into the new class is so that the class can define its own command names and structures.
+    ```
+You do not need to change the whole function, just add a `elif <condition>:` to the for loop. 
+- Note: you may need to pass in additional arguments to the function. 
+
 
 3. Create the run functions:
   - In most cases the same implementations of `run` and `run_args` in the `cmd_example.py` will work. If you need to customize these further it is left up to the user to do that. However I will give a quick description of the functions.
@@ -99,6 +118,7 @@ Note: In some cases you will not want to pass any arguments to your function. Th
     def __str__(self):
         return self.__commandName
     ```
+
 # How to send a request to threads.
 ## Architecture Description:
 The general structure of the code is as follows. `taskHandler.py` holds and maintains every thread in the system. The `messageHandler.py` in charge of routing messages from every class to the `taskHandler.py`. Thus when a request is made, it goes to the `messageHandler.py` class, which then sends it to the `taskHandler.py` class which then calls the function on the corresponding thread. In short, what this means is that your class needs to have access to the `messageHandler.py` class in order to send requests to other threads.
