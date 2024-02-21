@@ -4,7 +4,6 @@
     It also routs commands from the server to the data base
 '''
 import time
-import json
 import base64
 from commandParent import commandParent # pylint: disable=e0401
 from logging_system_display_python_api.logger import loggerCustom # pylint: disable=e0401
@@ -192,8 +191,6 @@ class cmd_data_collector(commandParent):
         self.__coms.print_message(dto_internal)
         data_combined = b''.join(data)
         base64_data_combined = base64.b64encode(data_combined).decode('utf-8')
-
-        # print(f"data_combined: {data_combined}")
         return {
             'text_data': f'The last line fetched was {last_db_index}',
             'file_data': base64_data_combined,
