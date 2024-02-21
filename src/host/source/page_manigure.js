@@ -122,14 +122,17 @@ function update_run_arg_box(row) {
     input_command_box.value = path_name;
 }
 
-function downloadFileFromResponse(text, file) {
-    //creating an invisible element
- 
+function downloadFileFromResponse(text, file, file_extension) {
+    //If the data is bin data then it needs to be decoded
+    if(file_extension == 'bin'){
+        // Decode the base64 string
+        text = atob(text);
+    }
+
+    //creating an invisible element and download the file
     var element = document.createElement('a');
-    element.setAttribute('href',
-        'data:text/plain;charset=utf-8, '
-        + encodeURIComponent(text));
-    element.setAttribute('download', file);
+    element.setAttribute('href','data:text/plain;charset=utf-8' + text);
+    element.setAttribute('download', file + "." + file_extension);
     document.body.appendChild(element);
     element.click();
 
@@ -144,7 +147,7 @@ function send_run_request() {
         .then(response => response.json())
         .then(data => {
             document.getElementById('result').innerHTML = data.text_data;
-            if(data.download == 'yes') downloadFileFromResponse(data.file_data, 'data_download.txt');
+            if(data.download == 'yes') downloadFileFromResponse(data.file_data, 'data_download', data.file_extension);
         })
         .catch(error => {
             // console.error('Error making GET request:', error);

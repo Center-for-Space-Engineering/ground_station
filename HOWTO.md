@@ -67,6 +67,32 @@ You do not need to change the whole function, just add a `elif <condition>:` to 
   - In most cases the same implementations of `run` and `run_args` in the `cmd_example.py` will work. If you need to customize these further it is left up to the user to do that. However I will give a quick description of the functions.
   - Description: The basic architecture of the `run` functions is simple: it just gets called if no arguments are passed to the server call. The `run_args` calls a function name given to it, and then passes args into that function. It uses the `self.__args` variable to call the functions.
   Note: In most cases the `run_args` is what you want. The `run` function is meant for commands that should be executed right away with not arguments.
+Note: Downloading data from the webpage. You can have you function tell the server to download a file if you wish. Here is an example:
+```python
+    base64_data_combined = base64.b64encode(data_combined).decode('utf-8')
+    return {
+        'text_data': f'The last line fetched was {last_db_index}',
+        'file_data': base64_data_combined,
+        'download': 'yes',
+        'file_extension' : 'bin', 
+    }
+```
+
+Note: That the users wishes to return a `.bin` file. Also note that the `file_data` has to be encoded in the correct why or it will not work. 
+
+If you want to return something other than `.bin` data here is an example:
+```python
+    data = 'Hello world'
+    return {
+        'text_data': f'The last line fetched was {last_db_index}',
+        'file_data': data,
+        'download': 'yes',
+        'file_extension' : 'txt', 
+    }
+```
+
+Final Note: the `text_data` is what the user will see on the webpage. 
+
 4. In this step the user should define their own functions. Each of these functions should be added to the `self.__args` dictionary when it is created in the `__init__` function.
 Note: If the function has arguments, the server will pass the argument to your function in a list format. Consider the following example.
 ```python
