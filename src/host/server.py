@@ -103,7 +103,7 @@ class serverHandler(threadWrapper):
         if isinstance(message, str):
             data_dict = {
                 'text_data' : message,
-                'download' : False,
+                'download' : 'no',
             }
             return jsonify(data_dict)
         else : 
