@@ -21,11 +21,14 @@ from DTOs.print_message_dto import print_message_dto # pylint: disable=e0401
 DISPLAY_OFF = True
 NO_SERIAL_LISTENER = False
 NO_SERIAL_WRITER = False
+NO_SENSORS = False
 
 if not NO_SERIAL_LISTENER:
     from python_serial_api.serial_listener import serial_listener # pylint: disable=e0401
 if not NO_SERIAL_WRITER:
     from python_serial_api.serial_writer import serial_writer # pylint: disable=e0401
+if not NO_SENSORS:
+    from sensor_interface_api.collect_sensor import sensor_importer # pylint: disable=e0401
 
 
 hostname = '144.39.167.206' #get this by running hostname -I
@@ -101,6 +104,13 @@ def main():
 
     #Good line if you need to test a thread crashing. 
     # coms.send_request('Data Base', ['save_byte_data', 'NO_TABLE', 0, 'serial listener'])
+        
+    # create the sensors interface
+    importer = sensor_importer() # create the importer object
+    importer.import_modules() # collect the models to import
+    importer.instantiate_sensor_objects(coms=coms) # create the sensors objects.
+
+    sensors = importer.get_sensors()
     
 
     #keep the main thread alive for use to see things running. 
