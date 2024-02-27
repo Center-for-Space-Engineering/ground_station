@@ -29,13 +29,16 @@ if not NO_SERIAL_WRITER:
     from python_serial_api.serial_writer import serial_writer # pylint: disable=e0401
 if not NO_SENSORS:
     from sensor_interface_api.collect_sensor import sensor_importer # pylint: disable=e0401
+    from sensor_interface_api import __init__ as sensor_config # pylint: disable=e0401
 
 
 hostname = '144.39.167.206' #get this by running hostname -I
 # hostname = '127.0.0.1'
 port = 5000
-serial_listener_name = 'serial listener'
-serial_writer_name = 'serial writer'
+serial_listener_name = 'serial listener one'
+serial_writer_name = 'serial writer one'
+serial_listener_2_name = 'serial listener two'
+serial_writer_2_name = 'serial writer two'
 server_listener_name = 'CSE_Server_Listener' #this the name for the internal thread that collect server info 
 server_name_host = 'CSE_Host' #this is the name for the thread that services all the web requests. 
 data_base = 'Data Base'
@@ -45,6 +48,8 @@ def main():
     This module runs everything, its main job is to create and run all of the 
     system objects and classes. 
     '''
+
+    ########### Set up server, database, and threading interface ########### 
     #create a server obj, not it will also create the coms object #144.39.167.206
     coms = messageHandler(display_off = DISPLAY_OFF, server_name=server_listener_name, hostname=hostname)
     #make database object 
@@ -90,6 +95,7 @@ def main():
         #pylint: disable=w0707
         raise Exception("No serial interface defined in dataTypes.dtobj file.\nExample: serial_feed\n\tbatch_sample:1024 > byte\nMust have serial_feed and batch_sample\n") 
     
+    ########### Set up seral interface ###########  
     # create the ser_listener
     if not NO_SERIAL_LISTENER:
         ser_listener = serial_listener(coms = coms, batch_size=batch_size, thread_name=serial_listener_name)
@@ -103,8 +109,19 @@ def main():
         threadPool.start() #start the new task
 
     #Good line if you need to test a thread crashing. 
-    # coms.send_request('Data Base', ['save_byte_data', 'NO_TABLE', 0, 'serial listener'])
-        
+    # coms.send_request('Data Base', ['save_byte_data', 'NO_TABLE', 0, 'serial listener'])\
+    
+    ########### Set up sensor interface ########### 
+    # set up the config file
+    sensor_config.serial_port_one = {
+        'listener name': serial_listener_name,
+        'writer name': serial_writer_name
+    }
+    sensor_config.serial_port_two = {
+        'listener name': serial_listener_2_name,
+        'writer name': serial_writer_2_name
+    }
+    
     # create the sensors interface
     importer = sensor_importer() # create the importer object
     importer.import_modules() # collect the models to import

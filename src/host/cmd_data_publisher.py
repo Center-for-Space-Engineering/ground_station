@@ -22,7 +22,7 @@ class cmd_data_publisher(commandParent, threadWrapper):
     def __init__(self, CMD, coms):
         #call parent __init__
         # init the parent
-        super().__init__(CMD, coms=coms, called_by_child=True)
+        commandParent.__init__(self, CMD, coms=coms, called_by_child=True)
         ############ set up the threadWrapper stuff ############
         # We need the threadWrapper so that the publisher can send a request to start a new thread.
         self.__function_dict = { #NOTE: I am only passing the function that the rest of the system needs
