@@ -131,7 +131,7 @@ function downloadFileFromResponse(text, file, file_extension) {
 
     //creating an invisible element and download the file
     var element = document.createElement('a');
-    element.setAttribute('href','data:text/plain;charset=utf-8' + text);
+    element.setAttribute('href','data:text/plain;charset=utf-8,' + encodeURIComponent(text));
     element.setAttribute('download', file + "." + file_extension);
     document.body.appendChild(element);
     element.click();

@@ -106,7 +106,7 @@ class serverHandler(threadWrapper):
                 'download' : 'no',
             }
             return jsonify(data_dict)
-        else : 
+        else :
             return jsonify(message)
     def serve_page_mangier(self):
         '''
