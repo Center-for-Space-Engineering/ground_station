@@ -123,15 +123,9 @@ function update_run_arg_box(row) {
 }
 
 function downloadFileFromResponse(text, file, file_extension) {
-    //If the data is bin data then it needs to be decoded
-    if(file_extension == 'bin'){
-        // Decode the base64 string
-        text = atob(text);
-    }
-
     //creating an invisible element and download the file
     var element = document.createElement('a');
-    element.setAttribute('href','data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('href','data:text/plain;charset=utf-8;base64,' + text);
     element.setAttribute('download', file + "." + file_extension);
     document.body.appendChild(element);
     element.click();
