@@ -125,6 +125,19 @@
         .orange-text{
             color: rgb(229, 94, 10);
         }
+        .nice_teal{
+            color: rgb(59, 181, 226);
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            box-shadow: 0 0 2px rgb(255, 254, 254);
+        }
     </style>
 </head>
 <body>
@@ -136,123 +149,162 @@
         <div class="tab" onclick="open_tab('Command')">Command</div>
         <div class="tab" onclick="open_tab('Sensor')">Sensor</div>
     </div>
-    <h2 class="green-text"> Configure the serial port: </h2>
-    <div class="container">
-        <div class="box_style">
-            <label class = "white-text" for="user_text">Enter baud_rate: </label>
-            <input type="text" id="baud_rate" placeholder="EX: 9600">
+    <div>
+        <h1 class = "green-text">Select serial listener: </h1>
+        <select id="serial_listener_dropdown"></select>
+
+        <h3 class="green-text"> Configure the serial listener: </h3>
+        <div class="container">
+            <div class="box_style">
+                <label class = "white-text" for="user_text">Enter baud_rate: </label>
+                <input type="text" id="baud_rate" placeholder="EX: 9600">
+            </div>
+            <div class="box_style">
+                <label class = "white-text" for="user_text">Enter stop bits: </label>
+                <input type="text" id="stop_bit" placeholder="EX: 1">
+            </div>
         </div>
-        <div class="box_style">
-            <label class = "white-text" for="user_text">Enter stop bits: </label>
-            <input type="text" id="stop_bit" placeholder="EX: 1">
+        <div class="container">
+            <button class = "button_format" onclick="send_serial_reconfig_request('listener')">Submit</button>
+            <div class="box_style">
+                <div class="green-text" id="result_serial_config_listener">Serial Report</div>
+            </div>
         </div>
     </div>
-    <div class="container">
-        <button class = "button_format" onclick="send_serial_reconfig_request()">Submit</button>
-        <div class="box_style">
-            <div class="green-text" id="result_serial_config">Serial Report</div>
+    <div>    
+        <h1 class = "green-text">Select serial writer: </h1>
+        <select id="serial_writer_dropdown"></select>
+
+        <h3 class="green-text"> Configure the serial writer: </h3>
+        <div class="container">
+            <div class="box_style">
+                <label class = "white-text" for="user_text">Enter baud_rate: </label>
+                <input type="text" id="baud_rate" placeholder="EX: 9600">
+            </div>
+            <div class="box_style">
+                <label class = "white-text" for="user_text">Enter stop bits: </label>
+                <input type="text" id="stop_bit" placeholder="EX: 1">
+            </div>
+        </div>
+        <div class="container">
+            <button class = "button_format" onclick="send_serial_reconfig_request('writer')">Submit</button>
+            <div class="box_style">
+                <div class="green-text" id="result_serial_config_writer">Serial Report</div>
+            </div>
         </div>
     </div>
-    <div class="container">
-        <div class="orange-text" id="reader_status_text">Reader Status: </div>
-        <div class="status-circle status-red" id = "reader_status"></div>
-    </div>
-    <div class="container">
-        <div class="orange-text" id="writer_status_text">Writer Status: </div>
-        <div class="status-circle status-red" id="writer_status"></div>
-    </div>
+    
+    <h2 class="green-text"> Serial Ports status report: </h2>
+    <table id = 'serial_status'>
+        <thead>
+            <tr class = "orange-text">
+                <th>Port</th>
+                <th>Connect ?</th>
+                <th>Buad rate</th>
+                <th>Stop Bits</th>
+                <th>Subscribers</th>
+            </tr>
+            <tbody id="serial_status_body">
+                <!-- Table body will be populated dynamically -->
+            </tbody>
+        </thead>
+    </table>
 
     <canvas id="myLineChart" width="400" height="100"></canvas>
 
     <script>
-        var ctx = document.getElementById('myLineChart').getContext('2d');
-        var lineChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: [],  // X-axis labels (timestamps)
-                datasets: [{
-                    label: 'Data received on the serial port (bytes)',
-                    data: [],  // Y-axis data points
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1,
-                    fill: false
-                }]
-            },
-            options: {
-                scales: {
-                    x: [{
-                        type: 'linear',
-                        position: 'bottom'
-                    }]
-                }
-            }
-        });
+        // Call the populateDropdown function when the page loads
+        window.addEventListener('load', get_serial_listener_drop_down);
+        window.addEventListener('load', get_serial_writer_drop_down);
+        window.addEventListener('load', update_serial_status);
+    //     var ctx = document.getElementById('myLineChart').getContext('2d');
+    //     var lineChart = new Chart(ctx, {
+    //         type: 'line',
+    //         data: {
+    //             labels: [],  // X-axis labels (timestamps)
+    //             datasets: [{
+    //                 label: 'Data received on the serial port (bytes)',
+    //                 data: [],  // Y-axis data points
+    //                 borderColor: 'rgba(75, 192, 192, 1)',
+    //                 borderWidth: 1,
+    //                 fill: false
+    //             }]
+    //         },
+    //         options: {
+    //             scales: {
+    //                 x: [{
+    //                     type: 'linear',
+    //                     position: 'bottom'
+    //                 }]
+    //             }
+    //         }
+    //     });
 
-        function updateLineChart(dataList) {
-            var labels = lineChart.data.labels;
-            var datasetData = lineChart.data.datasets[0].data;
+    //     function updateLineChart(dataList) {
+    //         var labels = lineChart.data.labels;
+    //         var datasetData = lineChart.data.datasets[0].data;
 
-            // Assuming data is an array of Y-axis values
-            dataList.forEach(function(data) {
-                datasetData.push(data.bytes);
+    //         // Assuming data is an array of Y-axis values
+    //         dataList.forEach(function(data) {
+    //             datasetData.push(data.bytes);
 
-                // Limit the number of data points to display
-                if (labels.length >= 10) {
-                    labels.shift();  // Remove the oldest label
-                    datasetData.shift();  // Remove the oldest data point
-                }
+    //             // Limit the number of data points to display
+    //             if (labels.length >= 10) {
+    //                 labels.shift();  // Remove the oldest label
+    //                 datasetData.shift();  // Remove the oldest data point
+    //             }
 
-                labels.push(data.time);  // X-axis label (timestamp)
-            });
-            // Update the chart
-            lineChart.update();
-        }
+    //             labels.push(data.time);  // X-axis label (timestamp)
+    //         });
+    //         // Update the chart
+    //         lineChart.update();
+    //     }
 
-        // Update the line chart every second
-        setInterval(function() {
-            fetch('/serial_running_listener')
-                .then(response => response.text())
-                .then(data => {
-                    if (data == 'Online')
-                    {
-                        var status = document.getElementById('reader_status');
-                        status.classList.remove('status-red');
-                        status.classList.add('status-green');
-                        document.getElementById('reader_status_text').innerText = "Reader Online";   
-                    }
-                    else
-                    {
-                        var status = document.getElementById('reader_status');
-                        status.classList.remove('status-green');
-                        status.classList.add('status-red');
-                    }
-                });
-            fetch('/serial_running_writer')
-                .then(response => response.text())
-                .then(data => {
-                    if (data == 'Online')
-                    {
-                        var status = document.getElementById('writer_status');
-                        status.classList.remove('status-red');
-                        status.classList.add('status-green');
+    //     // Update the line chart every second
+    //     setInterval(function() {
+    //         fetch('/serial_running_listener')
+    //             .then(response => response.text())
+    //             .then(data => {
+    //                 if (data == 'Online')
+    //                 {
+    //                     var status = document.getElementById('reader_status');
+    //                     status.classList.remove('status-red');
+    //                     status.classList.add('status-green');
+    //                     document.getElementById('reader_status_text').innerText = "Reader Online";   
+    //                 }
+    //                 else
+    //                 {
+    //                     var status = document.getElementById('reader_status');
+    //                     status.classList.remove('status-green');
+    //                     status.classList.add('status-red');
+    //                 }
+    //             });
+    //         fetch('/serial_running_writer')
+    //             .then(response => response.text())
+    //             .then(data => {
+    //                 if (data == 'Online')
+    //                 {
+    //                     var status = document.getElementById('writer_status');
+    //                     status.classList.remove('status-red');
+    //                     status.classList.add('status-green');
 
-                        fetch('/get_serial_info_update') 
-                            .then(response => response.json())
-                            .then(data => {
-                                updateLineChart(data);
-                            })
-                            .catch(error => {
-                                console.error('Error fetching data:', error);
-                            });
-                    }
-                    else
-                    {
-                        var status = document.getElementById('writer_status');
-                        status.classList.remove('status-green');
-                        status.classList.add('status-red');
-                    }
-                });
-        }, 1000);  // Update every 1000 milliseconds (1 second)
-    </script>
+    //                     fetch('/get_serial_info_update') 
+    //                         .then(response => response.json())
+    //                         .then(data => {
+    //                             updateLineChart(data);
+    //                         })
+    //                         .catch(error => {
+    //                             console.error('Error fetching data:', error);
+    //                         });
+    //                 }
+    //                 else
+    //                 {
+    //                     var status = document.getElementById('writer_status');
+    //                     status.classList.remove('status-green');
+    //                     status.classList.add('status-red');
+    //                 }
+    //             });
+    //     }, 1000);  // Update every 1000 milliseconds (1 second) 
+    </script> 
 </body>
 </html>

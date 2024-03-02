@@ -29,12 +29,12 @@ if not NO_SERIAL_WRITER:
     from python_serial_api.serial_writer import serial_writer # pylint: disable=e0401
 if not NO_SENSORS:
     from sensor_interface_api.collect_sensor import sensor_importer # pylint: disable=e0401
-    from sensor_interface_api import __init__ as sensor_config # pylint: disable=e0401
+    from sensor_interface_api import system_constants as sensor_config # pylint: disable=e0401
 
 
 hostname = '144.39.167.206' #get this by running hostname -I
 # hostname = '127.0.0.1'
-port = 5000
+port = 8000
 serial_listener_name = 'serial listener one'
 serial_writer_name = 'serial writer one'
 serial_listener_2_name = 'serial listener two'
@@ -60,7 +60,7 @@ def main():
     #note because the server requires a thread to run, it cant have a dedicated thread to listen to coms like
     #other classes so we need another class object to listen to internal coms for the server.
     server_message_handler = serverMessageHandler(coms=coms)
-    server = serverHandler(hostname, port, coms, cmd, serverMessageHandler, server_listener_name, serial_writer_name, serial_listener_name)
+    server = serverHandler(hostname, port, coms, cmd, serverMessageHandler, server_listener_name, [serial_writer_name, serial_writer_2_name], [serial_listener_name, serial_listener_2_name])
     
 
     #first start our thread handler and the message handler (coms) so we can start reporting
@@ -98,14 +98,26 @@ def main():
     ########### Set up seral interface ###########  
     # create the ser_listener
     if not NO_SERIAL_LISTENER:
+        # Serial listener one
         ser_listener = serial_listener(coms = coms, batch_size=batch_size, thread_name=serial_listener_name)
         threadPool.add_thread(ser_listener.run, serial_listener_name, ser_listener)
+
+        # SErial listener two
+        ser_2_listener = serial_listener(coms = coms, batch_size=batch_size, thread_name=serial_listener_2_name, baudrate=9600, stopbits=1)
+        threadPool.add_thread(ser_2_listener.run, serial_listener_2_name, ser_2_listener)
+        
         threadPool.start() #start the new task
 
     # create the ser_writer
     if not NO_SERIAL_WRITER:
+        # Serial writer one
         ser_writer = serial_writer(coms = coms, thread_name=serial_writer_name)
         threadPool.add_thread(ser_writer.run, serial_writer_name, ser_writer)
+
+        # Serial writer two
+        ser_2_writer = serial_writer(coms = coms, thread_name=serial_writer_2_name, baudrate=9600, stopbits=1)
+        threadPool.add_thread(ser_2_writer.run, serial_writer_2_name, ser_2_writer)
+        
         threadPool.start() #start the new task
 
     #Good line if you need to test a thread crashing. 

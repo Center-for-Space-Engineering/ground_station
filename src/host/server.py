@@ -20,7 +20,7 @@ class serverHandler(threadWrapper):
     '''
         This class is the server for the whole system. It hands serving the webpage and routing request to there respective classes. 
     '''
-    def __init__(self, hostName, serverPort, coms, cmd, messageHandler:serverMessageHandler, messageHandlerName:str, serial_writer_name:str, serial_listener_name:str):
+    def __init__(self, hostName, serverPort, coms, cmd, messageHandler:serverMessageHandler, messageHandlerName:str, serial_writer_name:list[str], serial_listener_name:list[str]):
         # pylint: disable=w0612
         self.__function_dict = { #NOTE: I am only passing the function that the rest of the system needs 
             'run' : self.run,
@@ -77,8 +77,8 @@ class serverHandler(threadWrapper):
         self.app.route('/serial_run_request')(self.serial_run_request)
         self.app.route('/favicon.ico')(self.facicon)
         self.app.route('/start_serial')(self.start_serial)
-        self.app.route('/serial_running_listener')(self.serial_running_listener)
-        self.app.route('/serial_running_writer')(self.serial_running_writer)
+        self.app.route('/get_serial_names')(self.get_serial_names)
+        self.app.route('/get_serial_status')(self.get_serial_status)
 
         #the paths caught by this will connect to the users commands they add
         self.app.add_url_rule('/<path:unknown_path>', 'handle_unknown_path',  self.handle_unknown_path)
@@ -303,50 +303,49 @@ class serverHandler(threadWrapper):
         return data_obj
     def start_serial(self):
         '''
-            This starts a reconfigured serial listener and writer. 
+            This starts a reconfigured request to the serial port the users asked for. 
         '''
+        requested_port = request.args.get('requested')
         baud_rate = request.args.get('baud_rate')
         stop_bit = request.args.get('stop_bit')
 
-        #make a request to switch the serial port to new configurations, for the serial writer
-        id_writer = self.__coms.send_request(self.__serial_writer_name, ['config_port', baud_rate, stop_bit]) #send the request to the serial writer
-        data_obj_writer = None
+        #make a request to switch the serial port to new configurations
+        id_request = self.__coms.send_request(requested_port, ['config_port', baud_rate, stop_bit]) #send the request to the port
+        data_obj = None
         #wait for the messages to be returned
-        while data_obj_writer is None:
-            data_obj_writer = self.__coms.get_return(self.__serial_writer_name, id_writer)
-        #make a request to switch the serial port to new configurations, for the serial listener
-        id_listener = self.__coms.send_request(self.__serial_listener_name, ['config_port', baud_rate, stop_bit]) #send the request to the serial writer
-        data_obj_listener = None
-        while data_obj_listener is None:
-            data_obj_listener = self.__coms.get_return(self.__serial_listener_name, id_listener)
-        data_obj = data_obj_listener + data_obj_writer
+        while data_obj is None:
+            data_obj = self.__coms.get_return(requested_port, id_request)
         return data_obj
-    def serial_running_writer(self):
-        '''
-            Checks if the serial writer is running and returns that to the server. 
-        '''
-        id_writer = self.__coms.send_request(self.__serial_writer_name, ['get_connected']) #send the request to the serial writer
-        data_obj_writer = None
-        #wait for the messages to be returned
-        while data_obj_writer is None:
-            data_obj_writer = self.__coms.get_return(self.__serial_writer_name, id_writer)
-        if isinstance(data_obj_writer, bool): 
-            data_obj = "Online" if data_obj_writer else "Not Online"
-        else : data_obj = "Not Online"
-        return data_obj
-    def serial_running_listener(self):
-        '''
-            Checks fi the serial reader is running and returns that to the server.
-        '''
-        id_listener = self.__coms.send_request(self.__serial_listener_name, ['get_connected']) #send the request to the serial writer
-        data_obj_listen = None
-        #wait for the messages to be returned
-        while data_obj_listen is None:
-            data_obj_listen = self.__coms.get_return(self.__serial_listener_name, id_listener)
-        if isinstance(data_obj_listen, bool):
-            data_obj = "Online" if data_obj_listen else "Not Online"
-        else : data_obj = "Not Online"
-        return data_obj
+    def get_serial_status(self):
+        data_obj = []
+        request_list = [] #keeps track of all the request we have sent. 
+        for name in self.__serial_listener_name:
+            #make a request to switch the serial port to new configurations
+            request_list.append([name, self.__coms.send_request(name, ['get_status_web']), False]) #send the request to the port
+        for name in self.__serial_writer_name:
+            #make a request to switch the serial port to new configurations
+            request_list.append([name, self.__coms.send_request(name, ['get_status_web']), False]) #send the request to the port
+        all_request_serviced = False
+        while not all_request_serviced:
+            all_request_serviced = True
+            #loop over all our requests
+            for i in range(len(request_list)):
+                data_obj_temp = None
+                # if we haven't all ready seen the request come back  check for it. 
+                if not request_list[i][2]: 
+                    data_obj_temp = self.__coms.get_return(request_list[i][0], request_list[i][1])
+                    # if we do get a request add it to the list and make the request as having been serviced. 
+                    if data_obj_temp != None:
+                        request_list[i][2] = True
+                        data_obj.append(data_obj_temp)
+                all_request_serviced = all_request_serviced and request_list[i][2] #All the request have to say they have been serviced for this to mark as true. 
+        return jsonify(data_obj)
+
+    def get_serial_names(self):
+        return jsonify({
+            'listener' : self.__serial_listener_name,
+            'writer' : self.__serial_writer_name
+        })
     def run(self):
         '''
             This is the run function for the server. 

@@ -180,14 +180,24 @@ function send_serial_request() {
 }
 
 //This function takes an input from the user and then sends a request
-function send_serial_reconfig_request() {
+function send_serial_reconfig_request(type) {
+    if (type == 'listener') {
+        const dropdown = document.getElementById('serial_listener_dropdown');
+        var requested_serial = dropdown.value; // Get the selected value
+    }
+    else
+    {
+        const dropdown = document.getElementById('serial_writer_dropdown');
+        var requested_serial = dropdown.value; // Get the selected value
+    }
     var baud_rate = document.getElementById('baud_rate').value;
     var stop_bit = document.getElementById('stop_bit').value;
 
     // Define the data to be sent
     var data = {
         baud_rate:baud_rate,
-        stop_bit: stop_bit
+        stop_bit:stop_bit,
+        requested:requested_serial
     };
 
     // Convert the data object to a query string
@@ -197,10 +207,68 @@ function send_serial_reconfig_request() {
     fetch(`/start_serial?` + queryString)
         .then(response => response.text())
         .then(data => {
-            document.getElementById('result_serial_config').innerHTML = data;
+            if (type == 'listener') document.getElementById('result_serial_config_listener').innerHTML = data;
+            else document.getElementById('result_serial_config_writer').innerHTML = data;
         })
         .catch(error => {
             // console.error('Error making GET request:', error);
-            document.getElementById('result_serial_config').innerHTML = 'Error: ' + error.message;
+            if (type == 'listener') document.getElementById('result_serial_config_listener').innerHTML = 'Error: ' + error.message;
+            else document.getElementById('result_serial_config_writer').innerHTML = 'Error: ' + error.message;
         });
+    //update the table
+    update_serial_status();
+}
+
+function get_serial_listener_drop_down(){
+    // Fetch data from the server
+    fetch('/get_serial_names')
+        .then(response => response.json()) // Assuming the server returns JSON data
+        .then(data => {
+            // Populate dropdown list with options for listener
+            const dropdown = document.getElementById('serial_listener_dropdown');
+            dropdown.innerHTML = ''; // Clear all existing options
+            data.listener.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.textContent = option;
+                dropdown.appendChild(optionElement);
+            });
+        })
+        .catch();
+}
+function get_serial_writer_drop_down(){
+    // Fetch data from the server
+    fetch('/get_serial_names')
+        .then(response => response.json()) // Assuming the server returns JSON data
+        .then(data => {
+            // Populate dropdown list with options for listener
+            const dropdown = document.getElementById('serial_writer_dropdown');
+            dropdown.innerHTML = ''; // Clear all existing options
+            data.writer.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.textContent = option;
+                dropdown .appendChild(optionElement);
+            });
+        })
+        .catch();
+}
+// Function to fetch data from the server and update the table
+function update_serial_status() {
+    fetch('/get_serial_status')
+        .then(response => response.json()) // Assuming the server returns JSON data
+        .then(data => {
+            const tableBody = document.getElementById('serial_status_body');
+            tableBody.innerHTML = ''; // Clear existing rows
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class = 'nice_teal'>${item.port}</td>
+                    <td class = 'nice_teal'>${item.connected}</td>
+                    <td class = 'nice_teal'>${item.buad_rate}</td>
+                    <td class = 'nice_teal'>${item.stop_bits}</td>
+                    <td class = 'nice_teal'>${item.subscribers}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        })
+        .catch();
 }
