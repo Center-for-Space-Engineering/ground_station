@@ -22,6 +22,8 @@ DISPLAY_OFF = True
 NO_SERIAL_LISTENER = False
 NO_SERIAL_WRITER = False
 NO_SENSORS = False
+batch_size_1 = 8
+batch_size_2 = 1024
 
 if not NO_SERIAL_LISTENER:
     from python_serial_api.serial_listener import serial_listener # pylint: disable=e0401
@@ -35,10 +37,10 @@ if not NO_SENSORS:
 hostname = '144.39.167.206' #get this by running hostname -I
 # hostname = '127.0.0.1'
 port = 8000
-serial_listener_name = 'serial listener one'
-serial_writer_name = 'serial writer one'
-serial_listener_2_name = 'serial listener two'
-serial_writer_2_name = 'serial writer two'
+serial_listener_name = 'serial_listener_one'
+serial_writer_name = 'serial_writer_one'
+serial_listener_2_name = 'serial_listener_two'
+serial_writer_2_name = 'serial_writer_two'
 server_listener_name = 'CSE_Server_Listener' #this the name for the internal thread that collect server info 
 server_name_host = 'CSE_Host' #this is the name for the thread that services all the web requests. 
 data_base = 'Data Base'
@@ -79,31 +81,15 @@ def main():
 
     threadPool.start() #we need to start all the threads we have collected.
 
-    #collect the data for the serial monitor
-    try :
-        #first get the data type out of the database 
-        #NOTE: Do NOT change the object you get out, it is only a copy and will not change anything on the database end
-        request_num = dataBase.make_request('get_data_type', ['serial_feed'])
-        return_val = None
-        while return_val is None :
-            return_val = dataBase.get_request(requestNum=request_num)
-        serial_data_type = return_val #did this just to make the code easier to read
-        batch_size = int (serial_data_type.get_fields()['batch_sample'][0])
-    except Exception as e : #pylint: disable=w0719
-        print(e)
-        #pylint: disable=w0719
-        #pylint: disable=w0707
-        raise Exception("No serial interface defined in dataTypes.dtobj file.\nExample: serial_feed\n\tbatch_sample:1024 > byte\nMust have serial_feed and batch_sample\n") 
-    
     ########### Set up seral interface ###########  
     # create the ser_listener
     if not NO_SERIAL_LISTENER:
         # Serial listener one
-        ser_listener = serial_listener(coms = coms, batch_size=batch_size, thread_name=serial_listener_name)
+        ser_listener = serial_listener(coms = coms, batch_size=batch_size_1, thread_name=serial_listener_name)
         threadPool.add_thread(ser_listener.run, serial_listener_name, ser_listener)
 
         # SErial listener two
-        ser_2_listener = serial_listener(coms = coms, batch_size=batch_size, thread_name=serial_listener_2_name, baudrate=9600, stopbits=1)
+        ser_2_listener = serial_listener(coms = coms, batch_size=batch_size_2, thread_name=serial_listener_2_name, baudrate=9600, stopbits=1)
         threadPool.add_thread(ser_2_listener.run, serial_listener_2_name, ser_2_listener)
         
         threadPool.start() #start the new task

@@ -1,6 +1,4 @@
-serial_feed
+serial_listener_one
     batch_sample:8 > byte
-test_table1
-    norealdata:32 > int
-test_table2
-    no real data 2:32 > int
+serial_listener_two
+    batch_sample:1024 > byte
