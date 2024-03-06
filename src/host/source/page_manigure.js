@@ -130,7 +130,6 @@ function downloadFileFromResponse(text, file, file_extension) {
 
     document.body.removeChild(element);
 }
-
 //This function takes an input from the user and then runs 
 function send_run_request() {
     var userInput = document.getElementById('commands_args').value;
@@ -179,14 +178,17 @@ function send_serial_reconfig_request(type) {
     if (type == 'listener') {
         const dropdown = document.getElementById('serial_listener_dropdown');
         var requested_serial = dropdown.value; // Get the selected value
+        var baud_rate = document.getElementById('baud_rate_listener').value;
+        var stop_bit = document.getElementById('stop_bit_listener').value;
     }
     else
     {
         const dropdown = document.getElementById('serial_writer_dropdown');
         var requested_serial = dropdown.value; // Get the selected value
+        var baud_rate = document.getElementById('baud_rate_writer').value;
+        var stop_bit = document.getElementById('stop_bit_writer').value;
     }
-    var baud_rate = document.getElementById('baud_rate').value;
-    var stop_bit = document.getElementById('stop_bit').value;
+    
 
     // Define the data to be sent
     var data = {

@@ -310,6 +310,8 @@ class serverHandler(threadWrapper):
         baud_rate = request.args.get('baud_rate')
         stop_bit = request.args.get('stop_bit')
 
+        print(f"{requested_port} {baud_rate} {stop_bit}")
+
         #make a request to switch the serial port to new configurations
         id_request = self.__coms.send_request(requested_port, ['config_port', baud_rate, stop_bit]) #send the request to the port
         data_obj = None

@@ -157,11 +157,11 @@
         <div class="container">
             <div class="box_style">
                 <label class = "white-text" for="user_text">Enter baud_rate: </label>
-                <input type="text" id="baud_rate" placeholder="EX: 9600">
+                <input type="text" id="baud_rate_listener" placeholder="EX: 9600">
             </div>
             <div class="box_style">
                 <label class = "white-text" for="user_text">Enter stop bits: </label>
-                <input type="text" id="stop_bit" placeholder="EX: 1">
+                <input type="text" id="stop_bit_listener" placeholder="EX: 1">
             </div>
         </div>
         <div class="container">
@@ -178,11 +178,11 @@
         <div class="container">
             <div class="box_style">
                 <label class = "white-text" for="user_text">Enter baud_rate: </label>
-                <input type="text" id="baud_rate" placeholder="EX: 9600">
+                <input type="text" id="baud_rate_writer" placeholder="EX: 9600">
             </div>
             <div class="box_style">
                 <label class = "white-text" for="user_text">Enter stop bits: </label>
-                <input type="text" id="stop_bit" placeholder="EX: 1">
+                <input type="text" id="stop_bit_writer" placeholder="EX: 1">
             </div>
         </div>
         <div class="container">
@@ -224,6 +224,8 @@
         makeGraphs();
         // Fetch data and update the graphs every second
         setInterval(updateGraphs, 1000);
+        //update the serial status
+        setInterval(update_serial_status, 1000);
         
     </script> 
 </body>
