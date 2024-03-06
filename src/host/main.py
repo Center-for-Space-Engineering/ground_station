@@ -33,21 +33,31 @@ if not NO_SENSORS:
     from sensor_interface_api.collect_sensor import sensor_importer # pylint: disable=e0401
     from sensor_interface_api import system_constants as sensor_config # pylint: disable=e0401
 
-
-hostname = '144.39.167.206' #get this by running hostname -I
-# hostname = '127.0.0.1'
-port = 8000
+############## Serial Configs ##############
 serial_listener_name = 'serial_listener_one'
 serial_writer_name = 'serial_writer_one'
 serial_listener_2_name = 'serial_listener_two'
 serial_writer_2_name = 'serial_writer_two'
-server_listener_name = 'CSE_Server_Listener' #this the name for the internal thread that collect server info 
-server_name_host = 'CSE_Host' #this is the name for the thread that services all the web requests. 
-data_base = 'Data Base'
-uart_0 = '/dev/ttyS0'
-uart_2 = '/dev/ttyAMA2'
 serial_listener_list = [serial_listener_name, serial_listener_2_name]
 serial_writer_list = [serial_writer_name, serial_writer_2_name]
+uart_0 = '/dev/ttyS0'
+uart_2 = '/dev/ttyAMA2'
+############################################
+
+############## Server Configs ##############
+hostname = '144.39.167.206' #get this by running hostname -I
+# hostname = '127.0.0.1'
+port = 8000
+server_listener_name = 'CSE_Server_Listener' #this the name for the internal thread that collect server info 
+server_name_host = 'CSE_Host' #this is the name for the thread that services all the web requests. 
+############################################
+
+############## Data Base configs ###########
+data_base = 'Data Base'
+############################################
+
+
+
 
 ########## Writer's NOTE ######################
 # The Raspberry pi 4b has 5 Uart lines.
@@ -113,7 +123,7 @@ def main():
         ser_listener = serial_listener(coms = coms, batch_size=batch_size_1, thread_name=serial_listener_name, stopbits=1, pins=uart_0)
         threadPool.add_thread(ser_listener.run, serial_listener_name, ser_listener)
 
-        # SErial listener two
+        # Serial listener two
         ser_2_listener = serial_listener(coms = coms, batch_size=batch_size_2, thread_name=serial_listener_2_name, baudrate=9600, stopbits=1, pins=uart_2)
         threadPool.add_thread(ser_2_listener.run, serial_listener_2_name, ser_2_listener)
         
@@ -130,20 +140,12 @@ def main():
         threadPool.add_thread(ser_2_writer.run, serial_writer_2_name, ser_2_writer)
         
         threadPool.start() #start the new task
-
-    #Good line if you need to test a thread crashing. 
-    # coms.send_request('Data Base', ['save_byte_data', 'NO_TABLE', 0, 'serial listener'])\
     
     ########### Set up sensor interface ########### 
     # set up the config file
-    sensor_config.serial_port_one = {
-        'listener name': serial_listener_name,
-        'writer name': serial_writer_name
-    }
-    sensor_config.serial_port_two = {
-        'listener name': serial_listener_2_name,
-        'writer name': serial_writer_2_name
-    }
+    sensor_config.interface_listener_list = serial_listener_list
+    sensor_config.interface_writer_list = serial_writer_list
+    sensor_config.server = server_listener_name
     
     # create the sensors interface
     importer = sensor_importer() # create the importer object
@@ -152,6 +154,8 @@ def main():
 
     sensors = importer.get_sensors()
     
+    #Good line if you need to test a thread crashing. 
+    # coms.send_request('Data Base', ['save_byte_data', 'NO_TABLE', 0, 'serial listener'])
 
     #keep the main thread alive for use to see things running. 
     running = True

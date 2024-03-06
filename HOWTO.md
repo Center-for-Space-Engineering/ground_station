@@ -5,6 +5,7 @@ In this document I will go through a few examples on how to add functionality to
 - Creating a new process and then running it with the parallel architecture.
 - Requesting and Inserting data in to the Database.
 - Working with the logging system.
+- Adding New serial lines to the system. 
 
 Note: When ever you are adding code to the CSE simulator, please make sure to lint your code. All of the `README.md` have instructions for doing this. By doing this you will help future developers be able to read your code. This is not consider optional for CSE coding standers, and must be complete before you push your code to `git`. 
 
@@ -165,6 +166,29 @@ Lets break the function call into its components.
 -  `'task_handler'`: this is the name of the `thread` that you want to send a request to.
 - `['add_thread_request_func', `: What follows is a list. The first index in the list is the function to be called, in this cas it is `'add_thread_request_func'`.
 - Anything that follows is arguments to be passed into that function.
+
+The following is an example of sending multiply request and then collecting there responses. 
+```python
+        data_obj = []
+        request_list = [] #keeps track of all the request we have sent. 
+        for request in list_of_request_to_make: #Assume the thread name is in the first index, and the function to run is in the second index, the third index is the args for the request.
+            #make a request to switch the serial port to new configurations
+            request_list.append([name, self.__coms.send_request(request[0], [request[1], request[2]]), False]) #send the request to the port`
+        all_request_serviced = False
+        while not all_request_serviced:
+            all_request_serviced = True
+            #loop over all our requests
+            for i in range(len(request_list)):
+                data_obj_temp = None
+                # if we haven't all ready seen the request come back  check for it. 
+                if not request_list[i][2]: 
+                    data_obj_temp = self.__coms.get_return(request_list[i][0], request_list[i][1])
+                    # if we do get a request add it to the list and make the request as having been serviced. 
+                    if data_obj_temp != None:
+                        request_list[i][2] = True
+                        data_obj.append(data_obj_temp)
+                all_request_serviced = all_request_serviced and request_list[i][2] #All the request have to say they have been serviced for this to mark as true. 
+```
 
 
 # How to create a new process and then run it with the parallel architecture.
@@ -332,3 +356,48 @@ There are a number of different logs you can send, here is a list.
 - Note: In this case no `DTO` is needed. This is an effort to keep things simpler for the user. 
 Note: Not all `DTO` types work with all the logger types. Please take care what you pass to the logger. 
 
+
+## Adding New serial lines to the system:
+## Architecture Description:
+There are 2 basic steps for adding serial ports to the code. 
+1. Enable them on the pi
+2. Add them to the code.
+
+
+### Step one:
+The Raspberry pi 4b has 5 Uart lines.
+| NAME  | TYPE |
+| ----- | ----- |
+| UART0 | PL011 |
+| UART1 | mini UART |
+| UART2 | PL011 |
+| UART3 | PL011 |
+| UART4 | PL011 |
+| UART5 | PL011 |
+NOTE: Each uart has 4 pins assign to it. The first to are TX and RX and the last two are for multi device uart. \
+mini uart does not work with the interface I have set up. However, it would be possible to figure out how to make it work.\
+In order to see what pins the uart is using run the following command 'dtoverlay -h uart2'. \
+In order to use the additional uart you first need to enable it, by doing the following. \
+first: add it to the '/boot/config.txt' try running  vim /boot/config.txt, or nano /boot/config.txt, then add the correct line to the bottom of the config.txt. It should look something like this dtoverlay=UART3 \
+Then reboot the pi.\
+Then check the /dev/ folder for the new serial over lay. It will probably be something like '/dev/ttyAMA3' or '/dev/ttyS3'. \
+
+### Step two:
+Adding it to the system is pretty simple (I hope...). First create a name for the listener and writer. (If you need both, you can just have one or the other.) Add the names to the respective lists `serial_listener_list` and `serial_writer_list`. Then create a file path variable for the system to use. Example `uart_2 = '/dev/ttyAMA2'`. \
+Note: Adding the names of your serial objects to `serial_listener_list` and `serial_writer_list` is what will tell the server and the sensors api what serial lines they have. `serial_listener_list` gets a graph on the webpage as well. \
+After you have created the need variables, All you need to do is create the classes.  Find where `########### Set up seral interface ###########` Under this section you wil see where the serial listeners and writers are made, create the class and then add it to the thread pool. The thread pool is already started in the code I wrote, but if you are adding the code somewhere else, you will need to tell the thread pool to start.\
+Example listener:
+```python
+        ser_2_listener = serial_listener(coms = coms, batch_size=batch_size_2, thread_name=serial_listener_2_name, baudrate=9600, stopbits=1, pins=uart_2)
+        threadPool.add_thread(ser_2_listener.run, serial_listener_2_name, ser_2_listener)
+        
+        threadPool.start()
+```
+Example writer: 
+```python
+        ser_2_writer = serial_writer(coms = coms, thread_name=serial_writer_2_name, baudrate=9600, stopbits=1, pins=uart_2)
+        threadPool.add_thread(ser_2_writer.run, serial_writer_2_name, ser_2_writer)
+        
+        threadPool.start()
+
+```
