@@ -10,9 +10,6 @@
 [submodule "src/host/python_serial_api"]
 	path = src/host/python_serial_api
 	url = git@github.com:Center-for-Space-Engineering/python_serial_api.git
-
-
-
 [submodule "src/host/sensor_interface_api"]
 	path = src/host/sensor_interface_api
 	url = git@github.com:Center-for-Space-Engineering/sensor_interface_api.git
