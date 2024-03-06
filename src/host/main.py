@@ -44,6 +44,30 @@ serial_writer_2_name = 'serial_writer_two'
 server_listener_name = 'CSE_Server_Listener' #this the name for the internal thread that collect server info 
 server_name_host = 'CSE_Host' #this is the name for the thread that services all the web requests. 
 data_base = 'Data Base'
+uart_0 = '/dev/ttyS0'
+uart_2 = '/dev/ttyAMA2'
+serial_listener_list = [serial_listener_name, serial_listener_2_name]
+serial_writer_list = [serial_writer_name, serial_writer_2_name]
+
+########## Writer's NOTE ######################
+# The Raspberry pi 4b has 5 Uart lines.
+# NAME  | TYPE
+#_______|_____
+# UART0 | PL011
+# UART1 | mini UART 
+# UART2 | PL011
+# UART3 | PL011
+# UART4 | PL011
+# UART5 | PL011
+# mini uart does not work with the interface I have set up. However, it would be possible to figure out how to make it work.
+# In order to see what pins the uart is using run the following command 'dtoverlay -h uart2'. 
+# In order to use the additional uart you first need to enable it, by doing the following. 
+#   first: add it to the '/boot/config.txt' try running  vim /boot/config.txt, or nano /boot/config.txt, then add the correct line 
+#       to the bottom of the config.txt. It should look something like this dtoverlay=UART3
+# Then reboot the pi.
+# Then check the /dev/ folder for the new serial over lay. It will probably be something like '/dev/ttyAMA3' or '/dev/ttyS3'. 
+# One you find the correct path, that is the path you should pass in to our serial class. (see uart_2 or uart_0)
+########## Writer's NOTE ######################
 
 def main():
     '''
@@ -62,7 +86,7 @@ def main():
     #note because the server requires a thread to run, it cant have a dedicated thread to listen to coms like
     #other classes so we need another class object to listen to internal coms for the server.
     server_message_handler = serverMessageHandler(coms=coms)
-    server = serverHandler(hostname, port, coms, cmd, serverMessageHandler, server_listener_name, [serial_writer_name, serial_writer_2_name], [serial_listener_name, serial_listener_2_name])
+    server = serverHandler(hostname, port, coms, cmd, serverMessageHandler, server_listener_name, serial_writer_name=serial_writer_list, serial_listener_name=serial_listener_list)
     
 
     #first start our thread handler and the message handler (coms) so we can start reporting
@@ -85,11 +109,11 @@ def main():
     # create the ser_listener
     if not NO_SERIAL_LISTENER:
         # Serial listener one
-        ser_listener = serial_listener(coms = coms, batch_size=batch_size_1, thread_name=serial_listener_name)
+        ser_listener = serial_listener(coms = coms, batch_size=batch_size_1, thread_name=serial_listener_name, stopbits=1, pins=uart_0)
         threadPool.add_thread(ser_listener.run, serial_listener_name, ser_listener)
 
         # SErial listener two
-        ser_2_listener = serial_listener(coms = coms, batch_size=batch_size_2, thread_name=serial_listener_2_name, baudrate=9600, stopbits=1)
+        ser_2_listener = serial_listener(coms = coms, batch_size=batch_size_2, thread_name=serial_listener_2_name, baudrate=9600, stopbits=1, pins=uart_2)
         threadPool.add_thread(ser_2_listener.run, serial_listener_2_name, ser_2_listener)
         
         threadPool.start() #start the new task
@@ -97,11 +121,11 @@ def main():
     # create the ser_writer
     if not NO_SERIAL_WRITER:
         # Serial writer one
-        ser_writer = serial_writer(coms = coms, thread_name=serial_writer_name)
+        ser_writer = serial_writer(coms = coms, thread_name=serial_writer_name, pins=uart_0)
         threadPool.add_thread(ser_writer.run, serial_writer_name, ser_writer)
 
         # Serial writer two
-        ser_2_writer = serial_writer(coms = coms, thread_name=serial_writer_2_name, baudrate=9600, stopbits=1)
+        ser_2_writer = serial_writer(coms = coms, thread_name=serial_writer_2_name, baudrate=9600, stopbits=1, pins=uart_2)
         threadPool.add_thread(ser_2_writer.run, serial_writer_2_name, ser_2_writer)
         
         threadPool.start() #start the new task

@@ -151,6 +151,7 @@
         <div>
             <div class="box_style">
                 <h2 class="green-text">Send Commands to Serial Line: </h2>
+                <label class = "white-text">Select serial writer: <select id="serial_writer_dropdown"></select> </label>
                 <label class = "white-text" for="user_text">Enter hex stream (FF00A122 ...):</label>
                 <input type="text" id="user_hex_input" placeholder="Type hex...">
                 <button class = "button_format" onclick="send_serial_request()">Submit</button>
@@ -167,5 +168,10 @@
             <div class="green-text" id="result_serial">No return val yet.</div>
         </div>
     </div>
+
+    <script>
+        // Call the populateDropdown function when the page loads
+        window.addEventListener('load', get_serial_writer_drop_down);
+    </script>
 </body>
 </html>

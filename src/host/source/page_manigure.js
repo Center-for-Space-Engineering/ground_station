@@ -1,3 +1,6 @@
+// Define a global variable to store references to the Chart.js objects
+var charts = {};
+
 function open_tab(message) 
 {
     // Call a Flask route using JavaScript
@@ -20,7 +23,6 @@ function open_tab(message)
 
     }
 }
-
 function refresh_logger_report()
 {
     // Fetch updated content list from Flask
@@ -42,7 +44,6 @@ function refresh_logger_report()
         }
     });
 }
-
 function refresh_prem_logger_report()
 {
     // Fetch updated content list from Flask
@@ -63,7 +64,6 @@ function refresh_prem_logger_report()
         }
     });
 }
-
 function refresh_thread_report()
 {
     // Fetch updated content list from Flask
@@ -113,7 +113,6 @@ function refresh_status_report()
         }
     });
 }
-
 // Function to execute action based on what the user clicked on in the table
 function update_run_arg_box(row) {
     //update the run commands text box
@@ -121,17 +120,10 @@ function update_run_arg_box(row) {
     var input_command_box = document.getElementById('commands_args');
     input_command_box.value = path_name;
 }
-
 function downloadFileFromResponse(text, file, file_extension) {
-    //If the data is bin data then it needs to be decoded
-    if(file_extension == 'bin'){
-        // Decode the base64 string
-        text = atob(text);
-    }
-
     //creating an invisible element and download the file
     var element = document.createElement('a');
-    element.setAttribute('href','data:text/plain;charset=utf-8' + text);
+    element.setAttribute('href','data:text/plain;charset=utf-8;base64,' + text);
     element.setAttribute('download', file + "." + file_extension);
     document.body.appendChild(element);
     element.click();
@@ -154,14 +146,16 @@ function send_run_request() {
             document.getElementById('result').innerHTML = 'Error: ' + error.message;
         });
 }
-
 //This function takes an input from the user and then sends a command
 function send_serial_request() {
     var userInput = document.getElementById('user_hex_input').value;
+    var serial = document.getElementById('serial_writer_dropdown').value;
+    
 
     // Define the data to be sent
     var data = {
-        serial_command: userInput
+        serial_command: userInput,
+        serial_name: serial
     };
 
     // Convert the data object to a query string
@@ -178,7 +172,6 @@ function send_serial_request() {
             document.getElementById('result_serial').innerHTML = 'Error: ' + error.message;
         });
 }
-
 //This function takes an input from the user and then sends a request
 function send_serial_reconfig_request(type) {
     if (type == 'listener') {
@@ -218,7 +211,6 @@ function send_serial_reconfig_request(type) {
     //update the table
     update_serial_status();
 }
-
 function get_serial_listener_drop_down(){
     // Fetch data from the server
     fetch('/get_serial_names')
@@ -264,11 +256,109 @@ function update_serial_status() {
                     <td class = 'nice_teal'>${item.port}</td>
                     <td class = 'nice_teal'>${item.connected}</td>
                     <td class = 'nice_teal'>${item.buad_rate}</td>
-                    <td class = 'nice_teal'>${item.stop_bits}</td>
+                    <td class = 'nice_teal'>${item.stopbits}</td>
                     <td class = 'nice_teal'>${item.subscribers}</td>
                 `;
                 tableBody.appendChild(row);
             });
+        })
+        .catch();
+}
+// Function to update the graphs with the fetched data
+function updateGraphs() {
+    // const dropdown = document.getElementById('debug_box');
+    fetch('/get_serial_info_update') 
+        .then(response => response.json())
+        .then(data => {
+            updateCharts(data);
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+        });
+}
+// Function to update chart data
+function updateCharts(data) {
+    // Iterate over each entry in the data
+    data.forEach(function(entry) {
+        // Iterate over each listener in the entry
+        Object.keys(entry).forEach(function(listener) {
+            // Check if the chart for this listener exists
+            if (charts.hasOwnProperty(listener)) {
+                // Get the chart object
+                var chart = charts[listener];
+
+                // Get the data for this listener
+                var listenerData = entry[listener];
+
+                // If the data length is greater than 10, slice it to get the last 10 entries
+                if (listenerData.length > 10) {
+                    listenerData = listenerData.slice(-10);
+                }
+
+                // Extract time and bytes data from listenerData
+                var times = listenerData.map(function(entry) {
+                    return entry.time;
+                });
+                var bytes = listenerData.map(function(entry) {
+                    return entry.bytes;
+                });
+
+                // Update the chart data
+                chart.data.labels = times;
+                chart.data.datasets[0].data = bytes;
+
+                // Update the chart
+                chart.update();
+            }
+        });
+    });
+}
+function makeGraphs(){
+    // Fetch data from the server
+    fetch('/get_serial_names')
+        .then(response => response.json()) // Assuming the server returns JSON data
+        .then(data => {
+            data.listener.forEach(name => {
+                // Create a new chart container div element
+                var container = document.createElement('div');
+                container.className = 'box_style'; // Apply the .box_style class
+                document.getElementById('graphs').appendChild(container);
+
+                // Create a canvas element for the graph
+                var canvas = document.createElement('canvas');
+                canvas.width = 200; // Set width
+                canvas.height = 150; // Set height
+                canvas.id = 'graph-' + name; // Set unique id for each graph
+
+                container.appendChild(canvas);
+        
+                // Get the context of the canvas
+                var ctx = canvas.getContext('2d');
+        
+                // Create a new chart with an empty dataset and the name as label
+                charts[name] = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: [], // No data, just labels
+                        datasets: [{
+                            label: name,
+                            data: [],
+                            fill: false,
+                            borderColor: 'rgb(75, 192, 192)',
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true
+                                }
+                            }]
+                        }
+                    }
+                });
+            })
         })
         .catch();
 }

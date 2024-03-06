@@ -4,6 +4,7 @@
 #python imports
 from threading import Lock
 import datetime
+import copy
 
 #imports from other folders that are not local
 from logging_system_display_python_api.logger import loggerCustom # pylint: disable=e0401
@@ -77,7 +78,7 @@ class serverMessageHandler(threadWrapper):
             this function adds a message to the log that contains the number of bytes received that the server will then display.
         '''
         with self.__byte_status_lock:
-            self.__byte_status = data 
+            self.__byte_status = data
     def get_messages(self):
         '''
             Server uses this function to pull the message log.
@@ -118,8 +119,8 @@ class serverMessageHandler(threadWrapper):
                         'bytes' : 0,
                     }
                 ]
-            else : data = self.__byte_status
-            self.__byte_status = {}
+            else : data = copy.deepcopy(self.__byte_status)
+            self.__byte_status.clear()
         return data
     
     

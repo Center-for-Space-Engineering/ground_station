@@ -100,13 +100,14 @@ class serverHandler(threadWrapper):
         self.__log.send_log(f"Path receive {unknown_path}")
         dto2 = print_message_dto("Server handled request")
         self.__coms.print_message(dto2, 2)
+        print(message)
         if isinstance(message, str):
             data_dict = {
                 'text_data' : message,
                 'download' : 'no',
             }
             return jsonify(data_dict)
-        else : 
+        else :
             return jsonify(message)
     def serve_page_mangier(self):
         '''
@@ -294,12 +295,13 @@ class serverHandler(threadWrapper):
         '''
             Send a request to the serial writer to execute a command.
         '''
+        thread_name = request.args.get('serial_name')
         #make a request for the messages
-        id_request = self.__coms.send_request(self.__serial_writer_name, ['write_to_serial_port', request.args.get('serial_command')]) #send the request to the serial writer
+        id_request = self.__coms.send_request(thread_name, ['write_to_serial_port', request.args.get('serial_command')]) #send the request to the serial writer
         data_obj = None
         #wait for the messages to be returned
         while data_obj is None:
-            data_obj = self.__coms.get_return(self.__serial_writer_name, id_request)
+            data_obj = self.__coms.get_return(thread_name, id_request)
         return data_obj
     def start_serial(self):
         '''
@@ -340,7 +342,6 @@ class serverHandler(threadWrapper):
                         data_obj.append(data_obj_temp)
                 all_request_serviced = all_request_serviced and request_list[i][2] #All the request have to say they have been serviced for this to mark as true. 
         return jsonify(data_obj)
-
     def get_serial_names(self):
         return jsonify({
             'listener' : self.__serial_listener_name,
