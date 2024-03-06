@@ -134,6 +134,8 @@ function downloadFileFromResponse(text, file, file_extension) {
 //This function takes an input from the user and then runs 
 function send_run_request() {
     var userInput = document.getElementById('commands_args').value;
+    document.getElementById('result').innerHTML = 'Running request...';
+
 
     fetch(`${userInput}`)
         .then(response => response.json())

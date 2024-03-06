@@ -100,7 +100,6 @@ class serverHandler(threadWrapper):
         self.__log.send_log(f"Path receive {unknown_path}")
         dto2 = print_message_dto("Server handled request")
         self.__coms.print_message(dto2, 2)
-        print(message)
         if isinstance(message, str):
             data_dict = {
                 'text_data' : message,
