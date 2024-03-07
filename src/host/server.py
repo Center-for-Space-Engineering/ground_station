@@ -322,12 +322,17 @@ class serverHandler(threadWrapper):
     def get_serial_status(self):
         data_obj = []
         request_list = [] #keeps track of all the request we have sent. 
+        list_pos = 0
         for name in self.__serial_listener_name:
             #make a request to switch the serial port to new configurations
-            request_list.append([name, self.__coms.send_request(name, ['get_status_web']), False]) #send the request to the port
+            request_list.append([name, self.__coms.send_request(name, ['get_status_web']), False, list_pos]) #send the request to the port
+            list_pos += 1
+            data_obj.append({"Place holder": None}) # We are creating a list will all spots we need for return values so later we can pack the list and everything will be in the same order. 
         for name in self.__serial_writer_name:
             #make a request to switch the serial port to new configurations
-            request_list.append([name, self.__coms.send_request(name, ['get_status_web']), False]) #send the request to the port
+            request_list.append([name, self.__coms.send_request(name, ['get_status_web']), False, list_pos]) #send the request to the port
+            list_pos += 1
+            data_obj.append({"Place holder": None}) # We are creating a list will all spots we need for return values so later we can pack the list and everything will be in the same order. 
         all_request_serviced = False
         while not all_request_serviced:
             all_request_serviced = True
@@ -340,7 +345,7 @@ class serverHandler(threadWrapper):
                     # if we do get a request add it to the list and make the request as having been serviced. 
                     if data_obj_temp != None:
                         request_list[i][2] = True
-                        data_obj.append(data_obj_temp)
+                        data_obj[request_list[i][3]] = data_obj_temp
                 all_request_serviced = all_request_serviced and request_list[i][2] #All the request have to say they have been serviced for this to mark as true. 
         return jsonify(data_obj)
     def get_serial_names(self):
