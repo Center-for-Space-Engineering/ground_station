@@ -384,7 +384,10 @@ Then reboot the pi.\
 Then check the /dev/ folder for the new serial over lay. It will probably be something like '/dev/ttyAMA3' or '/dev/ttyS3'. 
 
 ### Step two:
-Adding it to the system is pretty simple (I hope...). First create a name for the listener and writer. (If you need both, you can just have one or the other.) Add the names to the respective lists `serial_listener_list` and `serial_writer_list`. Then create a file path variable for the system to use. Example `uart_2 = '/dev/ttyAMA2'`. \
+Adding it to the system is pretty simple (I hope...). \
+Fist crate a `batch_size`. This variable will tell your listeners how many bytes to collect before submitting a save request to the data base. The larger this number the faster the data base can save the data (up to 8000), however the smaller the number the faster you will see the bytes come out the other end of the pipe. One Final note, for speed the listener will collect 10 samples of the `batch_size` then send that data to be saved by the data base. I did include a 5 second time out so if the listener stops receiving data, it will eventually save it to the data base. 
+
+Then create a name for the listener and writer. (If you need both, you can just have one or the other.) Add the names to the respective lists `serial_listener_list` and `serial_writer_list`. Then create a file path variable for the system to use. Example `uart_2 = '/dev/ttyAMA2'`. \
 Note: Adding the names of your serial objects to `serial_listener_list` and `serial_writer_list` is what will tell the server and the sensors api what serial lines they have. `serial_listener_list` gets a graph on the webpage as well. \
 After you have created the need variables, All you need to do is create the classes.  Find where `########### Set up seral interface ###########` Under this section you wil see where the serial listeners and writers are made, create the class and then add it to the thread pool. The thread pool is already started in the code I wrote, but if you are adding the code somewhere else, you will need to tell the thread pool to start.\
 Example listener:

@@ -28,7 +28,6 @@ class cmd_data_publisher(commandParent, threadWrapper):
         self.__function_dict = { #NOTE: I am only passing the function that the rest of the system needs
             #In this case I dont want any other functions
         }
-        # super(threadWrapper, self).__init__(self.__function_dict)
         threadWrapper.__init__(self, self.__function_dict)
         
         ############ set up the commandParent stuff ############

@@ -22,8 +22,6 @@ DISPLAY_OFF = True
 NO_SERIAL_LISTENER = False
 NO_SERIAL_WRITER = False
 NO_SENSORS = False
-batch_size_1 = 8
-batch_size_2 = 1024
 
 if not NO_SERIAL_LISTENER:
     from python_serial_api.serial_listener import serial_listener # pylint: disable=e0401
@@ -34,14 +32,25 @@ if not NO_SENSORS:
     from sensor_interface_api import system_constants as sensor_config # pylint: disable=e0401
 
 ############## Serial Configs ##############
+# How many bytes to collect
+batch_size_1 = 8
+batch_size_2 = 1024
+
+#Names of writers
 serial_listener_name = 'serial_listener_one'
 serial_writer_name = 'serial_writer_one'
+
+#Names of listeners
 serial_listener_2_name = 'serial_listener_two'
 serial_writer_2_name = 'serial_writer_two'
-serial_listener_list = [serial_listener_name, serial_listener_2_name]
-serial_writer_list = [serial_writer_name, serial_writer_2_name]
+
+#Location of serial port on raspberry pi system
 uart_0 = '/dev/ttyS0'
 uart_2 = '/dev/ttyAMA2'
+
+#List of interface for system to use
+serial_listener_list = [serial_listener_name, serial_listener_2_name]
+serial_writer_list = [serial_writer_name, serial_writer_2_name]
 ############################################
 
 ############## Server Configs ##############
@@ -54,6 +63,26 @@ server_name_host = 'CSE_Host' #this is the name for the thread that services all
 
 ############## Data Base configs ###########
 data_base = 'Data Base'
+############################################
+
+############## Sensor configs ###########
+gps_config = { #this dictionary tell the gps sensor how to configure it self.
+    'serial_port' : serial_listener_2_name, # Can be the name of a serial listener or None
+    'publisher' : 'yes',
+    'publish_data' : 'gps_packets',
+    'passive_active' : 'passive', #passive sensors only publish when they receive then process data, active sensors always publish on an interval. 
+}
+
+sensor_config_dict = { #this dictionary holds all the sensors configuration, NOTE: the key must match the self.__name variable in the sobj_<sensor> object. 
+    'gps board' : gps_config, 
+}
+
+# set up the config file
+sensor_config.interface_listener_list = serial_listener_list
+sensor_config.interface_writer_list = serial_writer_list
+sensor_config.server = server_listener_name
+sensor_config.sensors_config = sensor_config_dict
+    
 ############################################
 
 
@@ -142,17 +171,12 @@ def main():
         threadPool.start() #start the new task
     
     ########### Set up sensor interface ########### 
-    # set up the config file
-    sensor_config.interface_listener_list = serial_listener_list
-    sensor_config.interface_writer_list = serial_writer_list
-    sensor_config.server = server_listener_name
-    
     # create the sensors interface
     importer = sensor_importer() # create the importer object
     importer.import_modules() # collect the models to import
     importer.instantiate_sensor_objects(coms=coms) # create the sensors objects.
 
-    sensors = importer.get_sensors()
+    sensors = importer.get_sensors() #get the sensors objects
     
     #Good line if you need to test a thread crashing. 
     # coms.send_request('Data Base', ['save_byte_data', 'NO_TABLE', 0, 'serial listener'])
