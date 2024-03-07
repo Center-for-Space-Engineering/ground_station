@@ -381,7 +381,7 @@ In order to see what pins the uart is using run the following command 'dtoverlay
 In order to use the additional uart you first need to enable it, by doing the following. \
 first: add it to the '/boot/config.txt' try running  vim /boot/config.txt, or nano /boot/config.txt, then add the correct line to the bottom of the config.txt. It should look something like this dtoverlay=UART3 \
 Then reboot the pi.\
-Then check the /dev/ folder for the new serial over lay. It will probably be something like '/dev/ttyAMA3' or '/dev/ttyS3'. \
+Then check the /dev/ folder for the new serial over lay. It will probably be something like '/dev/ttyAMA3' or '/dev/ttyS3'. 
 
 ### Step two:
 Adding it to the system is pretty simple (I hope...). First create a name for the listener and writer. (If you need both, you can just have one or the other.) Add the names to the respective lists `serial_listener_list` and `serial_writer_list`. Then create a file path variable for the system to use. Example `uart_2 = '/dev/ttyAMA2'`. \
