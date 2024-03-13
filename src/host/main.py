@@ -34,7 +34,7 @@ if not NO_SENSORS:
 ############## Serial Configs ##############
 # How many bytes to collect
 batch_size_1 = 8
-batch_size_2 = 1024
+batch_size_2 = 32
 
 #Names of writers
 serial_listener_name = 'serial_listener_one'
@@ -69,7 +69,7 @@ data_base = 'Data Base'
 gps_config = { #this dictionary tell the gps sensor how to configure it self.
     'serial_port' : serial_listener_2_name, # Can be the name of a serial listener or None
     'publisher' : 'yes',
-    'publish_data' : 'gps_packets',
+    'publish_data_name' : 'gps_packets',
     'passive_active' : 'passive', #passive sensors only publish when they receive then process data, active sensors always publish on an interval. 
 }
 
@@ -178,6 +178,10 @@ def main():
 
     sensors = importer.get_sensors() #get the sensors objects
     
+    # create a thread for each sensor and then start them. 
+    for sensor in sensors:
+        threadPool.add_thread(sensor.run, sensor.get_sensor_name(), sensor)
+    threadPool.start()
     #Good line if you need to test a thread crashing. 
     # coms.send_request('Data Base', ['save_byte_data', 'NO_TABLE', 0, 'serial listener'])
 

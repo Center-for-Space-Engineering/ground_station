@@ -192,7 +192,7 @@ class cmd_data_publisher(commandParent, threadWrapper):
                 message.append({ 
                     'Name' : key,
                     'Path' : f'/{self.__commandName}/{key}/-port number-',
-                    'Description' : 'This command starts a publisher on the port that is given to it. Should be above 5000 and cann\'t be in use.'    
+                    'Description' : 'This command starts a publisher on the port that is given to it. Should be above 5000 and can\'t be in use.'    
                     })
             if key == "kill_data_publisher":
                 message.append({ 

@@ -35,3 +35,8 @@ NOTE: in this case A and B are the token names for the variables.
 
 
 https://alexkataev.medium.com/magic-python-mutable-vs-immutable-and-how-to-copy-objects-908bffb811fa
+
+
+
+## Events NOTE:
+makes sure the event function that is called is to large as it will shut down the whole classes thread for a short time. 
