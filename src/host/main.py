@@ -69,8 +69,9 @@ data_base = 'Data Base'
 gps_config = { #this dictionary tell the gps sensor how to configure it self.
     'serial_port' : serial_listener_2_name, # Can be the name of a serial listener or None
     'publisher' : 'yes',
-    'publish_data_name' : 'gps_packets',
-    'passive_active' : 'passive', #passive sensors only publish when they receive then process data, active sensors always publish on an interval. 
+    'publish_data_name' : 'gps_packets', #NOTE: NOT used right now
+    'passive_active' : 'passive', #passive sensors only publish when they receive then process data, active sensors always publish on an interval.
+    'interval_pub' : 0, # We are not using this param because we are a passive publisher, however if the sensor is active we will need to set this interval to the desired rate. 
 }
 
 sensor_config_dict = { #this dictionary holds all the sensors configuration, NOTE: the key must match the self.__name variable in the sobj_<sensor> object. 
