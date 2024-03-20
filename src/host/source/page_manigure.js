@@ -366,3 +366,38 @@ function makeGraphs(){
         })
         .catch();
 }
+// Function to fetch data from the server and update the table
+function update_sensor_status() {
+    fetch('/get_sensor_status ')
+        .then(response => response.json()) // Assuming the server returns JSON data
+        .then(data => {
+            const tableBody = document.getElementById('sensors_status_report');
+            tableBody.innerHTML = ''; // Clear existing rows
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class = 'nice_teal'>${item.name}</td>
+                    <td class = 'nice_teal'>${item.status}</td>
+                    <td class = 'nice_teal'>${item.taps}</td>
+                `;
+                row.addEventListener('click', function() {
+                    open_sensor_page(item.name) });
+                tableBody.appendChild(row);
+            });
+        })
+        .catch();
+}
+
+function open_sensor_page(name) 
+{
+    // Define the data to be sent
+    var data = {
+        name : name,
+    };
+
+    // Convert the data object to a query string
+    var queryString = Object.keys(data).map(key => key + '=' + data[key]).join('&');
+
+    // Open new webpage
+    window.location.href = `/sensor_page?` + queryString;
+}

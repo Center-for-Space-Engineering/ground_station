@@ -58,6 +58,11 @@ class serverHandler(threadWrapper):
         self.app = Flask(__name__)
         self.__favicon_directory = os.path.join(self.app.root_path, 'static')
         self.setup_routes()
+
+        # create a place holder for our sensors.
+        self.__sensor_list = None
+        self.__sensor_html_dict = {}
+
         print(f'Server started at http://{self.__hostName}:{self.__serverPort}')  
     def setup_routes(self):
         '''
@@ -79,6 +84,8 @@ class serverHandler(threadWrapper):
         self.app.route('/start_serial')(self.start_serial)
         self.app.route('/get_serial_names')(self.get_serial_names)
         self.app.route('/get_serial_status')(self.get_serial_status)
+        self.app.route('/get_sensor_status')(self.get_sensor_status)
+        self.app.route('/sensor_page')(self.sensor_page)
 
         #the paths caught by this will connect to the users commands they add
         self.app.add_url_rule('/<path:unknown_path>', 'handle_unknown_path',  self.handle_unknown_path)
@@ -353,6 +360,32 @@ class serverHandler(threadWrapper):
             'listener' : self.__serial_listener_name,
             'writer' : self.__serial_writer_name
         })
+    def get_sensor_status(self):
+        '''
+            This function gets all the sensors status then returns that to the server. 
+        '''
+        if self.__sensor_list is None:
+            return jsonify([{
+                'Name' :'NA',
+                'status' : 'NA',
+                'taps' : 'None'
+            }])
+        report = []
+        for sensor in self.__sensor_list:
+            sensor_name = sensor.get_sensor_name()
+            status = sensor.get__sensor_status()
+            taps = ' | '.join(sensor.get_taps())
+            report.append({
+                'name' : sensor_name,
+                'status' : status,
+                'taps' : taps
+            })
+        return jsonify(report)
+    def sensor_page(self):
+        sensor_name = request.args.get('name')
+        return render_template(self.__sensor_html_dict[sensor_name])
+
+
     def run(self):
         '''
             This is the run function for the server. 
@@ -400,3 +433,13 @@ class serverHandler(threadWrapper):
             Get the coms object, the coms object is how ever thread talks to each other. 
         '''
         return self.__coms
+    def set_sensor_list(self, sensors):
+        '''
+            This function takes a list of sensor classes that the system has created. 
+
+            NOTE: The list should be of sensor objects!
+        '''
+        self.__sensor_list = sensors
+        #Make the dictionary of all the file paths to each sensors html page, and generate the page (the get_html_page) generates the html page
+        for sensor in self.__sensor_list:
+            self.__sensor_html_dict[sensor.get_sensor_name()] = sensor.get_html_page().replace('templates/', '')

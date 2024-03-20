@@ -67,7 +67,7 @@ data_base = 'Data Base'
 
 ############## Sensor configs ###########
 gps_config = { #this dictionary tell the gps sensor how to configure it self.
-    'serial_port' : serial_listener_2_name, # Can be the name of a serial listener or None
+    'tap_request' : [serial_listener_2_name], # index in the list can be the name of a serial listener or any sensors who's date you want to listen to or None (Example for none: None) 
     'publisher' : 'yes',
     'publish_data_name' : 'gps_packets', #NOTE: NOT used right now
     'passive_active' : 'passive', #passive sensors only publish when they receive then process data, active sensors always publish on an interval.
@@ -76,7 +76,7 @@ gps_config = { #this dictionary tell the gps sensor how to configure it self.
 }
 
 sensor_config_dict = { #this dictionary holds all the sensors configuration, NOTE: the key must match the self.__name variable in the sobj_<sensor> object. 
-    'gps board' : gps_config, 
+    'gps_board' : gps_config, #NOTE: The key here becomes part of a file name so make sure you use valid chars in the name. 
 }
 
 # set up the config file
@@ -146,6 +146,8 @@ def main():
     # threadPool.add_thread(dummy.test2, 'Dummy data collector', dummy)
 
     threadPool.start() #we need to start all the threads we have collected.
+    ########################################################################################
+
 
     ########### Set up seral interface ###########  
     # create the ser_listener
@@ -171,6 +173,7 @@ def main():
         threadPool.add_thread(ser_2_writer.run, serial_writer_2_name, ser_2_writer)
         
         threadPool.start() #start the new task
+    ########################################################################################
     
     ########### Set up sensor interface ########### 
     # create the sensors interface
@@ -184,6 +187,13 @@ def main():
     for sensor in sensors:
         threadPool.add_thread(sensor.run, sensor.get_sensor_name(), sensor)
     threadPool.start()
+
+    # give the webpage gain access to the sensors.
+    server.set_sensor_list(sensors=sensors)
+
+    ########################################################################################
+
+
     #Good line if you need to test a thread crashing. 
     # coms.send_request('Data Base', ['save_byte_data', 'NO_TABLE', 0, 'serial listener'])
 
