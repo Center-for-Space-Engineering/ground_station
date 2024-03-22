@@ -36,11 +36,9 @@ if not NO_SENSORS:
 batch_size_1 = 8
 batch_size_2 = 32
 
-#Names of writers
 serial_listener_name = 'serial_listener_one'
 serial_writer_name = 'serial_writer_one'
 
-#Names of listeners
 serial_listener_2_name = 'serial_listener_two'
 serial_writer_2_name = 'serial_writer_two'
 
@@ -51,6 +49,28 @@ uart_2 = '/dev/ttyAMA2'
 #List of interface for system to use
 serial_listener_list = [serial_listener_name, serial_listener_2_name]
 serial_writer_list = [serial_writer_name, serial_writer_2_name]
+
+########## Writer's NOTE ######################
+# The Raspberry pi 4b has 5 Uart lines.
+# NAME  | TYPE
+#_______|_____
+# UART0 | PL011
+# UART1 | mini UART 
+# UART2 | PL011
+# UART3 | PL011
+# UART4 | PL011
+# UART5 | PL011
+# NOTE: Each uart has 4 pins assign to it. The first to are TX and RX and the last two are for multi device uart. 
+# mini uart does not work with the interface I have set up. However, it would be possible to figure out how to make it work.
+# In order to see what pins the uart is using run the following command 'dtoverlay -h uart2'. 
+# In order to use the additional uart you first need to enable it, by doing the following. 
+#   first: add it to the '/boot/config.txt' try running  vim /boot/config.txt, or nano /boot/config.txt, then add the correct line 
+#       to the bottom of the config.txt. It should look something like this dtoverlay=UART3
+# Then reboot the pi.
+# Then check the /dev/ folder for the new serial over lay. It will probably be something like '/dev/ttyAMA3' or '/dev/ttyS3'. 
+# One you find the correct path, that is the path you should pass in to our serial class. (see uart_2 or uart_0)
+########## Writer's NOTE ######################
+
 ############################################
 
 ############## Server Configs ##############
@@ -60,6 +80,7 @@ port = 8000
 server_listener_name = 'CSE_Server_Listener' #this the name for the internal thread that collect server info 
 server_name_host = 'CSE_Host' #this is the name for the thread that services all the web requests. 
 ############################################
+
 
 ############## Data Base configs ###########
 data_base = 'Data Base'
@@ -86,30 +107,6 @@ sensor_config.server = server_listener_name
 sensor_config.sensors_config = sensor_config_dict
     
 ############################################
-
-
-
-
-########## Writer's NOTE ######################
-# The Raspberry pi 4b has 5 Uart lines.
-# NAME  | TYPE
-#_______|_____
-# UART0 | PL011
-# UART1 | mini UART 
-# UART2 | PL011
-# UART3 | PL011
-# UART4 | PL011
-# UART5 | PL011
-# NOTE: Each uart has 4 pins assign to it. The first to are TX and RX and the last two are for multi device uart. 
-# mini uart does not work with the interface I have set up. However, it would be possible to figure out how to make it work.
-# In order to see what pins the uart is using run the following command 'dtoverlay -h uart2'. 
-# In order to use the additional uart you first need to enable it, by doing the following. 
-#   first: add it to the '/boot/config.txt' try running  vim /boot/config.txt, or nano /boot/config.txt, then add the correct line 
-#       to the bottom of the config.txt. It should look something like this dtoverlay=UART3
-# Then reboot the pi.
-# Then check the /dev/ folder for the new serial over lay. It will probably be something like '/dev/ttyAMA3' or '/dev/ttyS3'. 
-# One you find the correct path, that is the path you should pass in to our serial class. (see uart_2 or uart_0)
-########## Writer's NOTE ######################
 
 def main():
     '''

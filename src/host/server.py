@@ -86,6 +86,9 @@ class serverHandler(threadWrapper):
         self.app.route('/get_serial_status')(self.get_serial_status)
         self.app.route('/get_sensor_status')(self.get_sensor_status)
         self.app.route('/sensor_page')(self.sensor_page)
+        self.app.route('/sensor_graph_names')(self.sensor_graph_names)
+        self.app.route('/get_sensor_graph_update')(self.get_sensor_graph_update)
+        self.app.route('/sensor_last_published')(self.sensor_last_published)
 
         #the paths caught by this will connect to the users commands they add
         self.app.add_url_rule('/<path:unknown_path>', 'handle_unknown_path',  self.handle_unknown_path)
@@ -382,9 +385,41 @@ class serverHandler(threadWrapper):
             })
         return jsonify(report)
     def sensor_page(self):
+        '''
+            Returns the html page for the sensors config
+        '''
+        try :
+            sensor_name = request.args.get('name')
+            return render_template(self.__sensor_html_dict[sensor_name])
+        except KeyError as e:
+            return self.open_sensor() #this means we haven't created our sensor page yet so we just are going to return a different page
+            
+    def sensor_graph_names(self):
+        '''
+            Returns a list of graphs to the browser
+        '''
         sensor_name = request.args.get('name')
-        return render_template(self.__sensor_html_dict[sensor_name])
-
+        return jsonify({
+            'graphs' : self.__sensor_html_dict[sensor_name][1].get_graph_names()
+        })
+    def get_sensor_graph_update(self):
+        '''
+            Returns a the data report to the browser
+        '''
+        sensor_name = request.args.get('name')
+        try : 
+            return jsonify(self.__sensor_html_dict[sensor_name][1].get_data_report())
+        except KeyError as e:
+            return jsonify('') #this means we haven't created our sensor page yet so we just are going to return a different page
+    def sensor_last_published(self) :
+        sensor_name = request.args.get('name')
+        try : 
+            return jsonify(self.__sensor_html_dict[sensor_name][1].get_last_published_data())
+        except KeyError as e:
+            return jsonify({
+            'time' : 'NA',
+            'data' : 'NA'
+        }) #this means we haven't created our sensor page yet so we just are going to return a different page  
 
     def run(self):
         '''
@@ -442,4 +477,4 @@ class serverHandler(threadWrapper):
         self.__sensor_list = sensors
         #Make the dictionary of all the file paths to each sensors html page, and generate the page (the get_html_page) generates the html page
         for sensor in self.__sensor_list:
-            self.__sensor_html_dict[sensor.get_sensor_name()] = sensor.get_html_page().replace('templates/', '')
+            self.__sensor_html_dict[sensor.get_sensor_name()] = (sensor.get_html_page().replace('templates/', ''), sensor)

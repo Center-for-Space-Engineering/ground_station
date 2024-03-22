@@ -1,5 +1,6 @@
 // Define a global variable to store references to the Chart.js objects
 var charts = {};
+var chartsSensors = {};
 
 function open_tab(message) 
 {
@@ -400,4 +401,120 @@ function open_sensor_page(name)
 
     // Open new webpage
     window.location.href = `/sensor_page?` + queryString;
+}
+
+function makeGraphsSensors(sensor_name){
+    // Define the data to be sent
+    var data = {
+        name : sensor_name,
+    };
+
+    // Convert the data object to a query string
+    var queryString = Object.keys(data).map(key => key + '=' + data[key]).join('&');
+
+    // Fetch data from the server
+    fetch(`/sensor_graph_names?` + queryString)
+        .then(response => response.json()) // Assuming the server returns JSON data
+        .then(data => {
+            data.graphs.forEach(name => {
+                // Create a new chart container div element
+                var container = document.createElement('div');
+                container.className = 'box_style'; // Apply the .box_style class
+                document.getElementById('graphs').appendChild(container);
+
+                // Create a canvas element for the graph
+                var canvas = document.createElement('canvas');
+                canvas.width = 200; // Set width
+                canvas.height = 150; // Set height
+                canvas.id = 'graph-' + name; // Set unique id for each graph
+
+                container.appendChild(canvas);
+        
+                // Get the context of the canvas
+                var ctx = canvas.getContext('2d');
+        
+                // Create a new chart with an empty dataset and the name as label
+                chartsSensors[name] = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: [], // No data, just labels
+                        datasets: [{
+                            label: name,
+                            data: [],
+                            fill: false,
+                            borderColor: 'rgb(75, 192, 192)',
+                            tension: 0.1
+                        }]
+                    }
+                });                
+            })
+        })
+        .catch();
+}
+// Function to update the graphs with the fetched data
+function updateGraphsSensor(sensor_name) {
+    // Define the data to be sent
+    var data = {
+        name : sensor_name,
+    };
+
+    // Convert the data object to a query string
+    var queryString = Object.keys(data).map(key => key + '=' + data[key]).join('&');
+
+    // Fetch data from the server
+    fetch(`/get_sensor_graph_update?` + queryString)
+        .then(response => response.json())
+        .then(data => {          
+            updateSensorCharts(data);
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+        });
+}
+
+// Function to update chart data
+function updateSensorCharts(data) {
+    // Iterate over each entry in the data
+    Object.keys(data).forEach(function(graph) {
+        // Check if the chart for this graph exists
+        if (chartsSensors.hasOwnProperty(graph)) {           
+            // Get the chart object
+            var chart = chartsSensors[graph];
+
+            // Get the data for this graph
+            var graphData = data[graph];
+
+            // Extract x and y data from graphData
+            var x = graphData.x;
+            var y = graphData.y;
+
+            // Update the chart data
+            chart.data.labels = x;
+            chart.data.datasets[0].data = y;
+
+            // Update the chart
+            chart.update();
+        }
+    });
+}
+
+function updateDataPublish(sensor_name){
+    // Define the data to be sent
+    var data = {
+        name : sensor_name,
+    };
+
+    // Convert the data object to a query string
+    var queryString = Object.keys(data).map(key => key + '=' + data[key]).join('&');
+    fetch(`/sensor_last_published?` + queryString)
+        .then(response => response.json()) // Assuming the server returns JSON data
+        .then(data => {
+            const time_tag = document.getElementById('time_pub_tag');
+            time_tag.innerHTML = data.time;
+
+            const data_tag = document.getElementById('data_pub_tag');
+            data_tag.innerHTML = data.data;
+            
+        })
+        .catch();
 }
