@@ -105,7 +105,7 @@ sensor_config.interface_listener_list = serial_listener_list
 sensor_config.interface_writer_list = serial_writer_list
 sensor_config.server = server_listener_name
 sensor_config.sensors_config = sensor_config_dict
-    
+sensor_config.database_name = data_base
 ############################################
 
 def main():

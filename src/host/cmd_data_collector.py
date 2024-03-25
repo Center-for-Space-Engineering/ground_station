@@ -43,6 +43,7 @@ class cmd_data_collector(commandParent):
             "get_data_type" : self.get_data_type,
             "get_data": self.get_data,
             "get_dto": self.get_dto,
+            "get_dto_full_table" : self.get_dto_full_table,
         }
 
         self.__coms = coms
@@ -105,7 +106,13 @@ class cmd_data_collector(commandParent):
                 message.append({
                     'Name' : key,
                     'Path' : f"/{self.__command_name}/{key}/-table_name-/-start index-/-field name-/-Optional max lines-",
-                    'Description' : 'This command returns data from the data base from a start index to a finishing index. It is built for speed.',
+                    'Description' : 'This command returns data (one felid) from the data base from a start index to a finishing index. It is built for speed.',
+                })
+            elif key == "get_dto_full_table":
+                message.append({
+                    'Name' : key,
+                    'Path' : f"/{self.__command_name}/{key}/-table_name-/-start index-/-Optional max lines-",
+                    'Description' : 'This command returns data from one table in the data base from a start index to a finishing index. It may not be as fast.',
                 })
             else :
                 message.append({
@@ -127,6 +134,8 @@ class cmd_data_collector(commandParent):
                 message += f"<url>/{self.__command_name}/{key}/<arg>-table name-</arg>/<arg>-start index-</arg></url><p></p>"
             elif key == "get_dto":
                 message += f"<url>/{self.__command_name}/{key}/<arg>-table_name-</arg>/<arg>-start index-</arg>/<arg>-field name-</arg>/<arg>-Optional max lines-</arg></url></url><p></p>"
+            elif key == "get_dto_full_table":
+                message += f"<url>/{self.__command_name}/{key}/<arg>-table_name-</arg>/<arg>-start index-</arg>/<arg>-Optional max lines-</arg></url></url><p></p>"
             else :
                 message += f"<url>/{self.__command_name}/{key}</url><p></p>"
         self.__logger.send_log("Returned to server: " + message)
@@ -158,7 +167,7 @@ class cmd_data_collector(commandParent):
         return self.__command_name
     def get_dto(self, args):
         '''
-            Gets data from the data base, then convert it to a dto (Data transfer Object)
+            Gets data (one row of a table) from the data base, then convert it to a dto (Data transfer Object)
             Args:
                 args[0] is not used in this function, 
                     it is used by the caller function, it should be the function name
@@ -189,12 +198,76 @@ class cmd_data_collector(commandParent):
         last_db_index = temp['Table Index'].tail(1).iat[0] #get the last row in the dto
         dto_internal = print_message_dto("DTO returned to requester.")
         self.__coms.print_message(dto_internal)
-        data_combined = b''.join(data)
-        base64_data_combined = base64.b64encode(data_combined).decode('utf-8')
+        try : 
+            data_combined = b''.join(data)
+            base64_data_combined = base64.b64encode(data_combined).decode('utf-8')
+            file_extension = 'bin'
+        except TypeError as e:
+            data_combined = args[3] + "\n" #include the name of the col 
+            data_combined += data.to_string(index=False, header=True)
+           # Encode the string using base64 encoding
+            base64_encoded_bytes = base64.b64encode(data_combined.encode('utf-8'))
+            file_extension = 'csv'
+
+            # Decode the base64 encoded bytes to a UTF-8 string
+            base64_data_combined = base64_encoded_bytes.decode('utf-8')
+        except Exception as e:
+            return f'Error occurred {e}'
+        
         return {
             'text_data': f'The last line fetched was {last_db_index}',
             'file_data': base64_data_combined,
             'download': 'yes',
-            'file_extension' : 'bin', 
+            'file_extension' : file_extension, 
+        }
+    
+    def get_dto_full_table(self, args):
+        '''
+            Gets data from the data base, then convert it to a dto (Data transfer Object)
+            Args:
+                args[0] is not used in this function, 
+                    it is used by the caller function, it should be the function name
+                args[1] is the table name
+                args[2] is the start index
+                args[3] is optional but if passed it will set the max number of rows per dto to the new value
+        '''
+        #see if we have a new max row
+        try :
+            self.__max_rows = int(args[3])
+        except : # pylint: disable=w0702
+            pass
+        #make the data request to the database.
+        request_num = self.__data_base.make_request('get_data_large', [args[1], args[2], self.__max_rows])
+        temp = self.__data_base.get_request(request_num)
+
+        #wait for the database to return the data
+        while temp is None: #wait until we get a return value
+            temp = self.__data_base.get_request(request_num)
+            time.sleep(0.1) #let other process run
+        #if the database returns a string it is an error
+        if isinstance(temp, str) : 
+            return temp
+        if temp.empty: 
+            return  "<! DOCTYPE html>\n<html>\n<body>\n<h1><strong>dto (data transfer object): No saved data</strong></h1>\n</body>\n</html>"
+        data = temp #septate data out
+        last_db_index = temp['Table Index'].tail(1).iat[0] #get the last row in the dto
+        dto_internal = print_message_dto("DTO returned to requester.")
+        self.__coms.print_message(dto_internal)
+        try : 
+            data_combined = data.to_string(index=False, header=True)
+           # Encode the string using base64 encoding
+            base64_encoded_bytes = base64.b64encode(data_combined.encode('utf-8'))
+            file_extension = 'csv'
+
+            # Decode the base64 encoded bytes to a UTF-8 string
+            base64_data_combined = base64_encoded_bytes.decode('utf-8')
+        except Exception as e:
+            return f'Error occurred {e}'
+        
+        return {
+            'text_data': f'The last line fetched was {last_db_index}',
+            'file_data': base64_data_combined,
+            'download': 'yes',
+            'file_extension' : file_extension, 
         }
         

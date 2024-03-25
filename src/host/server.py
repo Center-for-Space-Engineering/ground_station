@@ -392,8 +392,7 @@ class serverHandler(threadWrapper):
             sensor_name = request.args.get('name')
             return render_template(self.__sensor_html_dict[sensor_name])
         except KeyError as e:
-            return self.open_sensor() #this means we haven't created our sensor page yet so we just are going to return a different page
-            
+            return self.open_sensor() #this means we haven't created our sensor page yet so we just are going to return a different page        
     def sensor_graph_names(self):
         '''
             Returns a list of graphs to the browser
@@ -420,7 +419,6 @@ class serverHandler(threadWrapper):
             'time' : 'NA',
             'data' : 'NA'
         }) #this means we haven't created our sensor page yet so we just are going to return a different page  
-
     def run(self):
         '''
             This is the run function for the server. 
