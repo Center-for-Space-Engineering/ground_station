@@ -29,7 +29,7 @@ if not NO_SERIAL_WRITER:
     from python_serial_api.serial_writer import serial_writer # pylint: disable=e0401
 if not NO_SENSORS:
     from sensor_interface_api.collect_sensor import sensor_importer # pylint: disable=e0401
-    from sensor_interface_api import system_constants as sensor_config # pylint: disable=e0401
+import system_constants as sensor_config # pylint: disable=e0401
 
 ############## Serial Configs ##############
 # How many bytes to collect
@@ -49,6 +49,9 @@ uart_2 = '/dev/ttyAMA2'
 #List of interface for system to use
 serial_listener_list = [serial_listener_name, serial_listener_2_name]
 serial_writer_list = [serial_writer_name, serial_writer_2_name]
+
+#tell the system what the board serial name is 
+sensor_config.board_serial_listener_name = serial_listener_name
 
 ########## Writer's NOTE ######################
 # The Raspberry pi 4b has 5 Uart lines.

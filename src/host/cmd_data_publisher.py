@@ -6,6 +6,7 @@ import socket
 from datetime import datetime
 import time
 import threading
+import copy
 
 #custom python imports
 from commandParent import commandParent # pylint: disable=e0401
@@ -15,6 +16,8 @@ from threading_python_api.threadWrapper import threadWrapper # pylint: disable=e
 from DTOs.logger_dto import logger_dto # pylint: disable=e0401
 from DTOs.print_message_dto import print_message_dto # pylint: disable=e0401
 
+import system_constants as config # pylint: disable=e0401
+
 class cmd_data_publisher(commandParent, threadWrapper):
     '''
         This module collects data and then publishes it ever so often to a port. 
@@ -22,12 +25,13 @@ class cmd_data_publisher(commandParent, threadWrapper):
     def __init__(self, CMD, coms):
         #call parent __init__
         # init the parent
-        commandParent.__init__(self, CMD, coms=coms, called_by_child=True)
+        super().__init__(CMD, coms=coms, called_by_child=True)
         ############ set up the threadWrapper stuff ############
         # We need the threadWrapper so that the publisher can send a request to start a new thread.
         self.__function_dict = { #NOTE: I am only passing the function that the rest of the system needs
             #In this case I dont want any other functions
         }
+        # super(threadWrapper, self).__init__(self.__function_dict)
         threadWrapper.__init__(self, self.__function_dict)
         
         ############ set up the commandParent stuff ############
@@ -45,6 +49,9 @@ class cmd_data_publisher(commandParent, threadWrapper):
         self.__server_socket = None
         self.__Running = True
         self.__Running_lock = threading.Lock()
+        self.__data_received = []
+        self.__data_lock = threading.Lock()
+        self.__live_feed = config.board_serial_listener_name
 
     def run_args(self, args):
         '''
@@ -69,6 +76,7 @@ class cmd_data_publisher(commandParent, threadWrapper):
 
         #get the port from args
         self.__port = int(arg[0])
+        source = arg[1]
 
         #request the host name from the coms
         host = self.__coms.get_host_name()
@@ -84,7 +92,7 @@ class cmd_data_publisher(commandParent, threadWrapper):
 
         try:
             self.__server_socket.bind((host, self.__port))
-            self.__coms.send_request('task_handler', ['add_thread_request_func', self.run_publisher ,'publisher', self])
+            self.__coms.send_request('task_handler', ['add_thread_request_func', self.run_publisher ,'publisher', self, [source]])
             return f"Started data publisher on port:{self.__port}"
         except Exception as e: # pylint: disable=w0718
             return f"<p>Error {e}<p>"
@@ -99,7 +107,7 @@ class cmd_data_publisher(commandParent, threadWrapper):
         return "Commanded publisher to terminate."
         
 
-    def run_publisher(self):
+    def run_publisher(self, source):
         '''
             This is the function the runs the pipe on its own thread. 
         '''
@@ -114,29 +122,45 @@ class cmd_data_publisher(commandParent, threadWrapper):
             dto = logger_dto(message="Timeout occurred while waiting for a connection.", time=str(datetime.now()))
             self.__coms.print_message(dto)
             connected = False
+
+        is_live = False
         
-        #file_path = 'synthetic_data_profiles/TestAAFF00BB.bin'
-        file_path = 'synthetic_data_profiles/SyntheticFPP2_1000packets_CSEkw_with_garbage.bin'
-        try :
-            file = open(file_path, 'rb') # pylint: disable=R1732
-        except Exception as e: # pylint: disable=w0718
-            print(f'Failed to open file {e}')
+        if source != 'live':
+            file_path = f'synthetic_data_profiles/{source}'
+            #file_path = 'synthetic_data_profiles/SyntheticFPP2_1000packets_CSEkw_with_garbage.bin'
+            #file_path = 'synthetic_data_profiles/FPP2Packetx10.bin'
+            #file_path = 'synthetic_data_profiles/SyntheticFPP2_1000packets_CSEkw.bin'
+            try :
+                file = open(file_path, 'rb') # pylint: disable=R1732
+            except Exception as e: # pylint: disable=w0718
+                print(f'Failed to open file {e}')
+        else : 
+            self.__coms.send_request(self.__live_feed, ['create_tap', self.send_tap, 'data publisher']) #create a tap to the serial listener so it will send its data here. 
+            is_live = True
 
         try:
             running = True
             while running:
                 if connected:
                     try:
+                        with self.__data_lock:
+                            length_data_received = len(self.__data_received)
                         # Send data to the connected client
-                        message = file.read(519)
-                        if len(message) == 0:
-                            file.close()
-                            time.sleep(30)
-                            file = open(file_path, 'rb')
-                        else :
+                        if not is_live:
+                            message = file.read(-1)
+                            if len(message) == 0:
+                                file.close()
+                                time.sleep(1)
+                                file = open(file_path, 'rb')
+                            else :
+                                print(message)
+                                client_socket.sendall(message)
+                        elif length_data_received > 0: # If we are live and we have data
+                            with self.__data_lock:
+                                message = b''.join(self.__data_received)
+                                self.__data_received.clear()
                             print(message)
                             client_socket.sendall(message)
-                            #time.sleep(10)
                     except Exception as e: # pylint: disable=w0718
                         print("Waiting for connection")
                         print(f"Error {e}")
@@ -167,6 +191,14 @@ class cmd_data_publisher(commandParent, threadWrapper):
             return "<p>Pip closed <p>"
         except Exception as e: # pylint: disable=w0718
             return f"<p>Error  Server side {e}<p>"
+
+    def send_tap(self, data, _):
+        '''
+            This is the function that is called by the class you asked to make a tap.
+        '''
+        with self.__data_lock:
+            self.__data_received = copy.deepcopy(data) #NOTE: This could make things really slow, depending on the data rate.
+
     def get_args(self):
         '''
             This function returns an html obj that explains the args for all the internal
@@ -191,8 +223,8 @@ class cmd_data_publisher(commandParent, threadWrapper):
             if key == "start_data_publisher":
                 message.append({ 
                     'Name' : key,
-                    'Path' : f'/{self.__commandName}/{key}/-port number-',
-                    'Description' : 'This command starts a publisher on the port that is given to it. Should be above 5000 and can\'t be in use.'    
+                    'Path' : f'/{self.__commandName}/{key}/-port number-/-publish source-',
+                    'Description' : 'This command starts a publisher on the port that is given to it. Should be above 5000 and cann\'t be in use. You can use any file in synthetic_data_profiles (just type the file name) or pass the key word live,  '    
                     })
             if key == "kill_data_publisher":
                 message.append({ 
