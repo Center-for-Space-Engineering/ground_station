@@ -15,7 +15,7 @@ from server import serverHandler # pylint: disable=e0401
 from server_message_handler import serverMessageHandler # pylint: disable=e0401
 
 #import DTO for communicating internally
-from DTOs.print_message_dto import print_message_dto # pylint: disable=e0401
+from logging_system_display_python_api.DTOs.print_message_dto import print_message_dto # pylint: disable=e0401
 
 #These are some Debugging tools I add, Turning off the display is really useful for seeing errors, because the terminal wont get erased every few milliseconds with the display on.
 DISPLAY_OFF = True

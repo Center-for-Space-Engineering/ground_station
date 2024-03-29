@@ -13,8 +13,8 @@ from threading_python_api.threadWrapper import threadWrapper # pylint: disable=e
 from server_message_handler import serverMessageHandler # pylint: disable=e0401
 
 #import DTO for communicating internally
-from DTOs.logger_dto import logger_dto # pylint: disable=e0401
-from DTOs.print_message_dto import print_message_dto # pylint: disable=e0401
+from logging_system_display_python_api.DTOs.logger_dto import logger_dto # pylint: disable=e0401
+from logging_system_display_python_api.DTOs.print_message_dto import print_message_dto # pylint: disable=e0401
 
 class serverHandler(threadWrapper):
     '''

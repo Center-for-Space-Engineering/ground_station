@@ -8,7 +8,7 @@ from dynamicImporter import dynamicImporter # pylint: disable=e0401
 from logging_system_display_python_api.logger import loggerCustom # pylint: disable=e0401
 
 #print DTO
-from DTOs.print_message_dto import print_message_dto # pylint: disable=e0401
+from logging_system_display_python_api.DTOs.print_message_dto import print_message_dto # pylint: disable=e0401
 
 class cmd_inter():
     '''
