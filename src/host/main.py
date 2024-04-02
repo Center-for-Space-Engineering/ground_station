@@ -64,7 +64,7 @@ sensor_config.board_serial_listener_name = serial_listener_name
 # UART4 | PL011
 # UART5 | PL011
 # NOTE: Each uart has 4 pins assign to it. The first to are TX and RX and the last two are for multi device uart. 
-# mini uart does not work with the interface I have set up. However, it would be possible to figure out how to make it work.
+# mini uart does not work with the interface I have set up. However, it would be possible to figur\widetilde{X} e out how to make it work.
 # In order to see what pins the uart is using run the following command 'dtoverlay -h uart2'. 
 # In order to use the additional uart you first need to enable it, by doing the following. 
 #   first: add it to the '/boot/config.txt' try running  vim /boot/config.txt, or nano /boot/config.txt, then add the correct line 
