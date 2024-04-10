@@ -32,11 +32,38 @@ The above example shows how an immutable variable is declared in python. Note th
 NOTE: in this case A and B are the token names for the variables. 
 
 ![Token variable example](token_varible_example.webp)
+We can see that for immutable types we create a new token for the new value. So when threading if we do something like the following:
+```python
+shared_data = ... #immutable type
+
+with mutex_lock:
+    copy = shared_data
+#use copy ...
+``` 
+It will be safe so long as the variable type is immutable, however if the variable type is mutable then we need to do the following.
+
+the following:
+```python
+import copy
+
+shared_data = ... #mutable type
+
+with mutex_lock:
+    copy_mutable = copy.deepcopy(shared_data)
+#use copy_mutable ...
+``` 
+
+citation: https://alexkataev.medium.com/magic-python-mutable-vs-immutable-and-how-to-copy-objects-908bffb811fa
 
 
-https://alexkataev.medium.com/magic-python-mutable-vs-immutable-and-how-to-copy-objects-908bffb811fa
 
+## Events notes:
+I went back and forth on adding events but eventually I decided to add them. Just be careful not to have the function called by the event to take too long because it will freeze part of the system. 
 
+## Documentation:
+Look I am going to be honest, I HATE documentation, the day I wrote this for example I have literally been writing documentation for 8 hours today. However, I have worked on serval coding project, and without accepting projects that were not document got through away. If you want your code to last, then please document it. If you are going to add to  this code base, then please document what you are doing so all this work doesn't go to waste. 
 
-## Events NOTE:
-makes sure the event function that is called is to large as it will shut down the whole classes thread for a short time. 
+## Linting:  
+Look I hate linting as much as documentation, but all I gotta say is do it! If you want people to be able to read what you are doing then you need to lint. It forces your code to be readable. You don't have to lint when you are debugging, once you have a feature working go back though and lint the code then push it to main. 
+
+-Good luck to who ever follows me here. 

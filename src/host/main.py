@@ -96,7 +96,7 @@ gps_config = { #this dictionary tell the gps sensor how to configure it self.
     'publish_data_name' : 'gps_packets', #NOTE: NOT used right now
     'passive_active' : 'passive', #passive sensors only publish when they receive then process data, active sensors always publish on an interval.
     'interval_pub' : 'NA', # We are not using this param because we are a passive publisher, however if the sensor is active we will need to set this interval to the desired rate. 
-    'Sensor_data_tag' : 'temp' #This parameter is for the sensor class to search data from the tag, wether it comes from the serial line or from other sensors on the system. 
+    'Sensor_data_tag' : b'$' #This parameter is for the sensor class to search data from the tag, wether it comes from the serial line or from other sensors on the system. 
 }
 
 sensor_config_dict = { #this dictionary holds all the sensors configuration, NOTE: the key must match the self.__name variable in the sobj_<sensor> object. 
