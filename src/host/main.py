@@ -76,7 +76,7 @@ sensor_config.board_serial_listener_name = serial_listener_name
 ############## Server Configs ##############
 hostname = '144.39.167.206' #get this by running hostname -I
 # hostname = '127.0.0.1'
-port = 8000
+port = 5000
 server_listener_name = 'CSE_Server_Listener' #this the name for the internal thread that collect server info 
 server_name_host = 'CSE_Host' #this is the name for the thread that services all the web requests. 
 ############################################
