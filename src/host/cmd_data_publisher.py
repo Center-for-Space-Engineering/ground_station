@@ -107,7 +107,7 @@ class cmd_data_publisher(commandParent, threadWrapper):
         return "Commanded publisher to terminate."
         
 
-    def run_publisher(self, source):
+    def run_publisher(self, source): # pylint: disable=r0915
         '''
             This is the function the runs the pipe on its own thread. 
         '''
@@ -138,7 +138,7 @@ class cmd_data_publisher(commandParent, threadWrapper):
             self.__coms.send_request(self.__live_feed, ['create_tap', self.send_tap, 'data publisher']) #create a tap to the serial listener so it will send its data here. 
             is_live = True
 
-        try:
+        try: # pylint: disable=r1702
             running = True
             while running:
                 if connected:
@@ -151,7 +151,7 @@ class cmd_data_publisher(commandParent, threadWrapper):
                             if len(message) == 0:
                                 file.close()
                                 time.sleep(1)
-                                file = open(file_path, 'rb')
+                                file = open(file_path, 'rb') # pylint: disable=r1732
                             else :
                                 print(message)
                                 client_socket.sendall(message)

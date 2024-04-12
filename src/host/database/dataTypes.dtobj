@@ -6,9 +6,4 @@ serial_listener_two
     batch_sample:32 > byte
 
 processed_data_for_gps_board
-    gps_packets:0 > string
-    test_data:10 > int
-
-processed_data_for_gps_board_table_2
-    gps_packets:0 > string
-    test_data:10 > int
+    gps_packets:13 > byte

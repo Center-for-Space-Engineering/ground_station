@@ -202,7 +202,7 @@ class cmd_data_collector(commandParent):
             data_combined = b''.join(data)
             base64_data_combined = base64.b64encode(data_combined).decode('utf-8')
             file_extension = 'bin'
-        except TypeError as e:
+        except TypeError as e:# pylint: disable=w0612
             data_combined = args[3] + "\n" #include the name of the col 
             data_combined += data.to_string(index=False, header=True)
            # Encode the string using base64 encoding
@@ -211,7 +211,7 @@ class cmd_data_collector(commandParent):
 
             # Decode the base64 encoded bytes to a UTF-8 string
             base64_data_combined = base64_encoded_bytes.decode('utf-8')
-        except Exception as e:
+        except Exception as e: # pylint: disable=w0718
             return f'Error occurred {e}'
         
         return {
@@ -261,7 +261,7 @@ class cmd_data_collector(commandParent):
 
             # Decode the base64 encoded bytes to a UTF-8 string
             base64_data_combined = base64_encoded_bytes.decode('utf-8')
-        except Exception as e:
+        except Exception as e: # pylint: disable=w0718
             return f'Error occurred {e}'
         
         return {

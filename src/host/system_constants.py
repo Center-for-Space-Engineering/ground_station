@@ -1,4 +1,8 @@
-#This files holds the definition of where to find different tools that the system has access to. 
+'''
+    This files holds the definition of where to find different tools that the system has access to. 
+    The main purpose of this is to help the sensors class have very few imports. 
+'''
+
 interface_writer_list = {}
 interface_listener_list = {}
 server = None

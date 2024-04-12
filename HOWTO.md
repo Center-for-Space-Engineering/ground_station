@@ -276,6 +276,12 @@ Note: This call is for inserting a single row of data.
                 args[1] : dict of data to store
                 args[2] : thread id (used for reporting)
 ```
+```python
+    data_dict = {
+        'felid_name' : [... data list ...]
+    }
+    self.__coms.send_request('Data Base', ['save_data_group', self.__thread_name, data_dict, self.__thread_name])
+```
 3. `save_byte_data`: This function is for saving raw binary data. Here is the function docer string.
 ```
     This function is in charge of saving byte data (VARBINARY)
@@ -286,9 +292,17 @@ Note: This call is for inserting a single row of data.
 
             args:
                 [0] : table name
-                [1] : list of bytes
+                [1] : dictionary of data to save, where the key is the name of the felid, and the mapped value is a list of bytes. 
                 [2] : caller thread name
 ```
+Example :
+```python
+    data_dict = {
+        'felid_name' : [... byte list ... ]
+    }
+    self.__coms.send_request('Data Base', ['save_byte_data', self.__thread_name, data_dict, self.__thread_name])
+```
+NOTE: You can only have single column tables with byte data. 
 ## Request Data
 There are two function to call for requesting data.
 1. `get_data`: This is a slow function. It takes a starting index and requests EVERYTHING after that. I would recommend only using this for debugging. Here is the function docer string.
@@ -663,7 +677,8 @@ data = {
 sensor_parent.save_data(self, table = f'processed_data_for_{self.__name}', data = data)
 ```
 - `table` is the name of the table you want to save into, the data is the data. 
-- NOTE: data is a dictionary of the data you want to save, where the key is the column name, and the value mapped to is a list of data points to insert. I wrote it this way so that it would be easier to processes by type then save it all at once. Make sure your list are the same lengths. 
+- NOTE: data is a dictionary of the data you want to save, where the key is the column name, and the value mapped to is a list of data points to insert. I wrote it this way so that it would be easier to processes by type then save it all at once. Make sure your list are the same lengths.
+- NOTE: If your any of your columns contain byte data you need to call `sensor_parent.save_byte_data`, following the same structure. Reminder saving byte data only works for tables that only have one column. 
 
 #### - Graphing data
 Graphing is a simple x, y graph. After talking with our scientist, I assumed this would be sufficient for debugging. It should be easy to use, simply call: 

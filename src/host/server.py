@@ -3,7 +3,7 @@
 '''
 #python imports
 import logging 
-from flask import Flask, render_template, request , send_from_directory, jsonify, send_file
+from flask import Flask, render_template, request , send_from_directory, jsonify, send_file # pylint: disable=w0611 
 from datetime import datetime
 import os
 
@@ -110,13 +110,13 @@ class serverHandler(threadWrapper):
         self.__log.send_log(f"Path receive {unknown_path}")
         dto2 = print_message_dto("Server handled request")
         self.__coms.print_message(dto2, 2)
-        if isinstance(message, str):
+        if isinstance(message, str): # pylint: disable=r1705 
             data_dict = {
                 'text_data' : message,
                 'download' : 'no',
             }
             return jsonify(data_dict)
-        else :
+        else : 
             return jsonify(message)
     def serve_page_mangier(self):
         '''
@@ -330,6 +330,9 @@ class serverHandler(threadWrapper):
             data_obj = self.__coms.get_return(requested_port, id_request)
         return data_obj
     def get_serial_status(self):
+        '''
+            This is function returns the serial status to the web server for processing. 
+        '''
         data_obj = []
         request_list = [] #keeps track of all the request we have sent. 
         list_pos = 0
@@ -344,21 +347,24 @@ class serverHandler(threadWrapper):
             list_pos += 1
             data_obj.append({"Place holder": None}) # We are creating a list will all spots we need for return values so later we can pack the list and everything will be in the same order. 
         all_request_serviced = False
-        while not all_request_serviced:
+        while not all_request_serviced: # pylint: disable=c0200 
             all_request_serviced = True
             #loop over all our requests
-            for i in range(len(request_list)):
+            for i in range(len(request_list)): # pylint: disable=c0200 
                 data_obj_temp = None
                 # if we haven't all ready seen the request come back  check for it. 
                 if not request_list[i][2]: 
                     data_obj_temp = self.__coms.get_return(request_list[i][0], request_list[i][1])
                     # if we do get a request add it to the list and make the request as having been serviced. 
-                    if data_obj_temp != None:
+                    if data_obj_temp is not None:
                         request_list[i][2] = True
                         data_obj[request_list[i][3]] = data_obj_temp
                 all_request_serviced = all_request_serviced and request_list[i][2] #All the request have to say they have been serviced for this to mark as true. 
         return jsonify(data_obj)
     def get_serial_names(self):
+        '''
+            Returns all the serial names so the webpage knows about them. 
+        '''
         return jsonify({
             'listener' : self.__serial_listener_name,
             'writer' : self.__serial_writer_name
@@ -391,7 +397,7 @@ class serverHandler(threadWrapper):
         try :
             sensor_name = request.args.get('name')
             return render_template(self.__sensor_html_dict[sensor_name])
-        except KeyError as e:
+        except KeyError:
             return self.open_sensor() #this means we haven't created our sensor page yet so we just are going to return a different page        
     def sensor_graph_names(self):
         '''
@@ -408,13 +414,16 @@ class serverHandler(threadWrapper):
         sensor_name = request.args.get('name')
         try : 
             return jsonify(self.__sensor_html_dict[sensor_name][1].get_data_report())
-        except KeyError as e:
+        except KeyError:
             return jsonify('') #this means we haven't created our sensor page yet so we just are going to return a different page
     def sensor_last_published(self) :
+        '''
+            Finds the last published data on the current sensor
+        '''
         sensor_name = request.args.get('name')
         try : 
             return jsonify(self.__sensor_html_dict[sensor_name][1].get_last_published_data())
-        except KeyError as e:
+        except KeyError:
             return jsonify({
             'time' : 'NA',
             'data' : 'NA'

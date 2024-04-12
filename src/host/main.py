@@ -7,15 +7,13 @@ import time
 import datetime
 
 #python custom imports
+import system_constants as sensor_config # pylint: disable=e0401 
 from threading_python_api.taskHandler import taskHandler # pylint: disable=e0401 
 from database_python_api.database_control import DataBaseHandler # pylint: disable=e0401
 from logging_system_display_python_api.messageHandler import messageHandler # pylint: disable=e0401
 from cmd_inter import cmd_inter # pylint: disable=e0401
 from server import serverHandler # pylint: disable=e0401
 from server_message_handler import serverMessageHandler # pylint: disable=e0401
-
-#import DTO for communicating internally
-from logging_system_display_python_api.DTOs.print_message_dto import print_message_dto # pylint: disable=e0401
 
 #These are some Debugging tools I add, Turning off the display is really useful for seeing errors, because the terminal wont get erased every few milliseconds with the display on.
 DISPLAY_OFF = True
@@ -29,7 +27,6 @@ if not NO_SERIAL_WRITER:
     from python_serial_api.serial_writer import serial_writer # pylint: disable=e0401
 if not NO_SENSORS:
     from sensor_interface_api.collect_sensor import sensor_importer # pylint: disable=e0401
-import system_constants as sensor_config # pylint: disable=e0401
 
 ############## Serial Configs ##############
 # How many bytes to collect
@@ -206,9 +203,7 @@ def main():
             time.sleep(0.35)
         except KeyboardInterrupt:
             running = False
-            dto2 = print_message_dto('Main thread Shutdown started')
-            coms.report_additional_status('Main', dto2)
-        
+            print('\n>>> Main thread Shutdown Commanded, use ctrl c if termination takes to long.')        
     
     threadPool.kill_tasks()
      
