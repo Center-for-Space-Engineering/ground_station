@@ -219,12 +219,6 @@ class cmd_data_collector(commandParent):
             'download': 'yes',
             'file_extension' : file_extension, 
         }
-    # Define a function to encode byte data to UTF-8
-    def encode_to_utf8(self, byte_data):
-        '''
-            This function is used so we can turn byte data into a format that the webpage likes. 
-        '''
-        return byte_data.decode('utf-8')
     
     def get_dto_full_table(self, args):
         '''
@@ -269,7 +263,8 @@ class cmd_data_collector(commandParent):
         table_column_information = table_info.get_fields()
         for column_key in table_column_information:
             if table_column_information[column_key][1] == 'byte': #if the data is byte data we need to encode it before we ship it off to the webpage.
-                data_in_table_df[column_key] = data_in_table_df[column_key].apply(self.encode_to_utf8)
+                data_in_table_df[column_key] = data_in_table_df[column_key].apply(lambda x: x.hex())
+
        
         last_db_index = data_in_table_df['Table Index'].tail(1).iat[0] #get the last row in the dto
         dto_internal = print_message_dto("DTO returned to requester.")
