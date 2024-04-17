@@ -57,7 +57,6 @@ class cmd_data_collector(commandParent):
                 [1:] ARGS that the function needs. NOTE: can be blank
         '''
         message = f"<h3>Running command {self.__command_name} with args {str(args)}</h3>"
-        # message += self.__args[args[0]](args)
         try:
             temp = self.__args[args[0]](args)
 
@@ -220,6 +219,12 @@ class cmd_data_collector(commandParent):
             'download': 'yes',
             'file_extension' : file_extension, 
         }
+    # Define a function to encode byte data to UTF-8
+    def encode_to_utf8(self, byte_data):
+        '''
+            This function is used so we can turn byte data into a format that the webpage likes. 
+        '''
+        return byte_data.decode('utf-8')
     
     def get_dto_full_table(self, args):
         '''
@@ -238,23 +243,39 @@ class cmd_data_collector(commandParent):
             pass
         #make the data request to the database.
         request_num = self.__data_base.make_request('get_data_large', [args[1], args[2], self.__max_rows])
-        temp = self.__data_base.get_request(request_num)
+        data_in_table_df = self.__data_base.get_request(request_num)
 
         #wait for the database to return the data
-        while temp is None: #wait until we get a return value
-            temp = self.__data_base.get_request(request_num)
+        while data_in_table_df is None: #wait until we get a return value
+            data_in_table_df = self.__data_base.get_request(request_num)
             time.sleep(0.1) #let other process run
-        #if the database returns a string it is an error
-        if isinstance(temp, str) : 
-            return temp
-        if temp.empty: 
+        
+         #if the database returns a string it is an error
+        if isinstance(data_in_table_df, str) : 
+            return data_in_table_df
+        # table is empty so drop out of function
+        if data_in_table_df.empty: 
             return  "<! DOCTYPE html>\n<html>\n<body>\n<h1><strong>dto (data transfer object): No saved data</strong></h1>\n</body>\n</html>"
-        data = temp #septate data out
-        last_db_index = temp['Table Index'].tail(1).iat[0] #get the last row in the dto
+        
+        #get the table information
+        request_num = self.__data_base.make_request('get_data_type', [args[1]])
+        table_info = self.__data_base.get_request(request_num)
+
+        #wait for the database to return the table object
+        while table_info is None: #wait until we get a return value
+            table_info = self.__data_base.get_request(request_num)
+            time.sleep(0.1) #let other process run
+
+        table_column_information = table_info.get_fields()
+        for column_key in table_column_information:
+            if table_column_information[column_key][1] == 'byte': #if the data is byte data we need to encode it before we ship it off to the webpage.
+                data_in_table_df[column_key] = data_in_table_df[column_key].apply(self.encode_to_utf8)
+       
+        last_db_index = data_in_table_df['Table Index'].tail(1).iat[0] #get the last row in the dto
         dto_internal = print_message_dto("DTO returned to requester.")
         self.__coms.print_message(dto_internal)
         try : 
-            data_combined = data.to_string(index=False, header=True)
+            data_combined = data_in_table_df.to_csv(index=False, header=True)
            # Encode the string using base64 encoding
             base64_encoded_bytes = base64.b64encode(data_combined.encode('utf-8'))
             file_extension = 'csv'
