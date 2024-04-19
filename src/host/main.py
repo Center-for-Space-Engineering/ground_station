@@ -5,6 +5,7 @@
 #python built in imports
 import time
 import datetime
+import yaml
 
 #python custom imports
 import system_constants as sensor_config # pylint: disable=e0401 
@@ -28,91 +29,56 @@ if not NO_SERIAL_WRITER:
 if not NO_SENSORS:
     from sensor_interface_api.collect_sensor import sensor_importer # pylint: disable=e0401
 
-############## Serial Configs ##############
-# How many bytes to collect
-batch_size_1 = 8
-batch_size_2 = 32
-
-serial_listener_name = 'serial_listener_one'
-serial_writer_name = 'serial_writer_one'
-
-serial_listener_2_name = 'serial_listener_two'
-serial_writer_2_name = 'serial_writer_two'
-
-#Location of serial port on raspberry pi system
-uart_0 = '/dev/ttyS0'
-uart_2 = '/dev/ttyAMA2'
-
-#List of interface for system to use
-serial_listener_list = [serial_listener_name, serial_listener_2_name]
-serial_writer_list = [serial_writer_name, serial_writer_2_name]
-
-#tell the system what the board serial name is 
-sensor_config.board_serial_listener_name = serial_listener_name
-
-########## Writer's NOTE ######################
-# The Raspberry pi 4b has 5 Uart lines.
-# NAME  | TYPE
-#_______|_____
-# UART0 | PL011
-# UART1 | mini UART 
-# UART2 | PL011
-# UART3 | PL011
-# UART4 | PL011
-# UART5 | PL011
-# NOTE: Each uart has 4 pins assign to it. The first to are TX and RX and the last two are for multi device uart. 
-# mini uart does not work with the interface I have set up. However, it would be possible to figur\widetilde{X} e out how to make it work.
-# In order to see what pins the uart is using run the following command 'dtoverlay -h uart2'. 
-# In order to use the additional uart you first need to enable it, by doing the following. 
-#   first: add it to the '/boot/config.txt' try running  vim /boot/config.txt, or nano /boot/config.txt, then add the correct line 
-#       to the bottom of the config.txt. It should look something like this dtoverlay=UART3
-# Then reboot the pi.
-# Then check the /dev/ folder for the new serial over lay. It will probably be something like '/dev/ttyAMA3' or '/dev/ttyS3'. 
-# One you find the correct path, that is the path you should pass in to our serial class. (see uart_2 or uart_0)
-########## Writer's NOTE ######################
-
-############################################
-
-############## Server Configs ##############
-hostname = '144.39.167.206' #get this by running hostname -I
-# hostname = '127.0.0.1'
-port = 5000
-server_listener_name = 'CSE_Server_Listener' #this the name for the internal thread that collect server info 
-server_name_host = 'CSE_Host' #this is the name for the thread that services all the web requests. 
-############################################
-
-
-############## Data Base configs ###########
-data_base = 'Data Base'
-############################################
-
-############## Sensor configs ###########
-gps_config = { #this dictionary tell the gps sensor how to configure it self.
-    'tap_request' : [serial_listener_2_name], # index in the list can be the name of a serial listener or any sensors who's date you want to listen to or None (Example for none: None) 
-    'publisher' : 'yes',
-    'publish_data_name' : 'gps_packets', #NOTE: NOT used right now
-    'passive_active' : 'passive', #passive sensors only publish when they receive then process data, active sensors always publish on an interval.
-    'interval_pub' : 'NA', # We are not using this param because we are a passive publisher, however if the sensor is active we will need to set this interval to the desired rate. 
-    'Sensor_data_tag' : b'$' #This parameter is for the sensor class to search data from the tag, wether it comes from the serial line or from other sensors on the system. 
-}
-
-sensor_config_dict = { #this dictionary holds all the sensors configuration, NOTE: the key must match the self.__name variable in the sobj_<sensor> object. 
-    'gps_board' : gps_config, #NOTE: The key here becomes part of a file name so make sure you use valid chars in the name. 
-}
-
-# set up the config file
-sensor_config.interface_listener_list = serial_listener_list
-sensor_config.interface_writer_list = serial_writer_list
-sensor_config.server = server_listener_name
-sensor_config.sensors_config = sensor_config_dict
-sensor_config.database_name = data_base
-############################################
-
 def main():
     '''
     This module runs everything, its main job is to create and run all of the 
     system objects and classes. 
     '''
+
+    ###################### Import from the Yaml file #########################
+    # Load the YAML file
+    with open("main.yaml", "r") as file:
+        config_data = yaml.safe_load(file)
+    # Load the sensor yaml file
+    if not NO_SENSORS:
+        with open("sensor_interface_api/sensors.yaml", "r") as file:
+            sensor_config_yaml = yaml.safe_load(file)
+
+        # Combine the data into a single dictionary
+        config_data = {**config_data, **sensor_config_yaml}
+
+    batch_size_1 = config_data.get("batch_size_1", 0)
+    batch_size_2 = config_data.get("batch_size_2", 0)
+
+    serial_listener_name = config_data.get("serial_listener_name", "")
+    serial_writer_name = config_data.get("serial_writer_name", "")
+    serial_listener_2_name = config_data.get("serial_listener_2_name", "")
+    serial_writer_2_name = config_data.get("serial_writer_2_name", "")
+
+    uart_0 = config_data.get("uart_0", "")
+    uart_2 = config_data.get("uart_2", "")
+
+    serial_listener_list = config_data.get("serial_listener_list", [])
+    serial_writer_list = config_data.get("serial_writer_list", [])
+
+    hostname = config_data.get("hostname", "")
+    port = config_data.get("port", 0)
+    server_listener_name = config_data.get("server_listener_name", "")
+    server_name_host = config_data.get("server_name_host", "")
+
+    data_base = config_data.get("data_base", "")
+    if not NO_SENSORS:
+        # Sensor configs
+        sensor_config_dict = config_data.get("sensor_config_dict", {})
+
+        # set up the config file
+        sensor_config.interface_listener_list = serial_listener_list
+        sensor_config.interface_writer_list = serial_writer_list
+        sensor_config.server = server_listener_name
+        sensor_config.sensors_config = sensor_config_dict
+        sensor_config.database_name = data_base
+
+    ########################################################################################
 
     ########### Set up server, database, and threading interface ########### 
     #create a server obj, not it will also create the coms object #144.39.167.206
@@ -150,6 +116,7 @@ def main():
     # create the ser_listener
     if not NO_SERIAL_LISTENER:
         # Serial listener one
+        print(f"{batch_size_1} {serial_listener_name} {uart_0}")
         ser_listener = serial_listener(coms = coms, batch_size=batch_size_1, thread_name=serial_listener_name, stopbits=1, pins=uart_0)
         threadPool.add_thread(ser_listener.run, serial_listener_name, ser_listener)
 
