@@ -39,13 +39,6 @@ def main():
     # Load the YAML file
     with open("main.yaml", "r") as file:
         config_data = yaml.safe_load(file)
-    # Load the sensor yaml file
-    if not NO_SENSORS:
-        with open("sensor_interface_api/sensors.yaml", "r") as file:
-            sensor_config_yaml = yaml.safe_load(file)
-
-        # Combine the data into a single dictionary
-        config_data = {**config_data, **sensor_config_yaml}
 
     batch_size_1 = config_data.get("batch_size_1", 0)
     batch_size_2 = config_data.get("batch_size_2", 0)
@@ -116,7 +109,6 @@ def main():
     # create the ser_listener
     if not NO_SERIAL_LISTENER:
         # Serial listener one
-        print(f"{batch_size_1} {serial_listener_name} {uart_0}")
         ser_listener = serial_listener(coms = coms, batch_size=batch_size_1, thread_name=serial_listener_name, stopbits=1, pins=uart_0)
         threadPool.add_thread(ser_listener.run, serial_listener_name, ser_listener)
 

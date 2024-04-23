@@ -2,11 +2,11 @@
 batch_size_1: 8
 batch_size_2: 32
 
-serial_listener_name: serial_listener_one
-serial_writer_name: serial_writer_one
+serial_listener_name: &serial_listener_name serial_listener_one
+serial_writer_name: &serial_writer_name serial_writer_one
 
-serial_listener_2_name: serial_listener_two
-serial_writer_2_name: serial_writer_two
+serial_listener_2_name: &serial_listener_2_name serial_listener_two
+serial_writer_2_name: &serial_writer_2_name serial_writer_two
 
 # Location of serial port on Raspberry Pi system
 uart_0: /dev/ttyS0
@@ -14,12 +14,12 @@ uart_2: /dev/ttyAMA2
 
 # List of interfaces for system to use
 serial_listener_list:
-  - serial_listener_name
-  - serial_listener_2_name
+  - *serial_listener_name
+  - *serial_listener_2_name
 
 serial_writer_list:
-  - serial_writer_name
-  - serial_writer_2_name
+  - *serial_writer_name
+  - *serial_writer_2_name
 
 # Writer's NOTE
 # The Raspberry pi 4b has 5 Uart lines.
@@ -50,3 +50,16 @@ server_name_host: 'CSE_Host'  # this is the name for the thread that services al
 
 # Data Base configs
 data_base: 'Data Base'
+
+# Sensor configs
+sensor_config_dict:
+  # This dictionary holds all the sensors configuration, NOTE: the key must match the self.__name variable in the sobj_<sensor> object. 
+  # NOTE: The key here becomes part of a file name so make sure you use valid chars in the name. 
+  gps_board:
+      # This dictionary tells the GPS sensor how to configure itself.
+      tap_request: [*serial_listener_2_name]  # Index in the list can be the name of a serial listener or any sensors whose data you want to listen to or None (Example for none: None) 
+      publisher: 'yes'
+      publish_data_name: 'gps_packets'  # NOTE: NOT used right now
+      passive_active: 'passive'  # Passive sensors only publish when they receive then process data, active sensors always publish on an interval.
+      interval_pub: 'NA'  # We are not using this param because we are a passive publisher, however if the sensor is active we will need to set this interval to the desired rate. 
+      Sensor_data_tag: 0x24  # Hexadecimal representation of '$' This parameter is for the sensor class to search data from the tag, whether it comes from the serial line or from other sensors on the system.

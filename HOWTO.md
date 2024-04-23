@@ -400,6 +400,55 @@ Then check the /dev/ folder for the new serial over lay. It will probably be som
 
 ### Step two:
 Adding it to the system is pretty simple (I hope...). \
+NOTE: You add all these variables to the `main.yaml` file.  Then you will import them in the main file. This is the arcature we are using, so please stick to it. 
+Example `main.yaml`
+```yaml
+# Serial Configs
+batch_size_1: 8
+batch_size_2: 32
+
+serial_listener_name: &serial_listener_name serial_listener_one
+serial_writer_name: &serial_writer_name serial_writer_one
+
+serial_listener_2_name: &serial_listener_2_name serial_listener_two
+serial_writer_2_name: &serial_writer_2_name serial_writer_two
+
+# Location of serial port on Raspberry Pi system
+uart_0: /dev/ttyS0
+uart_2: /dev/ttyAMA2
+
+# List of interfaces for system to use
+serial_listener_list:
+  - *serial_listener_name
+  - *serial_listener_2_name
+
+serial_writer_list:
+  - *serial_writer_name
+  - *serial_writer_2_name
+
+```
+Example decoding in main file:
+```python
+###################### Import from the Yaml file #########################
+    # Load the YAML file
+    with open("main.yaml", "r") as file:
+        config_data = yaml.safe_load(file)
+
+    batch_size_1 = config_data.get("batch_size_1", 0)
+    batch_size_2 = config_data.get("batch_size_2", 0)
+
+    serial_listener_name = config_data.get("serial_listener_name", "")
+    serial_writer_name = config_data.get("serial_writer_name", "")
+    serial_listener_2_name = config_data.get("serial_listener_2_name", "")
+    serial_writer_2_name = config_data.get("serial_writer_2_name", "")
+
+    uart_0 = config_data.get("uart_0", "")
+    uart_2 = config_data.get("uart_2", "")
+
+    serial_listener_list = config_data.get("serial_listener_list", [])
+    serial_writer_list = config_data.get("serial_writer_list", [])
+    ########################################################################################
+```
 Fist crate a `batch_size`. This variable will tell your listeners how many bytes to collect before submitting a save request to the data base. The larger this number the faster the data base can save the data (up to 8000), however the smaller the number the faster you will see the bytes come out the other end of the pipe. One Final note, for speed the listener will collect 10 samples of the `batch_size` then send that data to be saved by the data base. I did include a 5 second time out so if the listener stops receiving data, it will eventually save it to the data base. 
 
 Then create a name for the listener and writer. (If you need both, you can just have one or the other.) Add the names to the respective lists `serial_listener_list` and `serial_writer_list`. Then create a file path variable for the system to use. Example `uart_2 = '/dev/ttyAMA2'`. \
@@ -427,17 +476,23 @@ Authors Note: This example is write to our data scientist, who are quite smart, 
 The system supports dynamically adding sensors. A sensors is anything that consumes and/or produces data. The system also supports producing sensor chains. For example: serial line -> L0 processing -> L1 processing. The sensors also allow for dynamically graphing your data. The sensors also support data insertion into the Data Base. Finally they will also handel shipping all that data to the webpage. This should allow for real time debugging on the system. However the primary purpose of sensors is to facilitate unit testing.
 
 ### Step One:
-Set up a config dictionary in the main file. This tells the system how to handle this sensor. Consider the following example:
-```python
-gps_config = { #this dictionary tell the gps sensor how to configure it self.
-    'tap_request' : ['serial_listener_connect_to_gps_board'], # index in the list can be the name of a serial listener or any sensors who's date you want to listen to or None (Example for none: None) 
-    'publisher' : 'yes',
-    'publish_data_name' : 'gps_packets', #NOTE: NOT used right now
-    'passive_active' : 'passive', #passive sensors only publish when they receive then process data, active sensors always publish on an interval.
-    'interval_pub' : 'NA', # We are not using this param because we are a passive publisher, however if the sensor is active we will need to set this interval to the desired rate. 
-    'Sensor_data_tag' : 'temp' #This parameter is for the sensor class to search data from the tag, wether it comes from the serial line or from other sensors on the system. 
-}
+Set up a config dictionary in the `main.yaml`. This tells the system how to handle this sensor. Consider the following example:
+```yaml
+# Sensor configs
+sensor_config_dict:
+  # This dictionary holds all the sensors configuration, NOTE: the key must match the self.__name variable in the sobj_<sensor> object. 
+  # NOTE: The key here becomes part of a file name so make sure you use valid chars in the name. 
+  gps_board:
+      # This dictionary tells the GPS sensor how to configure itself.
+      tap_request: [*serial_listener_2_name]  # Index in the list can be the name of a serial listener or any sensors whose data you want to listen to or None (Example for none: None) 
+      publisher: 'yes'
+      publish_data_name: 'gps_packets'  # NOTE: NOT used right now
+      passive_active: 'passive'  # Passive sensors only publish when they receive then process data, active sensors always publish on an interval.
+      interval_pub: 'NA'  # We are not using this param because we are a passive publisher, however if the sensor is active we will need to set this interval to the desired rate. 
+      Sensor_data_tag: 0x24  # Hexadecimal representation of '$' This parameter is for the sensor class to search data from the tag, whether it comes from the serial line or from other sensors on the system.
+
 ```
+NOTE: Any new sensor needs to go under the `sensor_config_dict` this is what tells the system there is a sensor to add.\
 Argument expiation: 
 1. `tap_request` : This parameter is a list of the classes you would like to listen too. (can be serial lines or sensors.) You are allowed to have more than one tap requests. 
 2. `publisher` : `yes` or `no` This parameter tells the system where or not this sensors will publish data. 
@@ -458,17 +513,10 @@ Argument expiation:
 5. `interval_pub` : This parameter is the interval you will publish on if you are an active sensor. Can be `NA` or `<some data>`.
 6. `Sensor_data_tag` : This parameter is not used by the system. It is meant to be used by the class you will  write if you so choose. Basically I put it there so that other users can see what data tag the sensor is searching for in the incoming data stream.
 
-NOTE: If you would like to add, addition args to your config dictionary, you can, the system wont care. 
+NOTE: If you would like to add, addition arguments to your config dictionary, you can, the system wont care. But all of the basic arguments should be present. 
 
 ### Step Two:
-Add the config dictionary you just made to the global config dictionary. 
-Example:
-```python
-sensor_config_dict = { #this dictionary holds all the sensors configuration, NOTE: the key must match the self.__name variable in the sobj_<sensor> object. 
-    'gps_board' : gps_config, #NOTE: The key here becomes part of a file name so make sure you use valid chars in the name. 
-}
-```
-NOTE: The key you use is super important. When you make the `sobj_-sensor-` class (step 3) you need to make sure that the `self.__name` variable must be  the same as the key or the system will be unable to match your config file to the sensor class you build.
+Take note of the key you use it is super important. When you make the `sobj_-sensor-` class (step 3) you need to make sure that the `self.__name` variable must be  the same as the key or the system will be unable to match your config file to the sensor class you build. IN the example above the key is `gps_board`
 
 ### Step Three:
 Now it is time to create the `sobj_-sensor-` class. I will first example how to set up the class, then I will example the tools you have to. Every sensors implementation will be different. So I wont be able to provide as detailed instructions, but I will do my best to give you enough information to be able to build a sensor, even if you have little to no programming experience.
