@@ -7,5 +7,4 @@
 # Implement the serial_listener, and writer classes to also support other protocols, such as i2c and spi. 
 # Add AI agent to listen to the sensors and find anomalies in the data, then report them. 
 # Test sensor to sensor taps.
-# write howto, and read me for sensor api. 
 # add automated email reporting to system. 

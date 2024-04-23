@@ -661,14 +661,17 @@ NOTE: You do not need to worry about threading here, because I have already done
 Now in the above example we are assuming that the data is coming in all nice and package for us. However this is not the case when it is coming from the serial lines. This is because the serial line just grab a bunch of data then ship it. I have built a function to help but the data back together, but it may not work in all situation. However here is an example of how to use it. 
 
 ```python
-if event == 'data_received_for_serial_listener_connect_to_gps_board':
-    temp = sensor_parent.preprocess_data(self, sensor_parent.get_data_received(self, self.__config['tap_request'][0]), delimiter=self.__config['Sensor_data_tag']) #add the received data to the list of data we have received.
+if event == 'data_received_for_serial_listener_two':
+    temp, start_partial, end_partial = sensor_parent.preprocess_data(self, sensor_parent.get_data_received(self, self.__config['tap_request'][0]), delimiter=self.__config['Sensor_data_tag'], terminator=self.__config['Sensor_terminator_data_tag']) #add the received data to the list of data we have received.
     with self.__data_lock:
-        if len(self.__serial_line_two_data) > 0: 
+        if start_partial and len(self.__serial_line_two_data) > 0: 
             self.__serial_line_two_data[-1] += temp[0] #append the message to the previous message (this is because partial message can be included in batches, so we are basically adding the partial messages to gether, across batches. )
             self.__serial_line_two_data += temp[1:]
         else :
             self.__serial_line_two_data += temp
+        data_ready_for_processing = len(self.__serial_line_two_data) if not end_partial else len(self.__serial_line_two_data) - 1 #if the last packet is a partial pack then we are not going to process it.  
+        
+        self.__coms.send_request('task_handler', ['add_thread_request_func', self.process_gps_packets, f'processing data for {self.__name} ', self, [data_ready_for_processing]]) #start a thread to process data
 ```
 NOTE: This is where it might be useful to use the 'Sensor_data_tag' parameter from the config dictionary in step 1, but it is not required.
 Lets look at the processing steps:
