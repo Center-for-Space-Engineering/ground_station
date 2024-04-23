@@ -63,7 +63,6 @@ def main():
     if not NO_SENSORS:
         # Sensor configs
         sensor_config_dict = config_data.get("sensor_config_dict", {})
-        print(sensor_config_dict)
 
         # set up the config file
         sensor_config.interface_listener_list = serial_listener_list

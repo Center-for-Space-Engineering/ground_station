@@ -63,3 +63,6 @@ sensor_config_dict:
       passive_active: 'passive'  # Passive sensors only publish when they receive then process data, active sensors always publish on an interval.
       interval_pub: 'NA'  # We are not using this param because we are a passive publisher, however if the sensor is active we will need to set this interval to the desired rate. 
       Sensor_data_tag: 0x24  # Hexadecimal representation of '$' This parameter is for the sensor class to search data from the tag, whether it comes from the serial line or from other sensors on the system.
+      # Binary tag representing the data terminator used by the sensor.
+      # Modify this tag to match the data terminator of additional sensors.
+      Sensor_terminator_data_tag: 0x0D0A  # Hexadecimal representation of '\r\n'
