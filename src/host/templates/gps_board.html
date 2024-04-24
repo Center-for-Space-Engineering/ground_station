@@ -1,0 +1,129 @@
+<html>
+ <head>
+  <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js">
+  </script>
+  <title>
+   https://usu.cse.spacecraftemulator.com/gps_board
+  </title>
+  <script src="page_manigure.js">
+  </script>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js">
+  </script>
+ </head>
+ <body>
+  <div class="horizontal-container">
+   <h1 class="white-text">
+    CSE Space Craft Emulator: Sensor interface gps_board
+   </h1>
+  </div>
+  <div class="tab-container">
+   <div class="tab" onclick="open_tab('Status Report')">
+    Status Report
+   </div>
+   <div class="tab" onclick="open_tab('Data Stream')">
+    Data Stream
+   </div>
+   <div class="tab" onclick="open_tab('Sensor')">
+    Sensor
+   </div>
+   <div class="tab" onclick="open_tab('Command')">
+    Command
+   </div>
+  </div>
+  <div class="horizontal-container">
+   <h1 class="green-text">
+    Report from gps_board:
+   </h1>
+  </div>
+  <div class="horizontal-container">
+   <h2 class="orange-text">
+    Configurations:
+   </h2>
+  </div>
+  <table>
+   <thead>
+    <tr class="orange-text">
+     <th>
+      Configuration option
+     </th>
+     <th>
+      Configuration status
+     </th>
+    </tr>
+    <tbody>
+     <tr>
+      <td class="nice_teal">
+       tap_request
+      </td>
+      <td class="nice_teal">
+       ['serial_listener_two']
+      </td>
+     </tr>
+     <tr>
+      <td class="nice_teal">
+       publisher
+      </td>
+      <td class="nice_teal">
+       yes
+      </td>
+     </tr>
+     <tr>
+      <td class="nice_teal">
+       publish_data_name
+      </td>
+      <td class="nice_teal">
+       gps_packets
+      </td>
+     </tr>
+     <tr>
+      <td class="nice_teal">
+       passive_active
+      </td>
+      <td class="nice_teal">
+       passive
+      </td>
+     </tr>
+     <tr>
+      <td class="nice_teal">
+       interval_pub
+      </td>
+      <td class="nice_teal">
+       NA
+      </td>
+     </tr>
+     <tr>
+      <td class="nice_teal">
+       Sensor_data_tag
+      </td>
+      <td class="nice_teal">
+       36
+      </td>
+     </tr>
+     <tr>
+      <td class="nice_teal">
+       Sensor_terminator_data_tag
+      </td>
+      <td class="nice_teal">
+       3338
+      </td>
+     </tr>
+    </tbody>
+   </thead>
+  </table>
+  <h2 class="green-text">
+   Last published data:
+  </h2>
+  <h3 class="orange-text" id="time_pub_tag">
+   NA
+  </h3>
+  <h3 class="orange-text" id="data_pub_tag">
+   NA
+  </h3>
+  <script>
+   setInterval(function() {
+                    updateDataPublish("gps_board");
+                }, 1000);
+  </script>
+ </body>
+</html>

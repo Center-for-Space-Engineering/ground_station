@@ -436,7 +436,7 @@ class serverHandler(threadWrapper):
         dto = logger_dto(message="Server started http://%s:%s" % (self.__hostName, self.__serverPort), time=str(datetime.now()))
         self.__coms.send_message_permanent(dto, 2)
         super().set_status("Running")
-        self.app.run(debug=False, host=self.__hostName, port=self.__serverPort)
+        self.app.run(debug=False, host=self.__hostName, port=self.__serverPort, threaded=True)
     def kill_Task(self):
         '''
             This closes the Server, after the kill command is received.

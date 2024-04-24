@@ -120,7 +120,6 @@ class serverMessageHandler(threadWrapper):
                     }
                 ]
             else : data = copy.deepcopy(self.__byte_status)
-            self.__byte_status.clear()
         return data
     
     
