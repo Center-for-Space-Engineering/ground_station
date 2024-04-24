@@ -265,3 +265,9 @@ depending on context. The command to run `pylint` is:
 ```python
     python3 -m pylint --jobs 0 --rcfile .pylintrc <name of python file or folder>
 ```
+
+## Freezing system requirements:
+In order to make the code easier to use on other system I have added requirements.txt files, in order to update them run 
+```bash
+    pip freeze > requirements.txt
+```
