@@ -17,7 +17,24 @@
         <div class="tab" onclick="open_tab('Data Stream')">Data Stream</div>
         <div class="tab" onclick="open_tab('Command')">Command</div>
         <div class="tab" onclick="open_tab('Sensor')">Sensor</div>
+        <div class="tab" onclick="open_tab('unit_testing')">Passed Unit test</div>
+        <div class="tab" onclick="open_tab('failed_test')">failed test</div>
     </div>
+    <h1>Session Control</h1>
+    <div class="container">
+        <div class="box_style">
+            <label for="sessionInput">Enter Session Name:</label>
+            <input type="text" id="sessionInput" name="sessionName">
+            <label for="sessionDescription">Enter Session Description:</label>
+            <input type="text" id="sessionDescription" name="description">
+        </div>
+    </div>
+    <!-- Button to start session -->
+    <button class = "button_format" onclick="startSession()">Start Session</button>
+
+    <!-- Button to end session -->
+    <button class = "button_format_red" onclick="endSession()">End Session</button>
+
     <div class="horizontal-container"></div>
         <h2 class="white-text">Status Report From Space craft Emulator</h2>
         <h3 class="green-text">Permanent Logging Report</h3>
@@ -56,6 +73,26 @@
         setInterval(refresh_prem_logger_report, 500);
         setInterval(refresh_thread_report, 500);
         setInterval(refresh_status_report, 500);
+
+        function startSession() {
+            var sessionName = document.getElementById("sessionInput").value;
+            var description = document.getElementById("sessionDescription").value;
+            // Make AJAX request to Flask server to start session
+            fetch('/start_session', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ sessionName: sessionName, description:description }),
+            })
+        }
+
+        function endSession() {
+            // Make AJAX request to Flask server to end session
+            fetch('/end_session', {
+                method: 'POST',
+            })
+        }
     </script>
 </body>
 </html>

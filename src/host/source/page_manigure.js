@@ -23,6 +23,16 @@ function open_tab(message)
         window.location.href = '/Command';
 
     }
+    else if (message == 'unit_testing')
+    {
+        window.location.href = '/unit_testing';
+
+    }
+    else if (message == 'failed_test')
+    {
+        window.location.href = '/failed_test';
+
+    }
 }
 function refresh_logger_report()
 {
@@ -389,6 +399,46 @@ function update_sensor_status() {
         .catch();
 }
 
+// Function to fetch data from the server and update the table
+function update_failed_test() {
+    fetch('/update_failed_test ')
+        .then(response => response.json()) // Assuming the server returns JSON data
+        .then(data => {
+            const tableBody = document.getElementById('failed_test_list');
+            tableBody.innerHTML = ''; // Clear existing rows
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class = 'nice_teal'>${item}</td>
+                `;
+                row.addEventListener('click', function() {
+                    open_test_page(item) });
+                tableBody.appendChild(row);
+            });
+        })
+        .catch();
+}
+
+// Function to fetch data from the server and update the table
+function update_passed_test() {
+    fetch('/update_passed_test ')
+        .then(response => response.json()) // Assuming the server returns JSON data
+        .then(data => {
+            const tableBody = document.getElementById('Passed_test_list');
+            tableBody.innerHTML = ''; // Clear existing rows
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class = 'nice_teal'>${item}</td>
+                `;
+                row.addEventListener('click', function() {
+                    open_test_page(item) });
+                tableBody.appendChild(row);
+            });
+        })
+        .catch();
+}
+
 function open_sensor_page(name) 
 {
     // Define the data to be sent
@@ -403,6 +453,19 @@ function open_sensor_page(name)
     window.location.href = `/sensor_page?` + queryString;
 }
 
+function open_test_page(name) 
+{
+    // Define the data to be sent
+    var data = {
+        name : name,
+    };
+
+    // Convert the data object to a query string
+    var queryString = Object.keys(data).map(key => key + '=' + data[key]).join('&');
+
+    // Open new webpage
+    window.location.href = `/test_page?` + queryString;
+}
 function makeGraphsSensors(sensor_name){
     // Define the data to be sent
     var data = {

@@ -1,3 +1,14 @@
+#test interval seconds
+test_interval: 5
+
+#file location for failed and passed test (make sure to actually make this folder the system will not make it for you)
+#NOTE: these folders have to be inside the templates folder!
+failed_test_path: templates/failed_test
+passed_test_path: templates/passed_test
+
+#Maximum passed test Archive 
+max_passed_test: 15
+
 # Serial Configs
 batch_size_1: 8
 batch_size_2: 32
@@ -44,7 +55,8 @@ serial_writer_list:
 # Server Configs
 hostname: '144.39.167.206'  # get this by running hostname -I
 # hostname: '127.0.0.1'
-port: 5000
+# port: 5000
+port: 8080
 server_listener_name: 'CSE_Server_Listener'  # this the name for the internal thread that collects server info 
 server_name_host: 'CSE_Host'  # this is the name for the thread that services all the web requests
 

@@ -2,3 +2,5 @@
 **/__pycache__/
 **/database/**
 **/.vscode/**
+**/.pytest_cache/
+**/failed_test/

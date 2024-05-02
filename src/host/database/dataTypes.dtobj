@@ -7,3 +7,14 @@ serial_listener_two
 
 processed_data_for_gps_board
     gps_packets:13 > byte
+
+session_record
+    session_id:0 > string
+    start_time:0 > string
+    end_time:0 > string
+    description:0 > string
+
+tests_record
+    test_run_time:0 > string
+    pass_fail:0 > string
+    session_ID:0 > string

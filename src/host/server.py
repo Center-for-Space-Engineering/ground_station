@@ -6,6 +6,9 @@ import logging
 from flask import Flask, render_template, request , send_from_directory, jsonify, send_file # pylint: disable=w0611 
 from datetime import datetime
 import os
+import threading
+from werkzeug.serving import BaseWSGIServer
+from socketserver import ThreadingMixIn
 
 #imports from other folders that are not local
 from logging_system_display_python_api.logger import loggerCustom # pylint: disable=e0401
@@ -16,11 +19,14 @@ from server_message_handler import serverMessageHandler # pylint: disable=e0401
 from logging_system_display_python_api.DTOs.logger_dto import logger_dto # pylint: disable=e0401
 from logging_system_display_python_api.DTOs.print_message_dto import print_message_dto # pylint: disable=e0401
 
+class ThreadedWSGIServer(ThreadingMixIn, BaseWSGIServer):
+    pass
+
 class serverHandler(threadWrapper):
     '''
         This class is the server for the whole system. It hands serving the webpage and routing request to there respective classes. 
     '''
-    def __init__(self, hostName, serverPort, coms, cmd, messageHandler:serverMessageHandler, messageHandlerName:str, serial_writer_name:list[str], serial_listener_name:list[str]):
+    def __init__(self, hostName, serverPort, coms, cmd, messageHandler:serverMessageHandler, messageHandlerName:str, serial_writer_name:list[str], serial_listener_name:list[str], failed_test_path:str, passed_test_path:str):
         # pylint: disable=w0612
         self.__function_dict = { #NOTE: I am only passing the function that the rest of the system needs 
             'run' : self.run,
@@ -63,7 +69,20 @@ class serverHandler(threadWrapper):
         self.__sensor_list = None
         self.__sensor_html_dict = {}
 
-        print(f'Server started at http://{self.__hostName}:{self.__serverPort}')  
+        #this is the file path for our failed test
+        self.__failed_test_path = failed_test_path
+        self.__passed_test_path = passed_test_path
+
+        # Enable template auto-reloading in development mode
+        self.app.config["TEMPLATES_AUTO_RELOAD"] = True
+
+        self.__current_session_name = "NA"
+        self.__session_running = False
+        self.__session_description = "NA"
+        self.__session_lock = threading.Lock()
+
+        self.server = ThreadedWSGIServer(self.__hostName, self.__serverPort, self.app)
+        
     def setup_routes(self):
         '''
             This function sets up all the git request that can be accessed by the webpage.
@@ -73,6 +92,8 @@ class serverHandler(threadWrapper):
         self.app.route('/open_data_stream')(self.open_data_stream)
         self.app.route('/Sensor')(self.open_sensor)
         self.app.route('/Command')(self.command)
+        self.app.route('/unit_testing')(self.unit_testing)
+        self.app.route('/failed_test')(self.failed_test)
         self.app.route('/page_manigure.js')(self.serve_page_mangier)
         self.app.route('/get_updated_logger_report', methods=['GET'])(self.get_updated_logger_report)
         self.app.route('/get_updated_prem_logger_report', methods=['GET'])(self.get_updated_prem_logger_report)
@@ -86,12 +107,17 @@ class serverHandler(threadWrapper):
         self.app.route('/get_serial_status')(self.get_serial_status)
         self.app.route('/get_sensor_status')(self.get_sensor_status)
         self.app.route('/sensor_page')(self.sensor_page)
+        self.app.route('/test_page')(self.test_page)
         self.app.route('/sensor_graph_names')(self.sensor_graph_names)
         self.app.route('/get_sensor_graph_update')(self.get_sensor_graph_update)
         self.app.route('/sensor_last_published')(self.sensor_last_published)
+        self.app.route('/update_failed_test')(self.update_failed_test)
+        self.app.route('/update_passed_test')(self.update_passed_test)
 
         #the paths caught by this will connect to the users commands they add
         self.app.add_url_rule('/<path:unknown_path>', 'handle_unknown_path',  self.handle_unknown_path)
+        self.app.add_url_rule('/start_session', 'start_session', self.start_session, methods=['POST'])
+        self.app.add_url_rule('/end_session', 'end_session', self.end_session, methods=['POST'])
     def facicon(self):
         '''
             Returns image in the corner of the tab. 
@@ -427,21 +453,57 @@ class serverHandler(threadWrapper):
             return jsonify({
             'time' : 'NA',
             'data' : 'NA'
-        }) #this means we haven't created our sensor page yet so we just are going to return a different page  
+        }) #this means we haven't created our sensor page yet so we just are going to return a different page
+    def update_failed_test(self):
+        '''
+            This function updates the list of failed test on the webpage
+        '''
+        files = []
+
+        # Walk through the testing folder and find all the failed test their. 
+        for root, dirs, filenames in os.walk(self.__failed_test_path):
+            # Add the file names to the list
+            for filename in filenames:
+                file_path = os.path.join(root, filename)
+                files.append(file_path.replace('templates/', ''))
+        return files
+    def update_passed_test(self):
+        '''
+            This function updates the list of passed test on the webpage
+        '''
+        files = []
+
+        # Walk through the testing folder and find all the failed test their. 
+        for root, dirs, filenames in os.walk(self.__passed_test_path):
+            # Add the file names to the list
+            for filename in filenames:
+                file_path = os.path.join(root, filename)
+                files.append(file_path.replace('templates/', ''))
+        return files
+    def test_page(self):
+        '''
+            Returns the html page for a test
+        '''
+        test_name = request.args.get('name')
+
+        return render_template(test_name)
     def run(self):
         '''
             This is the run function for the server. 
         '''
+        print(f'Server started at http://{self.__hostName}:{self.__serverPort}')  
         self.__log.send_log("Test Server started http://%s:%s" % (self.__hostName, self.__serverPort))
         dto = logger_dto(message="Server started http://%s:%s" % (self.__hostName, self.__serverPort), time=str(datetime.now()))
         self.__coms.send_message_permanent(dto, 2)
         super().set_status("Running")
-        self.app.run(debug=False, host=self.__hostName, port=self.__serverPort, threaded=True)
+        self.server.serve_forever()
     def kill_Task(self):
         '''
             This closes the Server, after the kill command is received.
         '''
         super().kill_Task()
+        if self.server:
+            self.server.shutdown()
         self.__log.send_log("Server stopped.")
         self.__log.send_log("Quite command received.")
     def setHandlers(self, db):
@@ -465,6 +527,16 @@ class serverHandler(threadWrapper):
         '''
         table_data = self.__cmd.get_commands_webpage()
         return render_template('Command.html', table_data=table_data)
+    def failed_test(self):
+        '''
+            Returns html for the command page
+        '''
+        return render_template('failed_test_achieve.html')
+    def unit_testing(self):
+        '''
+            Returns html for the unit testing page
+        '''
+        return render_template('passed_test_achieve.html')
     def get_message_handler(self):
         '''
             Return the servers message handler object. 
@@ -485,3 +557,38 @@ class serverHandler(threadWrapper):
         #Make the dictionary of all the file paths to each sensors html page, and generate the page (the get_html_page) generates the html page
         for sensor in self.__sensor_list:
             self.__sensor_html_dict[sensor.get_sensor_name()] = (sensor.get_html_page().replace('templates/', ''), sensor)
+    def start_session(self):
+        '''
+            Start a session id 
+        '''
+        session_name = request.json.get('sessionName')
+        session_description = request.json.get('description')
+
+        with self.__session_lock:
+            self.__current_session_name = session_name
+            self.__session_description = session_description
+            self.__session_running = True
+        if session_name:
+            # Do something with the session name, like start a session
+            return jsonify({'message': 'Session started successfully'}), 200
+        else:
+            return jsonify({'error': 'Session name not provided'}), 400
+
+    def end_session(self):
+        # Do something to end the session
+        with self.__session_lock:
+            self.__session_running = False
+        return jsonify({'message': 'Session ended successfully'}), 200
+
+    def get_session_info(self):
+        '''
+            Returns the session information to the requester.
+
+            Return order:
+            name, description, running 
+        '''
+        with self.__session_lock:
+            name = self.__current_session_name
+            session_description = self.__session_description
+            running = self.__session_running
+        return name, session_description, running

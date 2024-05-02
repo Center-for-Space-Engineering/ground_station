@@ -15,9 +15,10 @@ from logging_system_display_python_api.messageHandler import messageHandler # py
 from cmd_inter import cmd_inter # pylint: disable=e0401
 from server import serverHandler # pylint: disable=e0401
 from server_message_handler import serverMessageHandler # pylint: disable=e0401
+from pytesting_api.test_runner import test_runner # pylint: disable=e0401
+from pytesting_api import global_test_variables # pylint: disable=e0401
 
 #These are some Debugging tools I add, Turning off the display is really useful for seeing errors, because the terminal wont get erased every few milliseconds with the display on.
-DISPLAY_OFF = True
 NO_SERIAL_LISTENER = False
 NO_SERIAL_WRITER = False
 NO_SENSORS = False
@@ -39,6 +40,11 @@ def main():
     # Load the YAML file
     with open("main.yaml", "r") as file:
         config_data = yaml.safe_load(file)
+    
+    test_interval = config_data.get("test_interval", 0)
+    failed_test_path = config_data.get("failed_test_path", 0)
+    passed_test_path = config_data.get("passed_test_path", 0)
+    max_passed_test = config_data.get("max_passed_test", 0)
 
     batch_size_1 = config_data.get("batch_size_1", 0)
     batch_size_2 = config_data.get("batch_size_2", 0)
@@ -75,16 +81,16 @@ def main():
 
     ########### Set up server, database, and threading interface ########### 
     #create a server obj, not it will also create the coms object #144.39.167.206
-    coms = messageHandler(display_off = DISPLAY_OFF, server_name=server_listener_name, hostname=hostname)
+    coms = messageHandler(server_name=server_listener_name, hostname=hostname)
     #make database object 
     dataBase = DataBaseHandler(coms, is_gui=False)
-    #now that we have the data base we can collect all of our command handlers.
+    #now that we have the data base we can collect all of our command handlers.s
     cmd = cmd_inter(coms, dataBase)
     #now that we have all the commands we can make the server
     #note because the server requires a thread to run, it cant have a dedicated thread to listen to coms like
     #other classes so we need another class object to listen to internal coms for the server.
     server_message_handler = serverMessageHandler(coms=coms)
-    server = serverHandler(hostname, port, coms, cmd, serverMessageHandler, server_listener_name, serial_writer_name=serial_writer_list, serial_listener_name=serial_listener_list)
+    server = serverHandler(hostname, port, coms, cmd, serverMessageHandler, server_listener_name, serial_writer_name=serial_writer_list, serial_listener_name=serial_listener_list, failed_test_path=failed_test_path, passed_test_path=passed_test_path)
     
 
     #first start our thread handler and the message handler (coms) so we can start reporting
@@ -131,23 +137,45 @@ def main():
         threadPool.start() #start the new task
     ########################################################################################
     
-    ########### Set up sensor interface ########### 
-    # create the sensors interface
-    importer = sensor_importer() # create the importer object
-    importer.import_modules() # collect the models to import
-    importer.instantiate_sensor_objects(coms=coms) # create the sensors objects.
+    ########### Set up sensor interface ###########
+    if not NO_SENSORS:
+        # create the sensors interface
+        importer = sensor_importer() # create the importer object
+        importer.import_modules() # collect the models to import
+        importer.instantiate_sensor_objects(coms=coms) # create the sensors objects.
 
-    sensors = importer.get_sensors() #get the sensors objects
-    
-    # create a thread for each sensor and then start them. 
-    for sensor in sensors:
-        threadPool.add_thread(sensor.run, sensor.get_sensor_name(), sensor)
-    threadPool.start()
+        sensors = importer.get_sensors() #get the sensors objects
+        
+        # create a thread for each sensor and then start them. 
+        for sensor in sensors:
+            threadPool.add_thread(sensor.run, sensor.get_sensor_name(), sensor)
+        threadPool.start()
 
-    # give the webpage gain access to the sensors.
-    server.set_sensor_list(sensors=sensors)
+        # give the webpage gain access to the sensors.
+        server.set_sensor_list(sensors=sensors)
 
     ########################################################################################
+
+    ######################### Set up unit tests ############################################
+    global_test_variables.coms = coms
+    global_test_variables.db_name = data_base
+    global_test_variables.session_id = f"Start_up {datetime.datetime.now()}"
+
+    # Now lets set up the session table in the database, 
+    table_name = 'session_record'
+    table_structure = {
+        table_name : [['session_id', 0, 'string'], ['start_time', 0, 'string'], ['end_time', 0, 'string'], ['description', 0, 'string']],
+    }
+    # This is the main file, so we do have access to the data base object so we could call the create_table_external function directly, 
+    # however there are two major problems, 
+    # 1: we would actually need to call 'make_request' to get the database to actually run our request.
+    # 2: this provides a good example for the user of how to use the coms obj.
+    coms.send_request(data_base, ['create_table_external', table_structure]) 
+
+    #Now create the test_runner object
+    test_interface = test_runner(failed_test_path=failed_test_path, passed_test_path=passed_test_path, max_files_passed=max_passed_test)
+    ########################################################################################
+
 
 
     #Good line if you need to test a thread crashing. 
@@ -155,14 +183,58 @@ def main():
 
     #keep the main thread alive for use to see things running. 
     running = True
+    session_start_time = datetime.datetime.now()
+    session_end_time = datetime.datetime.now()
+    session_was_running = False
+    session = f'start up session {session_start_time}'
+    description = ''
+    session_running = False
+    test_start_time = datetime.datetime.now()
+
+    #Run the main loop handle session, testing, and threading overhead
     while running:
         try:
-            threadPool.get_thread_status()
-            coms.report_additional_status('Main', f'Main thread Running {datetime.datetime.now()}')
-            time.sleep(0.35)
+            threadPool.get_thread_status() #this commands the threads to report to the server how they are running. 
+            
+            session, description, session_running = server.get_session_info() #get the current session settings. 
+
+            if session_running: 
+                #tell users we have started
+                if not session_was_running:
+                    coms.report_additional_status('Main', f'Main thread : Running Session {datetime.datetime.now()}')
+
+                session_was_running = True
+
+                #run test if it is time
+                if datetime.datetime.now() - test_start_time >= test_interval:
+                    coms.report_additional_status('Main', f'Main thread : Running  test {datetime.datetime.now()}')
+                    test_interface.run_tests()
+                    coms.report_additional_status('Main', f'Main thread : Completed test {datetime.datetime.now()}')
+            elif session_was_running:
+                #report the session information
+                data = {
+                    'session_id' : [session],
+                    'start_time' : [str(session_start_time)],
+                    'end_time' : [str(session_end_time)],
+                    'description' : [description],
+                }
+                coms.send_request(data_base, ['save_data_group', table_name, data, 'main'])
+                session_was_running = False
+            else :
+                session_start_time = datetime.datetime.now()
+                session_was_running = False
+
+
         except KeyboardInterrupt:
+            data = {
+                    'session_id' : [session],
+                    'start_time' : [str(session_start_time)],
+                    'end_time' : [str(session_end_time)],
+                    'description' : [description],
+                }
+            coms.send_request(data_base, ['save_data_group', table_name, data, 'main'])
             running = False
-            print('\n>>> Main thread Shutdown Commanded, use ctrl c if termination takes to long.')        
+            print('\n>>> Main thread Shutdown Commanded, please wait.')        
     
     threadPool.kill_tasks()
      
