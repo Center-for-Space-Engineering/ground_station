@@ -10,7 +10,7 @@ passed_test_path: templates/passed_test
 max_passed_test: 15
 
 # Serial Configs
-batch_size_1: 8
+batch_size_1: 8000
 batch_size_2: 32
 
 serial_listener_name: &serial_listener_name serial_listener_one
