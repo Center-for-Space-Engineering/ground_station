@@ -16,3 +16,6 @@
 [submodule "src/host/pytesting_api"]
 	path = src/host/pytesting_api
 	url = git@github.com:Center-for-Space-Engineering/pytesting_api.git
+[submodule "src/host/port_interface_api"]
+	path = src/host/port_interface_api
+	url = git@github.com:Center-for-Space-Engineering/port_interface_api.git

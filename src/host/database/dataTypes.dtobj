@@ -1,8 +1,8 @@
 
-serial_listener_one
-    batch_sample:8 > byte
+port_listener_one
+    batch_sample:32 > byte
 
-serial_listener_two
+port_listener_two
     batch_sample:32 > byte
 
 processed_data_for_gps_board

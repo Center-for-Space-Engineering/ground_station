@@ -26,7 +26,7 @@ class serverHandler(threadWrapper):
     '''
         This class is the server for the whole system. It hands serving the webpage and routing request to there respective classes. 
     '''
-    def __init__(self, hostName, serverPort, coms, cmd, messageHandler:serverMessageHandler, messageHandlerName:str, serial_writer_name:list[str], serial_listener_name:list[str], failed_test_path:str, passed_test_path:str):
+    def __init__(self, hostName, serverPort, coms, cmd, messageHandler:serverMessageHandler, messageHandlerName:str, serial_writer_name:list[str], listener_name:list[str], failed_test_path:str, passed_test_path:str):
         # pylint: disable=w0612
         self.__function_dict = { #NOTE: I am only passing the function that the rest of the system needs 
             'run' : self.run,
@@ -45,7 +45,7 @@ class serverHandler(threadWrapper):
 
         #set up coms with the serial port
         self.__serial_writer_name = serial_writer_name
-        self.__serial_listener_name = serial_listener_name
+        self.__listener_name = listener_name
 
         #these class are used to communicate with the reset of the cse code
         self.__coms = coms
@@ -362,7 +362,7 @@ class serverHandler(threadWrapper):
         data_obj = []
         request_list = [] #keeps track of all the request we have sent. 
         list_pos = 0
-        for name in self.__serial_listener_name:
+        for name in self.__listener_name:
             #make a request to switch the serial port to new configurations
             request_list.append([name, self.__coms.send_request(name, ['get_status_web']), False, list_pos]) #send the request to the port
             list_pos += 1
@@ -392,7 +392,7 @@ class serverHandler(threadWrapper):
             Returns all the serial names so the webpage knows about them. 
         '''
         return jsonify({
-            'listener' : self.__serial_listener_name,
+            'listener' : self.__listener_name,
             'writer' : self.__serial_writer_name
         })
     def get_sensor_status(self):

@@ -19,14 +19,11 @@ from pytesting_api.test_runner import test_runner # pylint: disable=e0401
 from pytesting_api import global_test_variables # pylint: disable=e0401
 
 #These are some Debugging tools I add, Turning off the display is really useful for seeing errors, because the terminal wont get erased every few milliseconds with the display on.
-NO_SERIAL_LISTENER = False
-NO_SERIAL_WRITER = False
+NO_PORT_LISTENER = False
 NO_SENSORS = False
 
-if not NO_SERIAL_LISTENER:
-    from python_serial_api.serial_listener import serial_listener # pylint: disable=e0401
-if not NO_SERIAL_WRITER:
-    from python_serial_api.serial_writer import serial_writer # pylint: disable=e0401
+if not NO_PORT_LISTENER:
+    from port_interface_api.port_listener import port_listener # pylint: disable=e0401
 if not NO_SENSORS:
     from sensor_interface_api.collect_sensor import sensor_importer # pylint: disable=e0401
 
@@ -49,15 +46,19 @@ def main():
     batch_size_1 = config_data.get("batch_size_1", 0)
     batch_size_2 = config_data.get("batch_size_2", 0)
 
-    serial_listener_name = config_data.get("serial_listener_name", "")
-    serial_writer_name = config_data.get("serial_writer_name", "")
-    serial_listener_2_name = config_data.get("serial_listener_2_name", "")
-    serial_writer_2_name = config_data.get("serial_writer_2_name", "")
+    port_listener_name = config_data.get("port_listener_name", "")
+    port_listener_name_two = config_data.get("port_listener_name_two", "")
 
-    uart_0 = config_data.get("uart_0", "")
-    uart_2 = config_data.get("uart_2", "")
+    port_listener_one_host = config_data.get("port_listener_one_host", "")
+    port_listener_one_port = config_data.get("port_listener_one_port", 0)
 
-    serial_listener_list = config_data.get("serial_listener_list", [])
+    port_listener_two_host = config_data.get("port_listener_two_host", "")
+    port_listener_two_port = config_data.get("port_listener_two_port", 0)
+
+    pi_list = config_data.get("pi_list", "")
+
+
+    port_listener_list = config_data.get("port_listener_list", [])
     serial_writer_list = config_data.get("serial_writer_list", [])
 
     hostname = config_data.get("hostname", "")
@@ -71,7 +72,7 @@ def main():
         sensor_config_dict = config_data.get("sensor_config_dict", {})
 
         # set up the config file
-        sensor_config.interface_listener_list = serial_listener_list
+        sensor_config.interface_listener_list = port_listener_list
         sensor_config.interface_writer_list = serial_writer_list
         sensor_config.server = server_listener_name
         sensor_config.sensors_config = sensor_config_dict
@@ -90,7 +91,7 @@ def main():
     #note because the server requires a thread to run, it cant have a dedicated thread to listen to coms like
     #other classes so we need another class object to listen to internal coms for the server.
     server_message_handler = serverMessageHandler(coms=coms)
-    server = serverHandler(hostname, port, coms, cmd, serverMessageHandler, server_listener_name, serial_writer_name=serial_writer_list, serial_listener_name=serial_listener_list, failed_test_path=failed_test_path, passed_test_path=passed_test_path)
+    server = serverHandler(hostname, port, coms, cmd, serverMessageHandler, server_listener_name, serial_writer_name=serial_writer_list, listener_name=port_listener_list, failed_test_path=failed_test_path, passed_test_path=passed_test_path)
     
 
     #first start our thread handler and the message handler (coms) so we can start reporting
@@ -110,29 +111,16 @@ def main():
     threadPool.start() #we need to start all the threads we have collected.
     ########################################################################################
 
-
-    ########### Set up seral interface ###########  
+    ########### Set up port interface ###########  
     # create the ser_listener
-    if not NO_SERIAL_LISTENER:
-        # Serial listener one
-        ser_listener = serial_listener(coms = coms, batch_size=batch_size_1, thread_name=serial_listener_name, stopbits=1, pins=uart_0)
-        threadPool.add_thread(ser_listener.run, serial_listener_name, ser_listener)
+    if not NO_PORT_LISTENER:
+        # Port listener one
+        port_listener_obj = port_listener(coms = coms, batch_size=batch_size_1, thread_name=port_listener_name, host=port_listener_one_host, port=port_listener_one_port)
+        threadPool.add_thread(port_listener_obj.run, port_listener_name, port_listener_obj)
 
         # Serial listener two
-        ser_2_listener = serial_listener(coms = coms, batch_size=batch_size_2, thread_name=serial_listener_2_name, baudrate=9600, stopbits=1, pins=uart_2)
-        threadPool.add_thread(ser_2_listener.run, serial_listener_2_name, ser_2_listener)
-        
-        threadPool.start() #start the new task
-
-    # create the ser_writer
-    if not NO_SERIAL_WRITER:
-        # Serial writer one
-        ser_writer = serial_writer(coms = coms, thread_name=serial_writer_name, pins=uart_0)
-        threadPool.add_thread(ser_writer.run, serial_writer_name, ser_writer)
-
-        # Serial writer two
-        ser_2_writer = serial_writer(coms = coms, thread_name=serial_writer_2_name, baudrate=9600, stopbits=1, pins=uart_2)
-        threadPool.add_thread(ser_2_writer.run, serial_writer_2_name, ser_2_writer)
+        port_listener_obj_two = port_listener(coms = coms, batch_size=batch_size_1, thread_name=port_listener_name_two, host=port_listener_two_host, port=port_listener_two_port)
+        threadPool.add_thread(port_listener_obj_two.run, port_listener_name_two, port_listener_obj_two)
         
         threadPool.start() #start the new task
     ########################################################################################
