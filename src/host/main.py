@@ -119,7 +119,7 @@ def main():
         threadPool.add_thread(port_listener_obj.run, port_listener_name, port_listener_obj)
 
         # Serial listener two
-        port_listener_obj_two = port_listener(coms = coms, batch_size=batch_size_1, thread_name=port_listener_name_two, host=port_listener_two_host, port=port_listener_two_port)
+        port_listener_obj_two = port_listener(coms = coms, batch_size=batch_size_2, thread_name=port_listener_name_two, host=port_listener_two_host, port=port_listener_two_port)
         threadPool.add_thread(port_listener_obj_two.run, port_listener_name_two, port_listener_obj_two)
         
         threadPool.start() #start the new task
