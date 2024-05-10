@@ -5,8 +5,14 @@ port_listener_one
 port_listener_two
     batch_sample:32 > byte
 
+processed_data_for_gps_board_ccsds_packet
+    gps_packets:14 > byte
+
 processed_data_for_gps_board
-    gps_packets:13 > byte
+    day:0 > int
+    hour:0 > int
+    minute:0 > int
+    second:0 > int
 
 session_record
     session_id:0 > string
