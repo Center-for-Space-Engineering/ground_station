@@ -66,7 +66,14 @@ def main():
     server_listener_name = config_data.get("server_listener_name", "")
     server_name_host = config_data.get("server_name_host", "")
 
-    data_base = config_data.get("data_base", "")
+    data_base = config_data.get("data_base", "") #thread name
+    data_base_name = config_data.get("data_base_name", "")#sql database name
+    sensor_config.database_name = data_base #other things want this varible as well. 
+
+    host = config_data.get("host", "")
+    user = config_data.get("user", "")
+    password = config_data.get("password", "")
+    
     if not NO_SENSORS:
         # Sensor configs
         sensor_config_dict = config_data.get("sensor_config_dict", {})
@@ -76,7 +83,7 @@ def main():
         sensor_config.interface_writer_list = serial_writer_list
         sensor_config.server = server_listener_name
         sensor_config.sensors_config = sensor_config_dict
-        sensor_config.database_name = data_base
+    
 
     ########################################################################################
 
@@ -84,7 +91,7 @@ def main():
     #create a server obj, not it will also create the coms object #144.39.167.206
     coms = messageHandler(server_name=server_listener_name, hostname=hostname)
     #make database object 
-    dataBase = DataBaseHandler(coms, is_gui=False)
+    dataBase = DataBaseHandler(coms, db_name = data_base_name,is_gui=False, host=host, user=user, password=password)
     #now that we have the data base we can collect all of our command handlers.s
     cmd = cmd_inter(coms, dataBase)
     #now that we have all the commands we can make the server

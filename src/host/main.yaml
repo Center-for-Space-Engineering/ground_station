@@ -57,16 +57,21 @@ port_listener_list:
 # One you find the correct path, that is the path you should pass in to our serial class. (see uart_2 or uart_0)
 
 # Server Configs
-hostname: '172.22.79.192'  # get this by running hostname -I
+# hostname: '172.22.79.192'  # get this by running hostname -I
 # hostname: '127.0.0.1'
-# port: 5000
+hostname: 172.17.0.1
 port: 8000
 
 server_listener_name: 'CSE_Server_Listener'  # this the name for the internal thread that collects server info 
 server_name_host: 'CSE_Host'  # this is the name for the thread that services all the web requests
 
 # Data Base configs
-data_base: 'Data Base'
+data_base: 'data_base'
+data_base_name: 'ground_data'
+host: 'localhost'
+user: 'ground_cse'
+password: 'usuCSEgs'
+
 
 # Sensor configs
 sensor_config_dict:
