@@ -46,20 +46,7 @@ def main():
     batch_size_1 = config_data.get("batch_size_1", 0)
     batch_size_2 = config_data.get("batch_size_2", 0)
 
-    port_listener_name = config_data.get("port_listener_name", "")
-    port_listener_name_two = config_data.get("port_listener_name_two", "")
-
-    port_listener_one_host = config_data.get("port_listener_one_host", "")
-    port_listener_one_port = config_data.get("port_listener_one_port", 0)
-
-    port_listener_two_host = config_data.get("port_listener_two_host", "")
-    port_listener_two_port = config_data.get("port_listener_two_port", 0)
-
-    pi_list = config_data.get("pi_list", "")
-
-
-    port_listener_list = config_data.get("port_listener_list", [])
-    serial_writer_list = config_data.get("serial_writer_list", [])
+    peripheral_config_dict = config_data.get("peripheral_config_dict", "")
 
     hostname = config_data.get("hostname", "")
     port = config_data.get("port", 0)
@@ -73,6 +60,11 @@ def main():
     host = config_data.get("host", "")
     user = config_data.get("user", "")
     password = config_data.get("password", "")
+
+    port_listener_list = [sub_key for key in peripheral_config_dict for sub_key in peripheral_config_dict[key]]
+
+    serial_writer_list = []
+
     
     if not NO_SENSORS:
         # Sensor configs
@@ -80,7 +72,6 @@ def main():
 
         # set up the config file
         sensor_config.interface_listener_list = port_listener_list
-        sensor_config.interface_writer_list = serial_writer_list
         sensor_config.server = server_listener_name
         sensor_config.sensors_config = sensor_config_dict
     
@@ -121,13 +112,18 @@ def main():
     ########### Set up port interface ###########  
     # create the ser_listener
     if not NO_PORT_LISTENER:
-        # Port listener one
-        port_listener_obj = port_listener(coms = coms, batch_size=batch_size_1, thread_name=port_listener_name, host=port_listener_one_host, port=port_listener_one_port)
-        threadPool.add_thread(port_listener_obj.run, port_listener_name, port_listener_obj)
+        for key in peripheral_config_dict:
+            host = peripheral_config_dict[key]['host_name']
+            for sub_dictionary in peripheral_config_dict[key]['listener_port_list']:
+                port_listener_name = sub_dictionary['name']
+                port = sub_dictionary['port']
 
-        # Serial listener two
-        port_listener_obj_two = port_listener(coms = coms, batch_size=batch_size_2, thread_name=port_listener_name_two, host=port_listener_two_host, port=port_listener_two_port)
-        threadPool.add_thread(port_listener_obj_two.run, port_listener_name_two, port_listener_obj_two)
+                print(f"host {host} name {port_listener_name} port {port}")
+                
+                # Port listener one
+                port_listener_obj = port_listener(coms = coms, batch_size=batch_size_1, thread_name=port_listener_name, host=host, port=port)
+                threadPool.add_thread(port_listener_obj.run, port_listener_name, port_listener_obj)
+
         
         threadPool.start() #start the new task
     ########################################################################################

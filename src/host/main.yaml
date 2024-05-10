@@ -13,28 +13,15 @@ max_passed_test: 15
 batch_size_1: 32
 batch_size_2: 32
 
-port_listener_name: &port_listener_name port_listener_one
-
-port_listener_name_two: &port_listener_name_two port_listener_two
-
-# Raspberry pis publishing
-pi_one : &pi_one '144.39.167.206'
-
-# Location of ports on Raspberry Pi system
-port_listener_one_host: '144.39.167.206'
-port_listener_one_port: 5000
-
-port_listener_two_host: '144.39.167.206'
-port_listener_two_port: 5050
-
-
-# List of interfaces for system to use
-pi_list:
-  - *pi_one
-
-port_listener_list:
-  - *port_listener_name
-  - *port_listener_name_two
+peripheral_config_dict:
+  pi_one:
+    host_name: '144.39.167.206'
+    listener_port_list: 
+      # Location of ports on Raspberry Pi system
+      - name: port_listener_one
+        port: 5000
+      - name: port_listener_two
+        port: 5050
 
 # Writer's NOTE
 # The Raspberry pi 4b has 5 Uart lines.
@@ -57,9 +44,9 @@ port_listener_list:
 # One you find the correct path, that is the path you should pass in to our serial class. (see uart_2 or uart_0)
 
 # Server Configs
-# hostname: '172.22.79.192'  # get this by running hostname -I
+hostname: '172.22.79.192'  # get this by running hostname -I
 # hostname: '127.0.0.1'
-hostname: 172.17.0.1
+# hostname: 172.17.0.1
 port: 8000
 
 server_listener_name: 'CSE_Server_Listener'  # this the name for the internal thread that collects server info 
@@ -68,7 +55,7 @@ server_name_host: 'CSE_Host'  # this is the name for the thread that services al
 # Data Base configs
 data_base: 'data_base'
 data_base_name: 'ground_data'
-host: 'localhost'
+host: 172.17.0.1
 user: 'ground_cse'
 password: 'usuCSEgs'
 
@@ -79,7 +66,7 @@ sensor_config_dict:
   # NOTE: The key here becomes part of a file name so make sure you use valid chars in the name. 
   gps_board:
       # This dictionary tells the GPS sensor how to configure itself.
-      tap_request: [*port_listener_name]  # Index in the list can be the name of a serial listener or any sensors whose data you want to listen to or None (Example for none: None) 
+      tap_request: [port_listener_one]  # Index in the list can be the name of a serial listener or any sensors whose data you want to listen to or None (Example for none: None) 
       publisher: 'yes'
       publish_data_name: 'gps_packets'  # NOTE: NOT used right now
       passive_active: 'passive'  # Passive sensors only publish when they receive then process data, active sensors always publish on an interval.
