@@ -7,3 +7,6 @@
 [submodule "src/host/python_serial_api"]
 	path = src/host/python_serial_api
 	url = git@github.com:Center-for-Space-Engineering/python_serial_api.git
+[submodule "src/host/command_packets"]
+	path = src/host/command_packets
+	url = git@github.com:Center-for-Space-Engineering/command_packets.git
