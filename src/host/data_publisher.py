@@ -179,7 +179,7 @@ class data_publisher(threadWrapper):
         return client_socket, connected
     def send_tap(self, data, _):
         '''
-            This is the function that is called by the class you asked to make a tap.
+            This is the function that is called by the class you asked to make a tap, that class then populates the data you want into this one. 
         '''
         with self.__connected_lock:
             connected = self.__connected

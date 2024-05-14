@@ -12,6 +12,8 @@ from python_serial_api.serial_listener import serial_listener # pylint: disable=
 from python_serial_api.serial_writer import serial_writer # pylint: disable=e0401
 from logging_system_display_python_api.messageHandler import messageHandler # pylint: disable=e0401
 from data_publisher import data_publisher # pylint: disable=e0401
+from cmd_inter import cmd_inter # pylint: disable=e0401
+from server import serverHandler # pylint: disable=e0401
 
 def main():
     '''
@@ -32,24 +34,37 @@ def main():
     serial_listener_2_name = config_data.get("serial_listener_2_name", "")
     serial_writer_2_name = config_data.get("serial_writer_2_name", "")
 
+    serial_listener_list = config_data.get("serial_listener_list", [])
+    serial_writer_list = config_data.get("serial_writer_list", [])
+
     uart_0 = config_data.get("uart_0", "")
     uart_2 = config_data.get("uart_2", "")
 
     hostname = config_data.get("hostname", "")
+    display_name = config_data.get("display_name", "")
+    server_name_host = config_data.get("server_name_host", "")
 
+    port = config_data.get("port", 0)
     port_serial_1 = config_data.get("port_serial_1", "")
     port_serial_2 = config_data.get("port_serial_2", "")
 
 
     ########################################################################################
 
-    ########### Set up threading interface ########### 
-    coms = messageHandler(logging=False, hostname=hostname) # for the pi to decrease load, we are turning off logging. 
+    ########### Set up threading interface and server ########### 
+    coms_name = "Coms/Graphics_Handler"
+    coms = messageHandler(logging=False, hostname = hostname, coms_name=coms_name, display_name=display_name, destination="server") # for the pi to decrease load, we are turning off logging. 
     #first start our thread handler and the message handler (coms) so we can start reporting
-    threadPool = taskHandler(coms) # NOTE: we dont need to add a coms task because it add automatically.
+    threadPool = taskHandler(coms, coms_name=coms_name) # NOTE: we dont need to add a coms task because it add automatically.
+
+    cmd = cmd_inter(coms)
+    server = serverHandler(hostname, port, coms, cmd, serial_writer_name=serial_writer_list, listener_name=serial_listener_list, display_name=display_name)
 
     #Make sure to add the  thread handler to coms so that we can send threading requests
     coms.set_thread_handler(threadPool)
+
+    #Next we want to start the server and give it its own thread
+    threadPool.add_thread(server.run, server_name_host, server) #this thread services incoming web request
 
     threadPool.start() #we need to start all the threads we have collected.
     ########################################################################################

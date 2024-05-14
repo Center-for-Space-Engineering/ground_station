@@ -3,11 +3,20 @@
 batch_size_1: 1024
 batch_size_2: 64
 
-serial_listener_name: serial_listener_one
-serial_writer_name: serial_writer_one
+serial_listener_name: &serial_listener_name serial_listener_one
+serial_writer_name: &serial_writer_name serial_writer_one
 
-serial_listener_2_name: serial_listener_two
-serial_writer_2_name: serial_writer_two
+serial_listener_2_name: &serial_listener_2_name serial_listener_two
+serial_writer_2_name: &serial_writer_2_name serial_writer_two
+
+#List of interfaces for system to use, anything you put in this list will be added to the server and by extension the ground station host. 
+serial_listener_list:
+  - *serial_listener_name
+  - *serial_listener_2_name
+
+serial_writer_list:
+  - *serial_writer_name
+  - *serial_writer_2_name
 
 # Location of serial port on Raspberry Pi system
 uart_0: /dev/ttyS0
@@ -35,5 +44,7 @@ uart_2: /dev/ttyAMA2
 
 # Server Configs
 hostname: '144.39.167.206'  # get this by running hostname -I
+display_name : 'space_weather_probes_serial_#_1'
+port: 5010
 port_serial_1: 5050
 port_serial_2: 5000
