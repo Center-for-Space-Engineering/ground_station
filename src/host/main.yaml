@@ -18,6 +18,8 @@ serial_writer_list:
   - *serial_writer_name
   - *serial_writer_2_name
 
+swp_board_writer: *serial_writer_name
+
 # Location of serial port on Raspberry Pi system
 uart_0: /dev/ttyS0
 uart_2: /dev/ttyAMA2

@@ -15,6 +15,8 @@ from data_publisher import data_publisher # pylint: disable=e0401
 from cmd_inter import cmd_inter # pylint: disable=e0401
 from server import serverHandler # pylint: disable=e0401
 
+import system_constants
+
 def main():
     '''
     This module runs everything, its main job is to create and run all of the 
@@ -36,6 +38,9 @@ def main():
 
     serial_listener_list = config_data.get("serial_listener_list", [])
     serial_writer_list = config_data.get("serial_writer_list", [])
+
+    swp_board_writer = config_data.get("swp_board_writer", "")
+    system_constants.swp_board_writer = swp_board_writer
 
     uart_0 = config_data.get("uart_0", "")
     uart_2 = config_data.get("uart_2", "")

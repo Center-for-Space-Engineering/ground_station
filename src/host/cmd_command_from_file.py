@@ -1,8 +1,11 @@
 '''
-    This class shows and example of how to implement a command on the server. 
+    Class for creating command packets from bytes in a file and sending those created packets to the pi
 '''
+import time
+
 from commandParent import commandParent # pylint: disable=e0401
 from command_packets.functions import ccsds_crc16
+import system_constants
 
 #import DTO for communicating internally
 from logging_system_display_python_api.DTOs.print_message_dto import print_message_dto # pylint: disable=e0401
@@ -16,16 +19,21 @@ class cmd_command_from_file(commandParent):
         # init the parent
         super().__init__(CMD, coms=coms, called_by_child=True)
         #CMD is the cmd class and we are using it to hold all the command class
-        self.__commandName = 'example'
+        self.__commandName = 'command_from_file'
         self.__args ={
             "create_packet" : self.create_packet,
-            "send_packet" : self.send_packet
+            "send_packet" : self.send_packet,
+            "create_and_send_packet" : self.create_and_send_packet,
+            "send_mode_packet" : self.send_mode_packet,
+            "send_idle_packet" : self.send_idle_packet,
+            "request_status_packet" : self.request_status_packet
         }
         dictCmd = CMD.get_command_dict()
         dictCmd[self.__commandName] = self #this is the name the web server will see, so to call the command send a request for this command. 
         CMD.setCommandDict(dictCmd)
         self.__coms = coms
         self.__packet_count = 0
+        self.__packet_bytes = b''
 
     def run(self):
         '''
@@ -33,7 +41,7 @@ class cmd_command_from_file(commandParent):
         '''
         print("Ran command")
         dto  = print_message_dto("Ran command")
-        self.__coms.print_message(dto, 2)
+        self.__coms.print_message(dto, 2) 
         return f"<p>ran command {self.__commandName}<p>"
     def run_args(self, args):
         '''
@@ -42,7 +50,7 @@ class cmd_command_from_file(commandParent):
                 [0] : function name
                 [1:] ARGS that the function needs. NOTE: can be blank
         '''
-        print(f"ran command {str(args[0])} with args {str(args[1:])}")
+        # print(f"ran command {str(args[0])} with args {str(args[1:])}")
         try:
             message = self.__args[args[0]](args)
             dto = print_message_dto(message)
@@ -54,8 +62,10 @@ class cmd_command_from_file(commandParent):
         '''
             creates a byte array for a packet given a byte array with the packet contents and an APID.
         '''
-        bytes_filename = args[1]
-        packet_apid = args[2]
+        file_path = "command_packets/packets/"
+
+        bytes_filename = file_path + args[1] + ".bin"
+        packet_apid = int(args[2])
 
         #Import bytearray from file
         try:
@@ -70,17 +80,17 @@ class cmd_command_from_file(commandParent):
         packet_version_number = 0
         packet_type = 1
         secondary_header = 0
-        sequence_flags = 0
+        sequence_flags = 3
         packet_count = self.__packet_count
-        packet_length = len(byte_data)
+        packet_length = len(byte_data) + 1 #Has to be the total number of data bytes (not including crc) plus one for ccsds standard ¯\_(ツ)_/¯
         # self.__packet_count += 1
 
         header_byte1 = ((packet_version_number & 0b111) << 5) | ((packet_type & 0b1) << 4) | ((secondary_header & 0b1) << 3) | ((packet_apid & 0b11100000000) >> 8)
-        header_byte2 = (packet_apid & 0b00011111111)
+        header_byte2 = packet_apid & 0b00011111111
         header_byte3 = ((sequence_flags & 0b11) << 6) | ((packet_count & 0b11111100000000) >> 8)
-        header_byte4 = (packet_count & 0b00000011111111)
-        header_byte5 = (packet_length & 0xFF00)
-        header_byte6 = (packet_length & 0x00FF)
+        header_byte4 = packet_count & 0b00000011111111
+        header_byte5 = packet_length & 0xFF00
+        header_byte6 = packet_length & 0x00FF
 
         header = bytearray([header_byte1, header_byte2, header_byte3, header_byte4, header_byte5, header_byte6])
 
@@ -98,15 +108,238 @@ class cmd_command_from_file(commandParent):
         formatted_bytes =  ''.join(formatted_bytes)
 
 
-        print("ran create_packets")
-        dto = print_message_dto("Ran create_packets")
+        # print("ran create_packets")
+        dto = print_message_dto("Ran create_packet")
         self.__coms.print_message(dto, 2)
-        return f"<p>ran command create_packets with args {str(args)}</p><p>{formatted_bytes}<\p>"
+        return f"<p>ran command create_packet with args {str(args)}</p><p>{formatted_bytes}</p>"
     def send_packet(self, _):
         '''
             Sends the created packet to the pi.
         '''
+        serial_writer = system_constants.swp_board_writer
+        request_id = self.__coms.send_request(serial_writer, ["write_to_serial_port_bytes", self.__packet_bytes])
+        return_val = self.__coms.get_return(serial_writer, request_id)
+
+        while return_val is None:
+            time.sleep(0.001)
+            return_val = self.__coms.get_return(serial_writer, request_id)
         self.__packet_count += 1
+
+        return return_val
+    
+    def create_and_send_packet(self, args):
+        '''
+            creates and sends a byte array for a packet given a byte array with the packet contents and an APID.
+        '''
+        file_path = "command_packets/packets/"
+
+        bytes_filename = file_path + args[1] + ".bin"
+        packet_apid = int(args[2])
+
+        #Import bytearray from file
+        try:
+            with open(bytes_filename, 'rb') as file:
+                data = file.read()
+            byte_data = bytearray(data)
+        except FileNotFoundError:
+            return f"Error: File '{bytes_filename}' not found."
+        except IOError:
+            return f"Error: Unable to read file '{bytes_filename}'."
+
+        packet_version_number = 0
+        packet_type = 1
+        secondary_header = 0
+        sequence_flags = 3
+        packet_count = self.__packet_count
+        packet_length = len(byte_data) + 1 #Has to be the total number of data bytes (not including crc) plus one for ccsds standard ¯\_(ツ)_/¯
+        # self.__packet_count += 1
+
+        header_byte1 = ((packet_version_number & 0b111) << 5) | ((packet_type & 0b1) << 4) | ((secondary_header & 0b1) << 3) | ((packet_apid & 0b11100000000) >> 8)
+        header_byte2 = packet_apid & 0b00011111111
+        header_byte3 = ((sequence_flags & 0b11) << 6) | ((packet_count & 0b11111100000000) >> 8)
+        header_byte4 = packet_count & 0b00000011111111
+        header_byte5 = packet_length & 0xFF00
+        header_byte6 = packet_length & 0x00FF
+
+        header = bytearray([header_byte1, header_byte2, header_byte3, header_byte4, header_byte5, header_byte6])
+
+        bytes_for_crc = header + byte_data
+
+        crc = ccsds_crc16(data=bytes_for_crc)
+        
+        crc_bytes = crc.to_bytes(2, byteorder='big')
+
+        packet_bytes = bytes_for_crc + crc_bytes
+
+        formatted_bytes = [f'\\x{byte:02x}' for byte in packet_bytes]
+        formatted_bytes =  ''.join(formatted_bytes)
+
+        serial_writer = system_constants.swp_board_writer
+        request_id = self.__coms.send_request(serial_writer, ["write_to_serial_port_bytes", packet_bytes])
+        return_val = self.__coms.get_return(serial_writer, request_id)
+
+        while return_val is None:
+            time.sleep(0.001)
+            return_val = self.__coms.get_return(serial_writer, request_id)
+        self.__packet_count += 1
+
+        # print("ran create_packets")
+        dto = print_message_dto("Ran create_and_send_packet")
+        self.__coms.print_message(dto, 2)
+        return f"<p>ran command create_and_send_packet with args {str(args)}</p><p>{formatted_bytes}</p> " + return_val
+    
+    def send_mode_packet(self, args):
+        '''
+            sends a mode packet with the mode given by the 16 bits in args[1].
+        '''
+
+        packet_apid = 35 # 0x23
+        byte_data = int(args[1], 16)
+        byte_data = byte_data.to_bytes(2, byteorder='big')
+
+        packet_version_number = 0
+        packet_type = 1
+        secondary_header = 0
+        sequence_flags = 3
+        packet_count = self.__packet_count
+        packet_length = len(byte_data) + 1 #Has to be the total number of data bytes (not including crc) plus one for ccsds standard ¯\_(ツ)_/¯
+        # self.__packet_count += 1
+
+        header_byte1 = ((packet_version_number & 0b111) << 5) | ((packet_type & 0b1) << 4) | ((secondary_header & 0b1) << 3) | ((packet_apid & 0b11100000000) >> 8)
+        header_byte2 = packet_apid & 0b00011111111
+        header_byte3 = ((sequence_flags & 0b11) << 6) | ((packet_count & 0b11111100000000) >> 8)
+        header_byte4 = packet_count & 0b00000011111111
+        header_byte5 = packet_length & 0xFF00
+        header_byte6 = packet_length & 0x00FF
+
+        header = bytearray([header_byte1, header_byte2, header_byte3, header_byte4, header_byte5, header_byte6])
+
+        bytes_for_crc = header + byte_data
+
+        crc = ccsds_crc16(data=bytes_for_crc)
+        
+        crc_bytes = crc.to_bytes(2, byteorder='big')
+
+        packet_bytes = bytes_for_crc + crc_bytes
+
+        formatted_bytes = [f'\\x{byte:02x}' for byte in packet_bytes]
+        formatted_bytes =  ''.join(formatted_bytes)
+
+        serial_writer = system_constants.swp_board_writer
+        request_id = self.__coms.send_request(serial_writer, ["write_to_serial_port_bytes", packet_bytes])
+        return_val = self.__coms.get_return(serial_writer, request_id)
+
+        while return_val is None:
+            time.sleep(0.001)
+            return_val = self.__coms.get_return(serial_writer, request_id)
+        self.__packet_count += 1
+
+        # print("ran create_packets")
+        dto = print_message_dto("Ran send_mode_packet")
+        self.__coms.print_message(dto, 2)
+        return f"<p>ran command end_mode_packet with args {str(args)}</p><p>{formatted_bytes}</p> " + return_val
+    
+    def send_idle_packet(self, _):
+        '''
+            sends an idle packet.
+        '''
+
+        packet_apid = 33 # 0x21
+        byte_data = 0
+        byte_data = byte_data.to_bytes(1, byteorder='big')
+
+        packet_version_number = 0
+        packet_type = 1
+        secondary_header = 0
+        sequence_flags = 3
+        packet_count = self.__packet_count
+        packet_length = len(byte_data) + 1 #Has to be the total number of data bytes (not including crc) plus one for ccsds standard ¯\_(ツ)_/¯
+        # self.__packet_count += 1
+
+        header_byte1 = ((packet_version_number & 0b111) << 5) | ((packet_type & 0b1) << 4) | ((secondary_header & 0b1) << 3) | ((packet_apid & 0b11100000000) >> 8)
+        header_byte2 = packet_apid & 0b00011111111
+        header_byte3 = ((sequence_flags & 0b11) << 6) | ((packet_count & 0b11111100000000) >> 8)
+        header_byte4 = packet_count & 0b00000011111111
+        header_byte5 = packet_length & 0xFF00
+        header_byte6 = packet_length & 0x00FF
+
+        header = bytearray([header_byte1, header_byte2, header_byte3, header_byte4, header_byte5, header_byte6])
+
+        bytes_for_crc = header + byte_data
+
+        crc = ccsds_crc16(data=bytes_for_crc)
+        
+        crc_bytes = crc.to_bytes(2, byteorder='big')
+
+        packet_bytes = bytes_for_crc + crc_bytes
+
+        formatted_bytes = [f'\\x{byte:02x}' for byte in packet_bytes]
+        formatted_bytes =  ''.join(formatted_bytes)
+
+        serial_writer = system_constants.swp_board_writer
+        request_id = self.__coms.send_request(serial_writer, ["write_to_serial_port_bytes", packet_bytes])
+        return_val = self.__coms.get_return(serial_writer, request_id)
+
+        while return_val is None:
+            time.sleep(0.001)
+            return_val = self.__coms.get_return(serial_writer, request_id)
+        self.__packet_count += 1
+
+        # print("ran create_packets")
+        dto = print_message_dto("Ran send_idle_packet")
+        self.__coms.print_message(dto, 2)
+        return f"<p>ran command send_idle_packet</p><p>{formatted_bytes}</p> " + return_val
+    
+    def request_status_packet(self, _):
+        '''
+            requests an status packet.
+        '''
+
+        packet_apid = 34 # 0x22
+        byte_data = 0
+        byte_data = byte_data.to_bytes(1, byteorder='big')
+
+        packet_version_number = 0
+        packet_type = 1
+        secondary_header = 0
+        sequence_flags = 0
+        packet_count = self.__packet_count
+        packet_length = len(byte_data) + 1 #Has to be the total number of data bytes (not including crc) plus one for ccsds standard ¯\_(ツ)_/¯
+        # self.__packet_count += 1
+
+        header_byte1 = ((packet_version_number & 0b111) << 5) | ((packet_type & 0b1) << 4) | ((secondary_header & 0b1) << 3) | ((packet_apid & 0b11100000000) >> 8)
+        header_byte2 = packet_apid & 0b00011111111
+        header_byte3 = ((sequence_flags & 0b11) << 6) | ((packet_count & 0b11111100000000) >> 8)
+        header_byte4 = packet_count & 0b00000011111111
+        header_byte5 = packet_length & 0xFF00
+        header_byte6 = packet_length & 0x00FF
+
+        header = bytearray([header_byte1, header_byte2, header_byte3, header_byte4, header_byte5, header_byte6])
+
+        bytes_for_crc = header + byte_data
+
+        crc = ccsds_crc16(data=bytes_for_crc)
+        
+        crc_bytes = crc.to_bytes(2, byteorder='big')
+
+        packet_bytes = bytes_for_crc + crc_bytes
+
+        formatted_bytes = [f'\\x{byte:02x}' for byte in packet_bytes]
+        formatted_bytes =  ''.join(formatted_bytes)
+
+        serial_writer = system_constants.swp_board_writer
+        request_id = self.__coms.send_request(serial_writer, ["write_to_serial_port_bytes", packet_bytes])
+        return_val = self.__coms.get_return(serial_writer, request_id)
+
+        while return_val is None:
+            time.sleep(0.001)
+            return_val = self.__coms.get_return(serial_writer, request_id)
+        self.__packet_count += 1
+
+        # print("ran create_packets")
+        dto = print_message_dto("Ran request_status_packet")
+        self.__coms.print_message(dto, 2)
+        return f"<p>ran command request_status_packet</p><p>{formatted_bytes}</p> " + return_val
 
     def get_args(self):
         '''
@@ -127,9 +360,40 @@ class cmd_command_from_file(commandParent):
         '''
         message = []
         for key in self.__args:
-            message.append({ 
-            'Name' : key,
-            'Path' : f'/{self.__commandName}/{key}/-parameters for the function-',
-            'Description' : 'Example commands'    
-            })
+            if key == 'create_packet':
+                message.append({ 
+                'Name' : key,
+                'Path' : f'/{self.__commandName}/{key}/-filename-/-APID-',
+                'Description' : 'Creates a packet header and crc for bytes in file'    
+                })
+            elif key == 'send_packet':
+                message.append({ 
+                'Name' : key,
+                'Path' : f'/{self.__commandName}/{key}/',
+                'Description' : 'Sends the created packet to the pi'    
+                })
+            elif key == 'create_and_send_packet':
+                message.append({ 
+                'Name' : key,
+                'Path' : f'/{self.__commandName}/{key}/-filename-/-APID-',
+                'Description' : 'Runs both create and send packet'    
+                })
+            elif key == 'send_mode_packet':
+                message.append({ 
+                'Name' : key,
+                'Path' : f'/{self.__commandName}/{key}/-bytes[hex]-',
+                'Description' : 'Sends a mode packet with given bytes to the pi'    
+                })
+            elif key == 'send_idle_packet':
+                message.append({ 
+                'Name' : key,
+                'Path' : f'/{self.__commandName}/{key}/',
+                'Description' : 'Sends an idle packet to the pi'    
+                })
+            elif key == 'request_status_packet':
+                message.append({ 
+                'Name' : key,
+                'Path' : f'/{self.__commandName}/{key}/',
+                'Description' : 'Sends a status request packet to the pi'    
+                })
         return message

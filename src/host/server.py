@@ -62,7 +62,7 @@ class serverHandler(threadWrapper):
         # create a place holder for our sensors.
         self.__sensor_list = None
         self.__sensor_html_dict = {}
-        
+       
         self.__display_name = display_name
 
         # Enable template auto-reloading in development mode
@@ -77,8 +77,11 @@ class serverHandler(threadWrapper):
         self.app.route('/Command', methods=['GET'])(self.command)
         self.app.route('/receive_url', methods=['POST'])(self.set_host_url)
         self.app.route('/')(self.show_command)
+        self.app.route('/favicon.ico')(self.facicon)
         self.app.route('/page_manigure.js')(self.serve_page_mangier)
         self.app.route('/get_serial_names')(self.get_serial_names)
+        self.app.route('/get_serial_status')(self.get_serial_status)
+        self.app.route('/serial_run_request')(self.serial_run_request)
         #the paths caught by this will connect to the users commands they add
         self.app.add_url_rule('/<path:unknown_path>', 'handle_unknown_path',  self.handle_unknown_path)
     def facicon(self):
@@ -86,6 +89,7 @@ class serverHandler(threadWrapper):
             Returns image in the corner of the tab. 
         '''
         return send_from_directory(self.__favicon_directory, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+    
     def handle_unknown_path(self, unknown_path):
         '''
             This handles path that are not automatically added. (Basically user defined commands.)
@@ -211,3 +215,47 @@ class serverHandler(threadWrapper):
             'listener' : self.__listener_name,
             'writer' : self.__serial_writer_name
         })
+    def get_serial_status(self):
+        '''
+            This is function returns the serial status to the web server for processing. 
+        '''
+        data_obj = []
+        request_list = [] #keeps track of all the request we have sent. 
+        list_pos = 0
+        for name in self.__listener_name:
+            #make a request to switch the serial port to new configurations
+            request_list.append([name, self.__coms.send_request(name, ['get_status_web']), False, list_pos]) #send the request to the port
+            list_pos += 1
+            data_obj.append({"Place holder": None}) # We are creating a list will all spots we need for return values so later we can pack the list and everything will be in the same order. 
+        for name in self.__serial_writer_name:
+            #make a request to switch the serial port to new configurations
+            request_list.append([name, self.__coms.send_request(name, ['get_status_web']), False, list_pos]) #send the request to the port
+            list_pos += 1
+            data_obj.append({"Place holder": None}) # We are creating a list will all spots we need for return values so later we can pack the list and everything will be in the same order. 
+        all_request_serviced = False
+        while not all_request_serviced: # pylint: disable=c0200 
+            all_request_serviced = True
+            #loop over all our requests
+            for i in range(len(request_list)): # pylint: disable=c0200 
+                data_obj_temp = None
+                # if we haven't all ready seen the request come back  check for it. 
+                if not request_list[i][2]: 
+                    data_obj_temp = self.__coms.get_return(request_list[i][0], request_list[i][1])
+                    # if we do get a request add it to the list and make the request as having been serviced. 
+                    if data_obj_temp is not None:
+                        request_list[i][2] = True
+                        data_obj[request_list[i][3]] = data_obj_temp
+                all_request_serviced = all_request_serviced and request_list[i][2] #All the request have to say they have been serviced for this to mark as true. 
+        return jsonify(data_obj)
+    def serial_run_request(self):
+        '''
+            Send a request to the serial writer to execute a command.
+        '''
+        thread_name = request.args.get('serial_name')
+        #make a request for the messages
+        id_request = self.__coms.send_request(thread_name, ['write_to_serial_port', request.args.get('serial_command')]) #send the request to the serial writer
+        data_obj = None
+        #wait for the messages to be returned
+        while data_obj is None:
+            data_obj = self.__coms.get_return(thread_name, id_request)
+        return data_obj
