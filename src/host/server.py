@@ -7,26 +7,24 @@ from flask import Flask, render_template, request , send_from_directory, jsonify
 from datetime import datetime
 import os
 import threading
-from werkzeug.serving import BaseWSGIServer
-from socketserver import ThreadingMixIn
+import copy
+import requests
 
 #imports from other folders that are not local
 from logging_system_display_python_api.logger import loggerCustom # pylint: disable=e0401
 from threading_python_api.threadWrapper import threadWrapper # pylint: disable=e0401
 from server_message_handler import serverMessageHandler # pylint: disable=e0401
+from peripheral_hand_shake import peripheral_hand_shake
 
 #import DTO for communicating internally
 from logging_system_display_python_api.DTOs.logger_dto import logger_dto # pylint: disable=e0401
 from logging_system_display_python_api.DTOs.print_message_dto import print_message_dto # pylint: disable=e0401
-
-class ThreadedWSGIServer(ThreadingMixIn, BaseWSGIServer):
-    pass
-
+from logging_system_display_python_api.DTOs.byte_report import byte_report_dto
 class serverHandler(threadWrapper):
     '''
         This class is the server for the whole system. It hands serving the webpage and routing request to there respective classes. 
     '''
-    def __init__(self, hostName, serverPort, coms, cmd, messageHandler:serverMessageHandler, messageHandlerName:str, serial_writer_name:list[str], listener_name:list[str], failed_test_path:str, passed_test_path:str):
+    def __init__(self, hostName, serverPort, coms, cmd, messageHandler:serverMessageHandler, messageHandlerName:str, serial_writer_name:list[str], listener_name:list[str], failed_test_path:str, passed_test_path:str, peripheral_handler:peripheral_hand_shake, display_name:str):
         # pylint: disable=w0612
         self.__function_dict = { #NOTE: I am only passing the function that the rest of the system needs 
             'run' : self.run,
@@ -38,14 +36,19 @@ class serverHandler(threadWrapper):
         #set up server coms 
         self.__message_handler = messageHandler
         self.__message_handler_name = messageHandlerName
+        
 
 
         self.__hostName = hostName
         self.__serverPort = serverPort
+        self.__display_name = display_name
+        self.__system_info_lock = threading.Lock()
 
         #set up coms with the serial port
         self.__serial_writer_name = serial_writer_name
         self.__listener_name = listener_name
+        self.__serial_writter_lock = threading.Lock()
+        self.__serial_listener_lock = threading.Lock()
 
         #these class are used to communicate with the reset of the cse code
         self.__coms = coms
@@ -55,6 +58,16 @@ class serverHandler(threadWrapper):
         #get the possible commands to run
         cmd_dict = self.__cmd.get_command_dict()
 
+        #Connect to peripheral 
+        self.__peripheral_handler = peripheral_handler
+
+        self.__peripheral_handler.connect_peripherals()
+
+        self.__peripherals_commands = self.__peripheral_handler.get_commands()
+        self.__peripherals_commands_lock = threading.Lock()
+
+        self.__peripherals_serial_interface = self.__peripheral_handler.get_peripheral_serial_interfaces()
+        self.__peripherals_serial_interface_lock = threading.Lock()
         #set up server
         # Disable print statements by setting the logging level to ERROR
         log = logging.getLogger('werkzeug')
@@ -80,8 +93,6 @@ class serverHandler(threadWrapper):
         self.__session_running = False
         self.__session_description = "NA"
         self.__session_lock = threading.Lock()
-
-        self.server = ThreadedWSGIServer(self.__hostName, self.__serverPort, self.app)
         
     def setup_routes(self):
         '''
@@ -99,10 +110,8 @@ class serverHandler(threadWrapper):
         self.app.route('/get_updated_prem_logger_report', methods=['GET'])(self.get_updated_prem_logger_report)
         self.app.route('/get_updated_thread_report', methods=['GET'])(self.get_updated_thread_report)
         self.app.route('/get_refresh_status_report', methods=['GET'])(self.get_update_status_report)
-        self.app.route('/get_serial_info_update')(self.get_serial_info_update)
-        self.app.route('/serial_run_request')(self.serial_run_request)
+        self.app.route('/get_serial_info_update')(self.get_serial_info_update) 
         self.app.route('/favicon.ico')(self.facicon)
-        self.app.route('/start_serial')(self.start_serial)
         self.app.route('/get_serial_names')(self.get_serial_names)
         self.app.route('/get_serial_status')(self.get_serial_status)
         self.app.route('/get_sensor_status')(self.get_sensor_status)
@@ -117,7 +126,8 @@ class serverHandler(threadWrapper):
         #the paths caught by this will connect to the users commands they add
         self.app.add_url_rule('/<path:unknown_path>', 'handle_unknown_path',  self.handle_unknown_path)
         self.app.add_url_rule('/start_session', 'start_session', self.start_session, methods=['POST'])
-        self.app.add_url_rule('/end_session', 'end_session', self.end_session, methods=['POST'])
+        self.app.add_url_rule('/end_session', 'end_session', self.end_session, methods=['POST']) 
+        self.app.add_url_rule('/logger_reports', 'logger_reports', self.logger_reports, methods=['POST'])
     def facicon(self):
         '''
             Returns image in the corner of the tab. 
@@ -127,13 +137,27 @@ class serverHandler(threadWrapper):
         '''
             This handles path that are not automatically added. (Basically user defined commands.)
         '''
+        self.__log.send_log(f"Path receive {unknown_path}")
         path = unknown_path.split("/")
-        self.__log.send_log("Message received: " + str(path))
-        #this  if statement decides if it is going to run a prebuilt command or run one of the 
+        
         dto = print_message_dto("Message received: " + str(path))
         self.__coms.print_message(dto, 3)
-        message = self.__cmd.parse_cmd(path)
-        self.__log.send_log(f"Path receive {unknown_path}")
+
+        if 'Local' == path[0]: # if it is a command for the host lets run it here
+            message = self.__cmd.parse_cmd(path[1:])
+        elif 'local_code=501' == path[-1]: #forwarded command
+            message = self.__cmd.parse_cmd(path[:-1])
+        else :
+            response = requests.get('http://' + unknown_path + "/local_code=501") 
+
+            if response.status_code == 200:
+                message = (response.json())
+            else :
+                message = ({
+                        'text_data' : 'Unable to run command',
+                        'download' : 'no',
+                })                
+
         dto2 = print_message_dto("Server handled request")
         self.__coms.print_message(dto2, 2)
         if isinstance(message, str): # pylint: disable=r1705 
@@ -326,35 +350,7 @@ class serverHandler(threadWrapper):
         while data_obj is None:
             data_obj = self.__coms.get_return(self.__message_handler_name, id_request)
         return jsonify(data_obj)
-    def serial_run_request(self):
-        '''
-            Send a request to the serial writer to execute a command.
-        '''
-        thread_name = request.args.get('serial_name')
-        #make a request for the messages
-        id_request = self.__coms.send_request(thread_name, ['write_to_serial_port', request.args.get('serial_command')]) #send the request to the serial writer
-        data_obj = None
-        #wait for the messages to be returned
-        while data_obj is None:
-            data_obj = self.__coms.get_return(thread_name, id_request)
-        return data_obj
-    def start_serial(self):
-        '''
-            This starts a reconfigured request to the serial port the users asked for. 
-        '''
-        requested_port = request.args.get('requested')
-        baud_rate = request.args.get('baud_rate')
-        stop_bit = request.args.get('stop_bit')
-
-        print(f"{requested_port} {baud_rate} {stop_bit}")
-
-        #make a request to switch the serial port to new configurations
-        id_request = self.__coms.send_request(requested_port, ['config_port', baud_rate, stop_bit]) #send the request to the port
-        data_obj = None
-        #wait for the messages to be returned
-        while data_obj is None:
-            data_obj = self.__coms.get_return(requested_port, id_request)
-        return data_obj
+    
     def get_serial_status(self):
         '''
             This is function returns the serial status to the web server for processing. 
@@ -362,12 +358,24 @@ class serverHandler(threadWrapper):
         data_obj = []
         request_list = [] #keeps track of all the request we have sent. 
         list_pos = 0
-        for name in self.__listener_name:
+
+        if self.__serial_listener_lock.acquire(timeout=1):
+            serial_listener = copy.deepcopy(self.__listener_name)
+            self.__serial_listener_lock.release()
+        else :
+            raise RuntimeError("Could not aquire serial listener lock")
+        for name in serial_listener:
             #make a request to switch the serial port to new configurations
             request_list.append([name, self.__coms.send_request(name, ['get_status_web']), False, list_pos]) #send the request to the port
             list_pos += 1
             data_obj.append({"Place holder": None}) # We are creating a list will all spots we need for return values so later we can pack the list and everything will be in the same order. 
-        for name in self.__serial_writer_name:
+        
+        if self.__serial_writter_lock.acquire(timeout=1):
+            serial_writer = self.__serial_writer_name
+            self.__serial_writter_lock.release()
+        else :
+            raise RuntimeError("Could not aquire serial writer lock")
+        for name in serial_writer:
             #make a request to switch the serial port to new configurations
             request_list.append([name, self.__coms.send_request(name, ['get_status_web']), False, list_pos]) #send the request to the port
             list_pos += 1
@@ -386,15 +394,51 @@ class serverHandler(threadWrapper):
                         request_list[i][2] = True
                         data_obj[request_list[i][3]] = data_obj_temp
                 all_request_serviced = all_request_serviced and request_list[i][2] #All the request have to say they have been serviced for this to mark as true. 
+        
+        if self.__peripherals_serial_interface_lock.acquire(timeout=1):
+            peripherals_serial_copy = copy.deepcopy(self.__peripherals_serial_interface)
+            self.__peripherals_serial_interface_lock.release()
+        else :
+            raise RuntimeError("Could not aquire peripherals serial interface lock")
+        for host in peripherals_serial_copy:
+            try : 
+                response = requests.get('http://' + host + '/get_serial_status')
+            
+                if response.status_code == 200:
+                    data = (response.json())
+                    data_obj.extend(data)           
+            except : 
+                pass
         return jsonify(data_obj)
     def get_serial_names(self):
         '''
             Returns all the serial names so the webpage knows about them. 
         '''
-        return jsonify({
-            'listener' : self.__listener_name,
-            'writer' : self.__serial_writer_name
-        })
+
+        if self.__serial_listener_lock.acquire(timeout=1):
+            serial_listener = copy.deepcopy(self.__listener_name)
+            self.__serial_listener_lock.release()
+        else :
+            raise RuntimeError("Could not aquire serial listener lock")
+        if self.__serial_writter_lock.acquire(timeout=1):
+            serial_writer = copy.deepcopy(self.__serial_writer_name)
+            self.__serial_writter_lock.release()
+        else : 
+            raise RuntimeError("Could not aquire serial writter lock")
+        data = {
+            'listener' : serial_listener,
+            'writer' : serial_writer
+        }
+        
+        if self.__peripherals_serial_interface_lock.acquire(timeout=1):
+            peripherals_serial_copy = copy.deepcopy(self.__peripherals_serial_interface)
+            self.__peripherals_serial_interface_lock.release()
+        else : 
+            raise RuntimeError("Could not aquire serial interface lock")
+        for host in peripherals_serial_copy:
+            data['listener'].extend(peripherals_serial_copy[host]['listener'])
+            data['writer'].extend(peripherals_serial_copy[host]['writer'])
+        return jsonify(data)
     def get_sensor_status(self):
         '''
             This function gets all the sensors status then returns that to the server. 
@@ -415,6 +459,7 @@ class serverHandler(threadWrapper):
                 'status' : status,
                 'taps' : taps
             })
+        
         return jsonify(report)
     def sensor_page(self):
         '''
@@ -496,16 +541,7 @@ class serverHandler(threadWrapper):
         dto = logger_dto(message="Server started http://%s:%s" % (self.__hostName, self.__serverPort), time=str(datetime.now()))
         self.__coms.send_message_permanent(dto, 2)
         super().set_status("Running")
-        self.server.serve_forever()
-    def kill_Task(self):
-        '''
-            This closes the Server, after the kill command is received.
-        '''
-        super().kill_Task()
-        if self.server:
-            self.server.shutdown()
-        self.__log.send_log("Server stopped.")
-        self.__log.send_log("Quite command received.")
+        self.app.run(debug=False, host=self.__hostName, port=self.__serverPort, threaded=True)
     def setHandlers(self, db):
         '''
             Sets up the data base configuration. 
@@ -525,7 +561,25 @@ class serverHandler(threadWrapper):
         '''
             Returns html for the command page
         '''
+        if self.__system_info_lock.acquire(timeout=1):
+            display_name = self.__display_name
+            self.__system_info_lock.release()
+        else : 
+            raise RuntimeError("Could not aquire system info lock")
         table_data = self.__cmd.get_commands_webpage()
+        for command_dict in table_data:
+            command_dict['Host'] = 'Local'
+            command_dict['display_name'] = display_name
+        if self.__peripherals_commands_lock.acquire(timeout=1):
+            peripherals_commands_copy = copy.deepcopy(self.__peripherals_commands)
+            self.__peripherals_commands_lock.release()
+        else :
+            raise RuntimeError("Could not aquire peripherals commands lock")
+        for host in peripherals_commands_copy:
+            for command_dict in peripherals_commands_copy[host]['table_data']:
+                command_dict['Host'] = host 
+                command_dict['display_name'] = peripherals_commands_copy[host]['display_name']
+                table_data.append(command_dict)
         return render_template('Command.html', table_data=table_data)
     def failed_test(self):
         '''
@@ -564,10 +618,13 @@ class serverHandler(threadWrapper):
         session_name = request.json.get('sessionName')
         session_description = request.json.get('description')
 
-        with self.__session_lock:
+        if self.__session_lock.acquire(timeout=1):
             self.__current_session_name = session_name
             self.__session_description = session_description
             self.__session_running = True
+            self.__session_lock.release()
+        else : 
+            raise RuntimeError("Could not aquire session lock")
         if session_name:
             # Do something with the session name, like start a session
             return jsonify({'message': 'Session started successfully'}), 200
@@ -576,8 +633,11 @@ class serverHandler(threadWrapper):
 
     def end_session(self):
         # Do something to end the session
-        with self.__session_lock:
+        if self.__session_lock.acquire(timeout=1):
             self.__session_running = False
+            self.__session_lock.release()
+        else : 
+            raise RuntimeError("Could not aquire session lock")
         return jsonify({'message': 'Session ended successfully'}), 200
 
     def get_session_info(self):
@@ -587,8 +647,36 @@ class serverHandler(threadWrapper):
             Return order:
             name, description, running 
         '''
-        with self.__session_lock:
+        if self.__session_lock.acquire(timeout=1):
             name = self.__current_session_name
             session_description = self.__session_description
             running = self.__session_running
+            self.__session_lock.release()
+        else : 
+            raise RuntimeError("Could not aquire session lock")
         return name, session_description, running
+    def logger_reports(self):
+        '''
+            Collect data form the peripherals. The pass that data into our logging system.
+        '''
+
+        message = request.form.get('message')
+        sender = request.form.get('sender')
+        display_name = request.form.get('Display_name')
+        request_fucntion = request.form.get('function')
+        message = request.form.get('message')
+
+        if request_fucntion == 'send_message_permanet':
+            dto_obj = print_message_dto(message=f"{display_name} : {message}")
+            self.__coms.send_message_permanet(dto_obj)
+        elif request_fucntion == 'print_message':
+            dto_obj = print_message_dto(message=f"{display_name} : {message}")
+            self.__coms.print_message(dto_obj)
+        elif request_fucntion == 'report_bytes':
+            dto_obj = byte_report_dto(byte_count=int(message), thread_name=request.form.get('thread_name'), time=request.form.get('time'))
+            self.__coms.report_bytes(dto_obj)
+        elif request_fucntion == 'report_additional_status':
+            dto_obj = print_message_dto(message=f"{display_name} : {message}")
+            self.__coms.report_additional_status(dto_obj)
+        
+        return 'OK'

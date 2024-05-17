@@ -1,10 +1,3 @@
-
-port_listener_one
-    batch_sample:32 > byte
-
-port_listener_two
-    batch_sample:32 > byte
-
 processed_data_for_gps_board_ccsds_packet
     gps_packets:14 > byte
 
@@ -24,3 +17,9 @@ tests_record
     test_run_time:0 > string
     pass_fail:0 > string
     session_ID:0 > string
+
+gps_port_listener
+    batch_sample:32 > byte
+
+swp2_port_listener
+    batch_sample:32 > byte

@@ -24,7 +24,6 @@ class cmd_inter():
         self.__coms = coms
         self.collect_commands(db)
         
-    
     def parse_cmd(self, message):
         '''
             This func will look through the __commandDict to see if there is a map from the get request to a command.

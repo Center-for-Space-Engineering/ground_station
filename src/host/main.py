@@ -17,6 +17,7 @@ from server import serverHandler # pylint: disable=e0401
 from server_message_handler import serverMessageHandler # pylint: disable=e0401
 from pytesting_api.test_runner import test_runner # pylint: disable=e0401
 from pytesting_api import global_test_variables # pylint: disable=e0401
+from peripheral_hand_shake import peripheral_hand_shake # pylint: disable=e401
 
 #These are some Debugging tools I add, Turning off the display is really useful for seeing errors, because the terminal wont get erased every few milliseconds with the display on.
 NO_PORT_LISTENER = False
@@ -38,13 +39,12 @@ def main():
     with open("main.yaml", "r") as file:
         config_data = yaml.safe_load(file)
     
-    test_interval = config_data.get("test_interval", 0)
+    test_interval = datetime.timedelta(seconds=config_data.get("test_interval", 0))
     failed_test_path = config_data.get("failed_test_path", 0)
     passed_test_path = config_data.get("passed_test_path", 0)
     max_passed_test = config_data.get("max_passed_test", 0)
 
-    batch_size_1 = config_data.get("batch_size_1", 0)
-    batch_size_2 = config_data.get("batch_size_2", 0)
+    display_name = config_data.get("display_name", "")
 
     peripheral_config_dict = config_data.get("peripheral_config_dict", "")
 
@@ -61,9 +61,11 @@ def main():
     user = config_data.get("user", "")
     password = config_data.get("password", "")
 
-    port_listener_list = [sub_key for key in peripheral_config_dict for sub_key in peripheral_config_dict[key]]
+    port_listener_list = [sub_key['name'] for key in peripheral_config_dict for sub_key in peripheral_config_dict[key]['listener_port_list']]
 
     serial_writer_list = []
+
+    list_of_peripherals_url = [peripheral_config_dict[key]['host_name'] + ':' + str(peripheral_config_dict[key]['connection_port']) for key in peripheral_config_dict]
 
     
     if not NO_SENSORS:
@@ -78,6 +80,10 @@ def main():
 
     ########################################################################################
 
+    ######################## Get the peripherals informations ##############################
+    peripherals = peripheral_hand_shake(list_of_peripheral=list_of_peripherals_url, host_url=hostname + ":" + str(port))
+    ########################################################################################
+    
     ########### Set up server, database, and threading interface ########### 
     #create a server obj, not it will also create the coms object #144.39.167.206
     coms = messageHandler(server_name=server_listener_name, hostname=hostname)
@@ -89,7 +95,7 @@ def main():
     #note because the server requires a thread to run, it cant have a dedicated thread to listen to coms like
     #other classes so we need another class object to listen to internal coms for the server.
     server_message_handler = serverMessageHandler(coms=coms)
-    server = serverHandler(hostname, port, coms, cmd, serverMessageHandler, server_listener_name, serial_writer_name=serial_writer_list, listener_name=port_listener_list, failed_test_path=failed_test_path, passed_test_path=passed_test_path)
+    server = serverHandler(hostname, port, coms, cmd, serverMessageHandler, server_listener_name, serial_writer_name=serial_writer_list, listener_name=port_listener_list, failed_test_path=failed_test_path, passed_test_path=passed_test_path, peripheral_handler = peripherals, display_name=display_name)
     
 
     #first start our thread handler and the message handler (coms) so we can start reporting
@@ -117,11 +123,10 @@ def main():
             for sub_dictionary in peripheral_config_dict[key]['listener_port_list']:
                 port_listener_name = sub_dictionary['name']
                 port = sub_dictionary['port']
-
-                print(f"host {host} name {port_listener_name} port {port}")
+                batch_size = sub_dictionary['batch_size']
                 
                 # Port listener one
-                port_listener_obj = port_listener(coms = coms, batch_size=batch_size_1, thread_name=port_listener_name, host=host, port=port)
+                port_listener_obj = port_listener(coms = coms, batch_size=batch_size, thread_name=port_listener_name, host=host, port=port)
                 threadPool.add_thread(port_listener_obj.run, port_listener_name, port_listener_obj)
 
         
@@ -214,16 +219,10 @@ def main():
             else :
                 session_start_time = datetime.datetime.now()
                 session_was_running = False
+            time.sleep(0.1) # the main thread needs to sleep so that it doesnt hurt the cup
 
 
         except KeyboardInterrupt:
-            data = {
-                    'session_id' : [session],
-                    'start_time' : [str(session_start_time)],
-                    'end_time' : [str(session_end_time)],
-                    'description' : [description],
-                }
-            coms.send_request(data_base, ['save_data_group', table_name, data, 'main'])
             running = False
             print('\n>>> Main thread Shutdown Commanded, please wait.')        
     

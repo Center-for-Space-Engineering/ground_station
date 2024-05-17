@@ -9,19 +9,21 @@ passed_test_path: templates/passed_test
 #Maximum passed test Archive 
 max_passed_test: 15
 
-# Serial Configs
-batch_size_1: 32
-batch_size_2: 32
+display_name : CSE_ground_station
 
 peripheral_config_dict:
   pi_one:
     host_name: '144.39.167.206'
+    connection_port : 5010
     listener_port_list: 
       # Location of ports on Raspberry Pi system
-      - name: port_listener_one
+      - name: gps_port_listener
         port: 5000
-      - name: port_listener_two
+        batch_size: 32
+      - name: swp2_port_listener
         port: 5050
+        batch_size: 32
+
 
 # Writer's NOTE
 # The Raspberry pi 4b has 5 Uart lines.
@@ -44,9 +46,9 @@ peripheral_config_dict:
 # One you find the correct path, that is the path you should pass in to our serial class. (see uart_2 or uart_0)
 
 # Server Configs
-hostname: '172.22.79.192'  # get this by running hostname -I
+# Get the hostname by running hostname -I
 # hostname: '127.0.0.1'
-# hostname: 172.17.0.1
+hostname: 129.123.4.228
 port: 8000
 
 server_listener_name: 'CSE_Server_Listener'  # this the name for the internal thread that collects server info 
@@ -55,7 +57,7 @@ server_name_host: 'CSE_Host'  # this is the name for the thread that services al
 # Data Base configs
 data_base: 'data_base'
 data_base_name: 'ground_data'
-host: 172.17.0.1
+host: 'localhost'
 user: 'ground_cse'
 password: 'usuCSEgs'
 
@@ -66,7 +68,7 @@ sensor_config_dict:
   # NOTE: The key here becomes part of a file name so make sure you use valid chars in the name. 
   gps_board:
       # This dictionary tells the GPS sensor how to configure itself.
-      tap_request: [port_listener_one]  # Index in the list can be the name of a serial listener or any sensors whose data you want to listen to or None (Example for none: None) 
+      tap_request: [gps_port_listener]  # Index in the list can be the name of a serial listener or any sensors whose data you want to listen to or None (Example for none: None) 
       publisher: 'yes'
       publish_data_name: 'gps_packets'  # NOTE: NOT used right now
       passive_active: 'passive'  # Passive sensors only publish when they receive then process data, active sensors always publish on an interval.

@@ -102,8 +102,11 @@ class cmd_data_publisher(commandParent, threadWrapper):
             This function simply tells the data publisher to shut down. 
             It does this by setting the self.__Running variable to false. 
         '''
-        with self.__Running_lock:
+        if self.__Running_lock.acquire(timeout=1):
             self.__Running = False
+            self.__Running_lock.release()
+        else : 
+            raise RuntimeError("Could Not aquire running lock")
         return "Commanded publisher to terminate."
         
 
@@ -143,8 +146,11 @@ class cmd_data_publisher(commandParent, threadWrapper):
             while running:
                 if connected:
                     try:
-                        with self.__data_lock:
+                        if self.__data_lock.acquire(timeout=1):
                             length_data_received = len(self.__data_received)
+                            self.__data_lock.release()
+                        else : 
+                            raise RuntimeError("Could not aquire data lock")
                         # Send data to the connected client
                         if not is_live:
                             message = file.read(-1)
@@ -156,9 +162,12 @@ class cmd_data_publisher(commandParent, threadWrapper):
                                 print(message)
                                 client_socket.sendall(message)
                         elif length_data_received > 0: # If we are live and we have data
-                            with self.__data_lock:
+                            if self.__data_lock.acquire(timeout=1):
                                 message = b''.join(self.__data_received)
                                 self.__data_received.clear()
+                                self.__data_lock.release()
+                            else : 
+                                raise RuntimeError("Could not aquire data lock")
                             print(message)
                             client_socket.sendall(message)
                     except Exception as e: # pylint: disable=w0718
@@ -178,8 +187,11 @@ class cmd_data_publisher(commandParent, threadWrapper):
                             dto = logger_dto(message="Timeout occurred while waiting for a connection.", time=str(datetime.now()))
                             self.__coms.print_message(dto)
                             connected = False
-                with self.__Running_lock:
+                if self.__Running_lock.acquire(timeout=1):
                     running = self.__Running
+                    self.__Running_lock.release()
+                else : 
+                    raise RuntimeError("Could not aquire running lock")
             try :
                 self.__server_socket.close()
                 threadWrapper.set_status(self, 'Complete')
@@ -196,8 +208,11 @@ class cmd_data_publisher(commandParent, threadWrapper):
         '''
             This is the function that is called by the class you asked to make a tap.
         '''
-        with self.__data_lock:
+        if self.__data_lock.acquire(timeout=1):
             self.__data_received = copy.deepcopy(data) #NOTE: This could make things really slow, depending on the data rate.
+            self.__data_lock.release()
+        else : 
+            raise RuntimeError("Could not aquire data lock")
 
     def get_args(self):
         '''

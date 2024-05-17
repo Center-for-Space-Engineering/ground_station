@@ -24,13 +24,17 @@
     <table>
         <thead>
             <tr class = "orange-text">
+                <th>Host</th>
+                <th>Display Name</th>
                 <th>Name</th>
                 <th>Path</th>
                 <th>Description</th>
             </tr>
             <tbody>
                 {% for item in table_data %}
-                    <tr data-path ="{{ item.Path }}" onclick="update_run_arg_box(this)">
+                    <tr data-path ="{{ item.Path }}" Host_name = "{{ item.Host }}" onclick="update_run_arg_box(this)">
+                        <td class = 'nice_teal'>{{ item.Host }}</td>
+                        <td class = 'nice_teal'>{{ item.display_name }}</td>
                         <td class = 'nice_teal'>{{ item.Name }}</td>
                         <td class = 'nice_teal'>{{ item.Path }}</td>
                         <td class = 'nice_teal'>{{ item.Description }}</td>
@@ -46,25 +50,12 @@
             <input type="text" id="commands_args" placeholder="Type Args...">
             <button class = "button_format" onclick="send_run_request()">Submit</button>
         </div>
-        <div>
-            <div class="box_style">
-                <h2 class="green-text">Send Commands to Serial Line: </h2>
-                <label class = "white-text">Select serial writer: <select id="serial_writer_dropdown"></select> </label>
-                <label class = "white-text" for="user_text">Enter hex stream (FF00A122 ...):</label>
-                <input type="text" id="user_hex_input" placeholder="Type hex...">
-                <button class = "button_format" onclick="send_serial_request()">Submit</button>
-            </div>
-        </div>
     </div>
     <div class="container">
         <div class="box_style">
             <h2 class="green-text">What the last command returned:</h2>
             <div class="green-text" id="result">No return val yet.</div>
-        </div>
-        <div class="box_style">
-            <h2 class="green-text">The last serial command executed:</h2>
-            <div class="green-text" id="result_serial">No return val yet.</div>
-        </div>
+        </div> 
     </div>
 
     <script>

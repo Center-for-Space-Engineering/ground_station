@@ -5,4 +5,4 @@
 **/.pytest_cache/
 **/failed_test/
 gps_board.html
-**/templates/assests/**
+**/templates/assets/**

@@ -128,8 +128,9 @@ function refresh_status_report()
 function update_run_arg_box(row) {
     //update the run commands text box
     var path_name = row.getAttribute('data-path');
+    var host_name = row.getAttribute('Host_name')
     var input_command_box = document.getElementById('commands_args');
-    input_command_box.value = path_name;
+    input_command_box.value = host_name + path_name;
 }
 function downloadFileFromResponse(text, file, file_extension) {
     //creating an invisible element and download the file
