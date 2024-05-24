@@ -102,7 +102,7 @@ class cmd_data_publisher(commandParent, threadWrapper):
             This function simply tells the data publisher to shut down. 
             It does this by setting the self.__Running variable to false. 
         '''
-        if self.__Running_lock.acquire(timeout=1):
+        if self.__Running_lock.acquire(timeout=1):  # pylint: disable=R1732
             self.__Running = False
             self.__Running_lock.release()
         else : 
@@ -133,10 +133,12 @@ class cmd_data_publisher(commandParent, threadWrapper):
             #file_path = 'synthetic_data_profiles/SyntheticFPP2_1000packets_CSEkw_with_garbage.bin'
             #file_path = 'synthetic_data_profiles/FPP2Packetx10.bin'
             #file_path = 'synthetic_data_profiles/SyntheticFPP2_1000packets_CSEkw.bin'
+
             try :
-                file = open(file_path, 'rb') # pylint: disable=R1732
+                 # pylint: disable=R1732
+                file = open(file_path, 'rb')
             except Exception as e: # pylint: disable=w0718
-                print(f'Failed to open file {e}')
+                raise RuntimeError(f'Failed to open file {e}')  # pylint: disable=W0707
         else : 
             self.__coms.send_request(self.__live_feed, ['create_tap', self.send_tap, 'data publisher']) #create a tap to the serial listener so it will send its data here. 
             is_live = True
@@ -146,23 +148,24 @@ class cmd_data_publisher(commandParent, threadWrapper):
             while running:
                 if connected:
                     try:
-                        if self.__data_lock.acquire(timeout=1):
+                        if self.__data_lock.acquire(timeout=1):  # pylint: disable=R1732
                             length_data_received = len(self.__data_received)
                             self.__data_lock.release()
                         else : 
                             raise RuntimeError("Could not aquire data lock")
                         # Send data to the connected client
                         if not is_live:
-                            message = file.read(-1)
+                            message = file.read(-1) # pylint: disable=E0606
                             if len(message) == 0:
-                                file.close()
+                                file.close()  # pylint: disable=E0606
                                 time.sleep(1)
-                                file = open(file_path, 'rb') # pylint: disable=r1732
+                                 # pylint: disable=R1732
+                                file = open(file_path, 'rb')
                             else :
                                 print(message)
                                 client_socket.sendall(message)
                         elif length_data_received > 0: # If we are live and we have data
-                            if self.__data_lock.acquire(timeout=1):
+                            if self.__data_lock.acquire(timeout=1):  # pylint: disable=R1732
                                 message = b''.join(self.__data_received)
                                 self.__data_received.clear()
                                 self.__data_lock.release()
@@ -187,7 +190,7 @@ class cmd_data_publisher(commandParent, threadWrapper):
                             dto = logger_dto(message="Timeout occurred while waiting for a connection.", time=str(datetime.now()))
                             self.__coms.print_message(dto)
                             connected = False
-                if self.__Running_lock.acquire(timeout=1):
+                if self.__Running_lock.acquire(timeout=1):  # pylint: disable=R1732
                     running = self.__Running
                     self.__Running_lock.release()
                 else : 
@@ -208,7 +211,7 @@ class cmd_data_publisher(commandParent, threadWrapper):
         '''
             This is the function that is called by the class you asked to make a tap.
         '''
-        if self.__data_lock.acquire(timeout=1):
+        if self.__data_lock.acquire(timeout=1):  # pylint: disable=R1732
             self.__data_received = copy.deepcopy(data) #NOTE: This could make things really slow, depending on the data rate.
             self.__data_lock.release()
         else : 

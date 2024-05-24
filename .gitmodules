@@ -16,3 +16,6 @@
 [submodule "src/host/port_interface_api"]
 	path = src/host/port_interface_api
 	url = git@github.com:Center-for-Space-Engineering/port_interface_api.git
+[submodule "src/host/command_packets"]
+	path = src/host/command_packets
+	url = git@github.com:Center-for-Space-Engineering/command_packets.git

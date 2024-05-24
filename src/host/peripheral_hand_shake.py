@@ -4,6 +4,9 @@
 import requests
 
 class peripheral_hand_shake():
+    '''
+        This class reaches out the peripherals and then collects the important information so we can talk with them. 
+    '''
     def __init__(self, list_of_peripheral:list[str], host_url:str) -> None:
         '''
             For ever peripheral we have we are going to go through and get the commands, then set the host url.
@@ -22,16 +25,16 @@ class peripheral_hand_shake():
         for url in self.__list_of_peripheral:
             # Get the commands from the peripherals
             try :
-                response = requests.get('http://' + url + '/Command')
+                response = requests.get('http://' + url + '/Command', timeout=10)
                 if response.status_code == 200:
-                    self.__commands[url] = (response.json())
+                    self.__commands[url] = response.json()
                     self.__map[self.__commands[url]['display_name']] = url
                 else :
                     self.__commands[url] = ({
                             'table_data' : 'Unable to get commands',
                             'display_name' : 'Unable to get commands',                
                         })
-            except :
+            except : # pylint: disable=W0702
                 print(f'Command hand shake with peripheral {url} failed')
 
 
@@ -40,21 +43,21 @@ class peripheral_hand_shake():
                 'sender_url' : self.__host_url
             }
             try :
-                response = requests.post('http://' + url + '/receive_url', data)
-            except :
+                response = requests.post('http://' + url + '/receive_url', data, timeout=10)
+            except : # pylint: disable=W0702
                 print(f"Could not connect to peripheral {url}")
 
             ### Collect serial interfaces ###
             try :
-                response = requests.get('http://' + url + '/get_serial_names')
-                if response.status_code == 200:
-                    self.__peripheral_serial_interfaces[url] = (response.json())
+                response = requests.get('http://' + url + '/get_serial_names', timeout=10)
+                if response.status_code == 200: # pylint: disable=R1732
+                    self.__peripheral_serial_interfaces[url] = response.json()
                 else :
                     self.__peripheral_serial_interfaces[url] = ({
                             'listener' : [],
                             'writter' : [],                
                         })
-            except :
+            except : # pylint: disable=W0702
                 print(f'Serial Interface hand shake with peripheral {url} failed')
     def get_commands(self):
         '''
@@ -72,3 +75,4 @@ class peripheral_hand_shake():
             Returns all the collecteed serial interfaces fro m the peripherals.
         '''
         return self.__peripheral_serial_interfaces
+    

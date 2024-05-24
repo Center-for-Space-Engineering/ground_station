@@ -14,12 +14,13 @@ import requests
 from logging_system_display_python_api.logger import loggerCustom # pylint: disable=e0401
 from threading_python_api.threadWrapper import threadWrapper # pylint: disable=e0401
 from server_message_handler import serverMessageHandler # pylint: disable=e0401
-from peripheral_hand_shake import peripheral_hand_shake
+from peripheral_hand_shake import peripheral_hand_shake # pylint: disable=e0401
 
 #import DTO for communicating internally
 from logging_system_display_python_api.DTOs.logger_dto import logger_dto # pylint: disable=e0401
 from logging_system_display_python_api.DTOs.print_message_dto import print_message_dto # pylint: disable=e0401
-from logging_system_display_python_api.DTOs.byte_report import byte_report_dto
+from logging_system_display_python_api.DTOs.byte_report import byte_report_dto # pylint: disable=e0401
+
 class serverHandler(threadWrapper):
     '''
         This class is the server for the whole system. It hands serving the webpage and routing request to there respective classes. 
@@ -148,10 +149,10 @@ class serverHandler(threadWrapper):
         elif 'local_code=501' == path[-1]: #forwarded command
             message = self.__cmd.parse_cmd(path[:-1])
         else :
-            response = requests.get('http://' + unknown_path + "/local_code=501") 
+            response = requests.get('http://' + unknown_path + "/local_code=501", timeout=10) 
 
             if response.status_code == 200:
-                message = (response.json())
+                message = response.json()
             else :
                 message = ({
                         'text_data' : 'Unable to run command',
@@ -359,7 +360,7 @@ class serverHandler(threadWrapper):
         request_list = [] #keeps track of all the request we have sent. 
         list_pos = 0
 
-        if self.__serial_listener_lock.acquire(timeout=1):
+        if self.__serial_listener_lock.acquire(timeout=1): # pylint: disable=R1732
             serial_listener = copy.deepcopy(self.__listener_name)
             self.__serial_listener_lock.release()
         else :
@@ -370,7 +371,7 @@ class serverHandler(threadWrapper):
             list_pos += 1
             data_obj.append({"Place holder": None}) # We are creating a list will all spots we need for return values so later we can pack the list and everything will be in the same order. 
         
-        if self.__serial_writter_lock.acquire(timeout=1):
+        if self.__serial_writter_lock.acquire(timeout=1): # pylint: disable=R1732
             serial_writer = self.__serial_writer_name
             self.__serial_writter_lock.release()
         else :
@@ -395,32 +396,32 @@ class serverHandler(threadWrapper):
                         data_obj[request_list[i][3]] = data_obj_temp
                 all_request_serviced = all_request_serviced and request_list[i][2] #All the request have to say they have been serviced for this to mark as true. 
         
-        if self.__peripherals_serial_interface_lock.acquire(timeout=1):
+        if self.__peripherals_serial_interface_lock.acquire(timeout=1): # pylint: disable=R1732
             peripherals_serial_copy = copy.deepcopy(self.__peripherals_serial_interface)
             self.__peripherals_serial_interface_lock.release()
         else :
             raise RuntimeError("Could not aquire peripherals serial interface lock")
         for host in peripherals_serial_copy:
             try : 
-                response = requests.get('http://' + host + '/get_serial_status')
+                response = requests.get('http://' + host + '/get_serial_status', timeout=10)
             
                 if response.status_code == 200:
-                    data = (response.json())
+                    data = response.json()
                     data_obj.extend(data)           
-            except : 
-                pass
+            except : # pylint: disable=W0702
+                pass # request failed just going to pass it
         return jsonify(data_obj)
     def get_serial_names(self):
         '''
             Returns all the serial names so the webpage knows about them. 
         '''
 
-        if self.__serial_listener_lock.acquire(timeout=1):
+        if self.__serial_listener_lock.acquire(timeout=1): # pylint: disable=R1732
             serial_listener = copy.deepcopy(self.__listener_name)
             self.__serial_listener_lock.release()
         else :
             raise RuntimeError("Could not aquire serial listener lock")
-        if self.__serial_writter_lock.acquire(timeout=1):
+        if self.__serial_writter_lock.acquire(timeout=1): # pylint: disable=R1732
             serial_writer = copy.deepcopy(self.__serial_writer_name)
             self.__serial_writter_lock.release()
         else : 
@@ -430,7 +431,7 @@ class serverHandler(threadWrapper):
             'writer' : serial_writer
         }
         
-        if self.__peripherals_serial_interface_lock.acquire(timeout=1):
+        if self.__peripherals_serial_interface_lock.acquire(timeout=1): # pylint: disable=R1732
             peripherals_serial_copy = copy.deepcopy(self.__peripherals_serial_interface)
             self.__peripherals_serial_interface_lock.release()
         else : 
@@ -506,7 +507,7 @@ class serverHandler(threadWrapper):
         files = []
 
         # Walk through the testing folder and find all the failed test their. 
-        for root, dirs, filenames in os.walk(self.__failed_test_path):
+        for root, _, filenames in os.walk(self.__failed_test_path):
             # Add the file names to the list
             for filename in filenames:
                 file_path = os.path.join(root, filename)
@@ -519,7 +520,7 @@ class serverHandler(threadWrapper):
         files = []
 
         # Walk through the testing folder and find all the failed test their. 
-        for root, dirs, filenames in os.walk(self.__passed_test_path):
+        for root, _, filenames in os.walk(self.__passed_test_path):
             # Add the file names to the list
             for filename in filenames:
                 file_path = os.path.join(root, filename)
@@ -561,7 +562,7 @@ class serverHandler(threadWrapper):
         '''
             Returns html for the command page
         '''
-        if self.__system_info_lock.acquire(timeout=1):
+        if self.__system_info_lock.acquire(timeout=1): # pylint: disable=R1732
             display_name = self.__display_name
             self.__system_info_lock.release()
         else : 
@@ -570,7 +571,7 @@ class serverHandler(threadWrapper):
         for command_dict in table_data:
             command_dict['Host'] = 'Local'
             command_dict['display_name'] = display_name
-        if self.__peripherals_commands_lock.acquire(timeout=1):
+        if self.__peripherals_commands_lock.acquire(timeout=1): # pylint: disable=R1732
             peripherals_commands_copy = copy.deepcopy(self.__peripherals_commands)
             self.__peripherals_commands_lock.release()
         else :
@@ -618,22 +619,25 @@ class serverHandler(threadWrapper):
         session_name = request.json.get('sessionName')
         session_description = request.json.get('description')
 
-        if self.__session_lock.acquire(timeout=1):
+        if self.__session_lock.acquire(timeout=1): # pylint: disable=R1732
             self.__current_session_name = session_name
             self.__session_description = session_description
             self.__session_running = True
             self.__session_lock.release()
         else : 
             raise RuntimeError("Could not aquire session lock")
-        if session_name:
+        if session_name: # pylint: disable=R1705
             # Do something with the session name, like start a session
             return jsonify({'message': 'Session started successfully'}), 200
-        else:
+        else: 
             return jsonify({'error': 'Session name not provided'}), 400
 
     def end_session(self):
+        '''
+            This functions marks the session to end.
+        '''
         # Do something to end the session
-        if self.__session_lock.acquire(timeout=1):
+        if self.__session_lock.acquire(timeout=1): # pylint: disable=R1732
             self.__session_running = False
             self.__session_lock.release()
         else : 
@@ -647,7 +651,7 @@ class serverHandler(threadWrapper):
             Return order:
             name, description, running 
         '''
-        if self.__session_lock.acquire(timeout=1):
+        if self.__session_lock.acquire(timeout=1): # pylint: disable=R1732
             name = self.__current_session_name
             session_description = self.__session_description
             running = self.__session_running
@@ -661,7 +665,7 @@ class serverHandler(threadWrapper):
         '''
 
         message = request.form.get('message')
-        sender = request.form.get('sender')
+        _ = request.form.get('sender')
         display_name = request.form.get('Display_name')
         request_fucntion = request.form.get('function')
         message = request.form.get('message')

@@ -53,7 +53,7 @@ class serverMessageHandler(threadWrapper):
         '''
             this function adds a message to the log that the server will then display.
         '''
-        if self.__message_lock.acquire(timeout=1):
+        if self.__message_lock.acquire(timeout=1): # pylint: disable=R1732
             self.__messages = message
             self.__message_lock.release()
         else : 
@@ -62,7 +62,7 @@ class serverMessageHandler(threadWrapper):
         '''
             this function adds a message to the permanent log that the server will then display.
         '''
-        if self.__prem_message_lock.acquire(timeout=1):
+        if self.__prem_message_lock.acquire(timeout=1): # pylint: disable=R1732
             self.__prem_messages = message
             self.__prem_message_lock.release()
         else : 
@@ -71,7 +71,7 @@ class serverMessageHandler(threadWrapper):
         '''
             this function adds a message to the threading report that the server will then display.
         '''
-        if self.__thread_report_lock.acquire(timeout=1):
+        if self.__thread_report_lock.acquire(timeout=1): # pylint: disable=R1732
             self.__report = report
             self.__thread_report_lock.release()
         else : 
@@ -80,7 +80,7 @@ class serverMessageHandler(threadWrapper):
         '''
             this function adds a message the status report that the server will then display.
         '''
-        if self.__status_lock.acquire(timeout=1):
+        if self.__status_lock.acquire(timeout=1): # pylint: disable=R1732
             self.__status = report
             self.__status_lock.release()
         else : 
@@ -89,7 +89,7 @@ class serverMessageHandler(threadWrapper):
         '''
             this function adds a message to the log that contains the number of bytes received that the server will then display.
         '''
-        if self.__byte_status_lock.acquire(timeout=1):
+        if self.__byte_status_lock.acquire(timeout=1): # pylint: disable=R1732
             self.__byte_status = data
             self.__byte_status_lock.release()
         else :
@@ -98,7 +98,7 @@ class serverMessageHandler(threadWrapper):
         '''
             Server uses this function to pull the message log.
         '''
-        if self.__message_lock.acquire(timeout=1):
+        if self.__message_lock.acquire(timeout=1): # pylint: disable=R1732
             data = self.__messages
             self.__message_lock.release()
         else : 
@@ -108,7 +108,7 @@ class serverMessageHandler(threadWrapper):
         '''
             Server uses this Function to pull the prem message log.
         '''
-        if self.__prem_message_lock.acquire(timeout=1):
+        if self.__prem_message_lock.acquire(timeout=1): # pylint: disable=R1732
             data = self.__prem_messages
             self.__prem_message_lock.release()
         else : 
@@ -118,7 +118,7 @@ class serverMessageHandler(threadWrapper):
         '''
             Server uses this Function to pull the threading report log.
         '''
-        if self.__thread_report_lock.acquire(timeout=1):
+        if self.__thread_report_lock.acquire(timeout=1): # pylint: disable=R1732
             data = self.__report
             self.__thread_report_lock.release()
         else : 
@@ -128,7 +128,7 @@ class serverMessageHandler(threadWrapper):
         '''
             Server uses this function to pull the status message log.
         '''
-        if self.__status_lock.acquire(timeout=1):
+        if self.__status_lock.acquire(timeout=1): # pylint: disable=R1732
             data = self.__status
             self.__status_lock.release()
         else :
@@ -138,7 +138,7 @@ class serverMessageHandler(threadWrapper):
         '''
             Server uses this function to pull byte report log.
         '''
-        if self.__byte_status_lock.acquire(timeout=1):
+        if self.__byte_status_lock.acquire(timeout=1): # pylint: disable=R1732
             if len(self.__byte_status) <= 0:
                 data = [
                     {

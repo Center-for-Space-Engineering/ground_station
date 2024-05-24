@@ -17,7 +17,7 @@ from server import serverHandler # pylint: disable=e0401
 from server_message_handler import serverMessageHandler # pylint: disable=e0401
 from pytesting_api.test_runner import test_runner # pylint: disable=e0401
 from pytesting_api import global_test_variables # pylint: disable=e0401
-from peripheral_hand_shake import peripheral_hand_shake # pylint: disable=e401
+from peripheral_hand_shake import peripheral_hand_shake # pylint: disable=e0401
 
 #These are some Debugging tools I add, Turning off the display is really useful for seeing errors, because the terminal wont get erased every few milliseconds with the display on.
 NO_PORT_LISTENER = False
@@ -28,7 +28,7 @@ if not NO_PORT_LISTENER:
 if not NO_SENSORS:
     from sensor_interface_api.collect_sensor import sensor_importer # pylint: disable=e0401
 
-def main():
+def main(): # pylint: disable=R0915
     '''
     This module runs everything, its main job is to create and run all of the 
     system objects and classes. 
@@ -76,6 +76,27 @@ def main():
         sensor_config.interface_listener_list = port_listener_list
         sensor_config.server = server_listener_name
         sensor_config.sensors_config = sensor_config_dict
+
+        #ccsds packet parsing constants
+        ccsds_header_len = config_data.get("ccsds_header_len", 0)
+        sync_word = config_data.get("sync_word", 0)
+        sync_word_len = config_data.get("sync_word_len", 0)
+        packet_len_addr1 = config_data.get("packet_len_addr1", 0)
+        packet_len_addr2 = config_data.get("packet_len_addr2", 0)
+        system_clock = config_data.get("system_clock", 0)
+        real_time_clock = config_data.get("real_time_clock", 0)
+
+
+        sensor_config.ccsds_header_len = ccsds_header_len
+        sensor_config.sync_word = sync_word
+        sensor_config.sync_word_len = sync_word_len
+        sensor_config.packet_len_addr1 = packet_len_addr1
+        sensor_config.packet_len_addr2 = packet_len_addr2
+        sensor_config.system_clock = system_clock
+        sensor_config.real_time_clock = real_time_clock
+
+        # packet structre definition
+        packet_struture_path = config_data.get("packets_structure_file_path", 0)
     
 
     ########################################################################################
@@ -136,7 +157,7 @@ def main():
     ########### Set up sensor interface ###########
     if not NO_SENSORS:
         # create the sensors interface
-        importer = sensor_importer() # create the importer object
+        importer = sensor_importer(packets_file=packet_struture_path) # create the importer object
         importer.import_modules() # collect the models to import
         importer.instantiate_sensor_objects(coms=coms) # create the sensors objects.
 
@@ -146,6 +167,11 @@ def main():
         for sensor in sensors:
             threadPool.add_thread(sensor.run, sensor.get_sensor_name(), sensor)
         threadPool.start()
+
+        #Now that all the sensors are started lets build the tap network.
+        # create a thread for each sensor and then start them. 
+        for sensor in sensors:
+            sensor.set_up_taps()
 
         # give the webpage gain access to the sensors.
         server.set_sensor_list(sensors=sensors)
