@@ -85,6 +85,9 @@ EX: "127.0.0.1:5000/exsample/arg1/arg2/arg2" => `message = ['example', 'arg1', '
 ## `dynamicImporter`
 This class is simple. All it does is search the current directory for any python file that is lead with `cmd_`. If it finds a file with that tag, it turns it into a python module and that can then be turned into a class and run as a command by the server. \
 
+![class structure](cmd_import_flow.png)
+
+
 
 ### Functions:
 
