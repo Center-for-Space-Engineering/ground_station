@@ -29,7 +29,6 @@ class serverHandler(threadWrapper):
         # pylint: disable=w0612
         self.__function_dict = { #NOTE: I am only passing the function that the rest of the system needs 
             'run' : self.run,
-            'kill_Task' : self.kill_Task,
             'getComs' : self.getComs,
         }
         super().__init__(self.__function_dict)
