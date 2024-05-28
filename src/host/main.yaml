@@ -47,6 +47,29 @@ uart_2: /dev/ttyAMA2
 # Server Configs
 hostname: '144.39.167.206'  # get this by running hostname -I
 display_name : 'space_weather_probes_serial_#_1'
-port: 5010
-port_serial_1: 5050
-port_serial_2: 5000
+port: 8010
+port_serial_1: 8050
+port_serial_2: 8020
+
+
+#Command packets config
+APID_pps: 0x021
+APID_Idle: 0x022
+APID_Stat: 0x023
+APID_Mode: 0x024
+
+pvn: 0
+pck_type: 1
+sec_header: 0
+seq_flags: 3
+
+mask_pvn: 0b111
+mask_pck_type: 0b1
+mask_sec_header: 0b1
+mask_APID_1: 0b11100000000
+mask_APID_2: 0b00011111111
+mask_seq_flags: 0b11
+mask_packet_count_1: 0b11111100000000
+mask_packet_count_2: 0b00000011111111
+mask_packet_len_1: 0xFF00
+mask_packet_len_2: 0x00FF

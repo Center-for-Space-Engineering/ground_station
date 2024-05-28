@@ -42,6 +42,48 @@ def main():
     swp_board_writer = config_data.get("swp_board_writer", "")
     system_constants.swp_board_writer = swp_board_writer
 
+    APID_pps = config_data.get("APID_pps", "")
+    APID_Idle = config_data.get("APID_Idle", "")
+    APID_Stat = config_data.get("APID_Stat", "")
+    APID_Mode = config_data.get("APID_Mode", "")
+
+    pvn = config_data.get("pvn", "")
+    pck_type = config_data.get("pck_type", "")
+    sec_header = config_data.get("sec_header", "")
+    seq_flags = config_data.get("seq_flags", "")
+
+    mask_pvn = config_data.get("mask_pvn", "")
+    mask_pck_type = config_data.get("mask_pck_type", "")
+    mask_sec_header = config_data.get("mask_sec_header", "")
+    mask_APID_1 = config_data.get("mask_APID_1", "")
+    mask_APID_2 = config_data.get("mask_APID_2", "")
+    mask_seq_flags = config_data.get("mask_seq_flags", "")
+    mask_packet_count_1 = config_data.get("mask_packet_count_1", "")
+    mask_packet_count_2 = config_data.get("mask_packet_count_2", "")
+    mask_packet_len_1 = config_data.get("mask_packet_len_1", "")
+    mask_packet_len_2 = config_data.get("mask_packet_len_2", "")
+    
+    system_constants.APID_pps = APID_pps
+    system_constants.APID_Idle = APID_Idle
+    system_constants.APID_Stat = APID_Stat
+    system_constants.APID_Mode = APID_Mode
+    
+    system_constants.pvn = pvn
+    system_constants.pck_type = pck_type
+    system_constants.sec_header = sec_header
+    system_constants.seq_flags = seq_flags
+    
+    system_constants.mask_pvn = mask_pvn
+    system_constants.mask_pck_type = mask_pck_type
+    system_constants.mask_sec_header = mask_sec_header
+    system_constants.mask_APID_1 = mask_APID_1
+    system_constants.mask_APID_2 = mask_APID_2
+    system_constants.mask_seq_flags = mask_seq_flags
+    system_constants.mask_packet_count_1 = mask_packet_count_1
+    system_constants.mask_packet_count_2 = mask_packet_count_2
+    system_constants.mask_packet_len_1 = mask_packet_len_1
+    system_constants.mask_packet_len_2 = mask_packet_len_2
+
     uart_0 = config_data.get("uart_0", "")
     uart_2 = config_data.get("uart_2", "")
 

@@ -77,20 +77,20 @@ class cmd_command_from_file(commandParent):
         except IOError:
             return f"Error: Unable to read file '{bytes_filename}'."
 
-        packet_version_number = 0
-        packet_type = 1
-        secondary_header = 0
-        sequence_flags = 3
+        packet_version_number = system_constants.pvn
+        packet_type = system_constants.pck_type
+        secondary_header = system_constants.sec_header
+        sequence_flags = system_constants.seq_flags
         packet_count = self.__packet_count
         packet_length = len(byte_data) + 1 #Has to be the total number of data bytes (not including crc) plus one for ccsds standard ¯\_(ツ)_/¯
         # self.__packet_count += 1
 
-        header_byte1 = ((packet_version_number & 0b111) << 5) | ((packet_type & 0b1) << 4) | ((secondary_header & 0b1) << 3) | ((packet_apid & 0b11100000000) >> 8)
-        header_byte2 = packet_apid & 0b00011111111
-        header_byte3 = ((sequence_flags & 0b11) << 6) | ((packet_count & 0b11111100000000) >> 8)
-        header_byte4 = packet_count & 0b00000011111111
-        header_byte5 = packet_length & 0xFF00
-        header_byte6 = packet_length & 0x00FF
+        header_byte1 = ((packet_version_number & system_constants.mask_pvn) << 5) | ((packet_type & system_constants.mask_pck_type) << 4) | ((secondary_header & system_constants.mask_sec_header) << 3) | ((packet_apid & system_constants.mask_APID_1) >> 8)
+        header_byte2 = packet_apid & system_constants.mask_APID_2
+        header_byte3 = ((sequence_flags & system_constants.mask_seq_flags) << 6) | ((packet_count & system_constants.mask_packet_count_1) >> 8)
+        header_byte4 = packet_count & system_constants.mask_packet_count_2
+        header_byte5 = (packet_length & system_constants.mask_packet_len_1) >> 8
+        header_byte6 = packet_length & system_constants.mask_packet_len_2
 
         header = bytearray([header_byte1, header_byte2, header_byte3, header_byte4, header_byte5, header_byte6])
 
@@ -146,20 +146,20 @@ class cmd_command_from_file(commandParent):
         except IOError:
             return f"Error: Unable to read file '{bytes_filename}'."
 
-        packet_version_number = 0
-        packet_type = 1
-        secondary_header = 0
-        sequence_flags = 3
+        packet_version_number = system_constants.pvn
+        packet_type = system_constants.pck_type
+        secondary_header = system_constants.sec_header
+        sequence_flags = system_constants.seq_flags
         packet_count = self.__packet_count
         packet_length = len(byte_data) + 1 #Has to be the total number of data bytes (not including crc) plus one for ccsds standard ¯\_(ツ)_/¯
         # self.__packet_count += 1
 
-        header_byte1 = ((packet_version_number & 0b111) << 5) | ((packet_type & 0b1) << 4) | ((secondary_header & 0b1) << 3) | ((packet_apid & 0b11100000000) >> 8)
-        header_byte2 = packet_apid & 0b00011111111
-        header_byte3 = ((sequence_flags & 0b11) << 6) | ((packet_count & 0b11111100000000) >> 8)
-        header_byte4 = packet_count & 0b00000011111111
-        header_byte5 = packet_length & 0xFF00
-        header_byte6 = packet_length & 0x00FF
+        header_byte1 = ((packet_version_number & system_constants.mask_pvn) << 5) | ((packet_type & system_constants.mask_pck_type) << 4) | ((secondary_header & system_constants.mask_sec_header) << 3) | ((packet_apid & system_constants.mask_APID_1) >> 8)
+        header_byte2 = packet_apid & system_constants.mask_APID_2
+        header_byte3 = ((sequence_flags & system_constants.mask_seq_flags) << 6) | ((packet_count & system_constants.mask_packet_count_1) >> 8)
+        header_byte4 = packet_count & system_constants.mask_packet_count_2
+        header_byte5 = (packet_length & system_constants.mask_packet_len_1) >> 8
+        header_byte6 = packet_length & system_constants.mask_packet_len_2
 
         header = bytearray([header_byte1, header_byte2, header_byte3, header_byte4, header_byte5, header_byte6])
 
@@ -193,24 +193,23 @@ class cmd_command_from_file(commandParent):
             sends a mode packet with the mode given by the 16 bits in args[1].
         '''
 
-        packet_apid = 35 # 0x23
+        packet_apid = system_constants.APID_Mode #0x24
         byte_data = int(args[1], 16)
         byte_data = byte_data.to_bytes(2, byteorder='big')
 
-        packet_version_number = 0
-        packet_type = 1
-        secondary_header = 0
-        sequence_flags = 3
+        packet_version_number = system_constants.pvn
+        packet_type = system_constants.pck_type
+        secondary_header = system_constants.sec_header
+        sequence_flags = system_constants.seq_flags
         packet_count = self.__packet_count
         packet_length = len(byte_data) + 1 #Has to be the total number of data bytes (not including crc) plus one for ccsds standard ¯\_(ツ)_/¯
-        # self.__packet_count += 1
 
-        header_byte1 = ((packet_version_number & 0b111) << 5) | ((packet_type & 0b1) << 4) | ((secondary_header & 0b1) << 3) | ((packet_apid & 0b11100000000) >> 8)
-        header_byte2 = packet_apid & 0b00011111111
-        header_byte3 = ((sequence_flags & 0b11) << 6) | ((packet_count & 0b11111100000000) >> 8)
-        header_byte4 = packet_count & 0b00000011111111
-        header_byte5 = packet_length & 0xFF00
-        header_byte6 = packet_length & 0x00FF
+        header_byte1 = ((packet_version_number & system_constants.mask_pvn) << 5) | ((packet_type & system_constants.mask_pck_type) << 4) | ((secondary_header & system_constants.mask_sec_header) << 3) | ((packet_apid & system_constants.mask_APID_1) >> 8)
+        header_byte2 = packet_apid & system_constants.mask_APID_2
+        header_byte3 = ((sequence_flags & system_constants.mask_seq_flags) << 6) | ((packet_count & system_constants.mask_packet_count_1) >> 8)
+        header_byte4 = packet_count & system_constants.mask_packet_count_2
+        header_byte5 = (packet_length & system_constants.mask_packet_len_1) >> 8
+        header_byte6 = packet_length & system_constants.mask_packet_len_2
 
         header = bytearray([header_byte1, header_byte2, header_byte3, header_byte4, header_byte5, header_byte6])
 
@@ -244,24 +243,24 @@ class cmd_command_from_file(commandParent):
             sends an idle packet.
         '''
 
-        packet_apid = 33 # 0x21
+        packet_apid = system_constants.APID_Idle # 0x22
         byte_data = 0
         byte_data = byte_data.to_bytes(1, byteorder='big')
 
-        packet_version_number = 0
-        packet_type = 1
-        secondary_header = 0
-        sequence_flags = 3
+        packet_version_number = system_constants.pvn
+        packet_type = system_constants.pck_type
+        secondary_header = system_constants.sec_header
+        sequence_flags = system_constants.seq_flags
         packet_count = self.__packet_count
         packet_length = len(byte_data) + 1 #Has to be the total number of data bytes (not including crc) plus one for ccsds standard ¯\_(ツ)_/¯
         # self.__packet_count += 1
 
-        header_byte1 = ((packet_version_number & 0b111) << 5) | ((packet_type & 0b1) << 4) | ((secondary_header & 0b1) << 3) | ((packet_apid & 0b11100000000) >> 8)
-        header_byte2 = packet_apid & 0b00011111111
-        header_byte3 = ((sequence_flags & 0b11) << 6) | ((packet_count & 0b11111100000000) >> 8)
-        header_byte4 = packet_count & 0b00000011111111
-        header_byte5 = packet_length & 0xFF00
-        header_byte6 = packet_length & 0x00FF
+        header_byte1 = ((packet_version_number & system_constants.mask_pvn) << 5) | ((packet_type & system_constants.mask_pck_type) << 4) | ((secondary_header & system_constants.mask_sec_header) << 3) | ((packet_apid & system_constants.mask_APID_1) >> 8)
+        header_byte2 = packet_apid & system_constants.mask_APID_2
+        header_byte3 = ((sequence_flags & system_constants.mask_seq_flags) << 6) | ((packet_count & system_constants.mask_packet_count_1) >> 8)
+        header_byte4 = packet_count & system_constants.mask_packet_count_2
+        header_byte5 = (packet_length & system_constants.mask_packet_len_1) >> 8
+        header_byte6 = packet_length & system_constants.mask_packet_len_2
 
         header = bytearray([header_byte1, header_byte2, header_byte3, header_byte4, header_byte5, header_byte6])
 
@@ -295,24 +294,24 @@ class cmd_command_from_file(commandParent):
             requests an status packet.
         '''
 
-        packet_apid = 34 # 0x22
+        packet_apid = system_constants.APID_Stat # 0x23
         byte_data = 0
         byte_data = byte_data.to_bytes(1, byteorder='big')
 
-        packet_version_number = 0
-        packet_type = 1
-        secondary_header = 0
-        sequence_flags = 0
+        packet_version_number = system_constants.pvn
+        packet_type = system_constants.pck_type
+        secondary_header = system_constants.sec_header
+        sequence_flags = system_constants.seq_flags
         packet_count = self.__packet_count
         packet_length = len(byte_data) + 1 #Has to be the total number of data bytes (not including crc) plus one for ccsds standard ¯\_(ツ)_/¯
         # self.__packet_count += 1
 
-        header_byte1 = ((packet_version_number & 0b111) << 5) | ((packet_type & 0b1) << 4) | ((secondary_header & 0b1) << 3) | ((packet_apid & 0b11100000000) >> 8)
-        header_byte2 = packet_apid & 0b00011111111
-        header_byte3 = ((sequence_flags & 0b11) << 6) | ((packet_count & 0b11111100000000) >> 8)
-        header_byte4 = packet_count & 0b00000011111111
-        header_byte5 = packet_length & 0xFF00
-        header_byte6 = packet_length & 0x00FF
+        header_byte1 = ((packet_version_number & system_constants.mask_pvn) << 5) | ((packet_type & system_constants.mask_pck_type) << 4) | ((secondary_header & system_constants.mask_sec_header) << 3) | ((packet_apid & system_constants.mask_APID_1) >> 8)
+        header_byte2 = packet_apid & system_constants.mask_APID_2
+        header_byte3 = ((sequence_flags & system_constants.mask_seq_flags) << 6) | ((packet_count & system_constants.mask_packet_count_1) >> 8)
+        header_byte4 = packet_count & system_constants.mask_packet_count_2
+        header_byte5 = (packet_length & system_constants.mask_packet_len_1) >> 8
+        header_byte6 = packet_length & system_constants.mask_packet_len_2
 
         header = bytearray([header_byte1, header_byte2, header_byte3, header_byte4, header_byte5, header_byte6])
 
