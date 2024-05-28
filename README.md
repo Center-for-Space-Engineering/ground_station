@@ -1,42 +1,51 @@
-# Server overview
-This document contains many examples. They are all write with 127.0.0.1 witch the home address when running on other computers this needs to be replace with the IP of the computer you want to talk to.
+# Peripheral overview
+This Document provides an overview of how the peripherals should be structure in order to set up a connection the CSE Host and pass data to them. The main purpose of this document it to help the user set up peripherals.
+
+## Key concepts:
+- Commands start with `cmd_` these are executable by the server. (See the `HOWTO.md` for instruction on how to create them.)
+- Sensor objects collect, process, then publish data they start with `sobj_`. (See the `HOWTO.md` for instruction on how to create them.)
+- The `message_handler.py` is the internal communication class it is often referred to as `coms` or `self.__coms`.
+- Class will listen to each others data using a method called `taps`. The basics is when an object wants to publish data, it reads from a list of functions to call, then send the data using the functions in that list.
+
 
 
 
 
 ## clone repo
-    NOTE: this repo has submodels and must be clone with the `git clone --recurse-submodules <repo url>`.
+NOTE: this repo has submodels and must be clone with the 
+```bash
+git clone --recurse-submodules <repo url>.
+```
 
 
 ## `Main.py`
-Handles starting and running the server. It also creates an object for `server`, `taskHandler` (threading), and `data_collection`.
+Handles creating objects for the system to use. It creates most of the big objects used by the system such as the `server`, `taskHandler` (threading), and `Serial_listeners`.
 
 
-![class structure](ground_station_sserver.png)
+![class structure](data_flow.png)
 
 
 ## `Server`
-This class handles all incoming request and routes them to `cmd_inter` returns the html page and what ever `cmd_inter` returns to the webpage.
+This class handles all incoming request and routes them to `cmd_inter` returns the html page and what ever `cmd_inter` returns to the webpage. 
 
 
-### functions:
+###  Major functions:
 1. `__init__ `: this is pythons constructor. It builds the basic variables needed for the class.
 2. `setup_routes`: this sets up and get routes that can be requested.
 3. `run` : this function starts the server. It requests the port and if it can access it then it starts the server up.
 4. Other functions not listed: These functions are call backs that tie into the get requests. Basically when the user makes a git request one these functions are called.
 
+## `data_publisher`
+It is given a data steam to publish via a tap, then it publishes that data onto the network once a host connects to the pipe. 
 
-## `Server_messaage_handler`
+
+## `Server_message_handler`
 This class handles all internal messaging to the server. The server has a very high load, so this class handles collecting and storing messages to the server class.
 
 
 ### functions:
 1. `write_` or `report`: These functions are requested by other threads. They take a messages and store it for the server.
 2. `get_`: These functions are called by the server and return the stored messages.
-
-
-
-
 
 
 ## `cmd_inter`
@@ -49,7 +58,7 @@ EX: "127.0.0.1:5000/example", 'example' is used to index the dictionary.
 
 
 ### Functions:
-1. `parseCmd`:  This funct handles passing commands and then calling the correct class using the self.__commandDict. \
+1. `parseCmd`:  This func handles passing commands and then calling the correct class using the self.__commandDict. \
 NOTE:  The following code is used to decide if there are any arguments that need to be passed on to the cmd class.
 \
 EX: "127.0.0.1:5000/exsample" class ``.run()`` on the class whereas "127.0.0.1:5000/exsample/args" calls `.run(message[1:])`. One other thing to note is that `message` is a LIST! So for the second EX it looks like `message = ['example', 'args']`. It is important that the LIST gets pass on to the class, and NOT an individual arg. This is so that if the user wishes to have multiple args the server can support this. \
@@ -73,7 +82,7 @@ EX: "127.0.0.1:5000/exsample/arg1/arg2/arg2" => `message = ['example', 'arg1', '
 4. `__init__`: this func calls the `collectCommands` and sets up the `self.__commandDict`.
 
 
-## `dinamicImporter`
+## `dynamicImporter`
 This class is simple. All it does is search the current directory for any python file that is lead with `cmd_`. If it finds a file with that tag, it turns it into a python module and that can then be turned into a class and run as a command by the server. \
 
 
@@ -86,22 +95,13 @@ This class is simple. All it does is search the current directory for any python
 2. `getModList`: returns the list of modules that can be run.
 
 
-
-
-
-
-![importer](cmd_import_flow.png) \
-
-
-
-
 ## `commandParent`
 This class IS NOT strictly necessary for a functionality purpose. However, it is used to make it easier to make new commands. Basically it has all the command functions that have to be there for the server to run. If the user decides not to implement one of the functions then the command parent will have a basic version so that the server does not fail. \
 EX: if the user does not want a `runArgs(self, args)` function they don't need one.\
 NOTE: I STRONGLY recommend having an `__int__` and `__str__` function despite the command parent implementing them for you.
 
 
-## `cmd_exsample`
+## `cmd_example`
 This class is meant to be a help for the user as it provides an example of how to implement a `cmd_` class.
 
 
@@ -199,16 +199,12 @@ EX: example call : `http://127.0.0.1:5000/data_Collector/getData/exsample/169402
 9. `get_args_server`: returns the args for the class in a format the server can understand. (The return value is mapped to a table that is displayed on the web page.)
 
 
-## `cmd_data_publisher`
-This class is tasked with creating the pipe that is used by `Cosmos` for listening to our data. Basically it receives a command from the server to start and then makes a request to start a new thread with the  `run_publisher` as the function running on the thread.
+## `cmd_commands_from_file`
+Publishes commands to the pi to emulate the space craft. 
 
 
 ## `templates\`
 This folder holds the html templates the server uses to create the web page.
-
-
-## `synthetic_data_profilies\`
-This folder is for storing known data profiles that can be piped out to `Comos`. This is for testing purposes.
 
 
 ## `static\`
@@ -235,12 +231,6 @@ Hold the actual database and the database definition file.
 
 ## running main
 The command to run main in `python3 main.py` from the host folder. Main also is a meeting point for all the other `api`'s being used. NOTE: for ease of use it is best if all the other `api`'s are in the same folder as `main.py`
-
-
-## testing server
-
-
-## unit tests
 
 
 ## Logger
