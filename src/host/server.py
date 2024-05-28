@@ -6,9 +6,6 @@ import logging
 from flask import Flask, render_template, request , send_from_directory, jsonify, send_file # pylint: disable=w0611 
 from datetime import datetime
 import os
-import threading
-from werkzeug.serving import BaseWSGIServer
-from socketserver import ThreadingMixIn
 import requests
 
 #imports from other folders that are not local
@@ -19,9 +16,6 @@ from threading_python_api.threadWrapper import threadWrapper # pylint: disable=e
 from logging_system_display_python_api.DTOs.logger_dto import logger_dto # pylint: disable=e0401
 from logging_system_display_python_api.DTOs.print_message_dto import print_message_dto # pylint: disable=e0401
 
-class ThreadedWSGIServer(ThreadingMixIn, BaseWSGIServer):
-    pass
-
 class serverHandler(threadWrapper):
     '''
         This class is the server for the whole system. It hands serving the webpage and routing request to there respective classes. 
@@ -30,7 +24,6 @@ class serverHandler(threadWrapper):
         # pylint: disable=w0612
         self.__function_dict = { #NOTE: I am only passing the function that the rest of the system needs 
             'run' : self.run,
-            'kill_Task' : self.kill_Task,
         }
         super().__init__(self.__function_dict)
 
@@ -67,8 +60,6 @@ class serverHandler(threadWrapper):
 
         # Enable template auto-reloading in development mode
         self.app.config["TEMPLATES_AUTO_RELOAD"] = True
-
-        self.server = ThreadedWSGIServer(self.__hostName, self.__serverPort, self.app)
         
     def setup_routes(self):
         '''
@@ -105,10 +96,10 @@ class serverHandler(threadWrapper):
         elif 'local_code=501' == path[-1]: #forwarded command
             message = self.__cmd.parse_cmd(path[:-1])
         else :
-            response = requests.get('http://' + unknown_path + "/local_code=501") 
+            response = requests.get('http://' + unknown_path + "/local_code=501", timeout=10) 
 
             if response.status_code == 200:
-                message = (response.json())
+                message = response.json()
             else :
                 message = ({
                         'text_data' : 'Unable to run command',
@@ -135,16 +126,7 @@ class serverHandler(threadWrapper):
         dto = logger_dto(message="Server started http://%s:%s" % (self.__hostName, self.__serverPort), time=str(datetime.now()))
         self.__coms.send_message_permanent(dto, 2)
         super().set_status("Running")
-        self.server.serve_forever()
-    def kill_Task(self):
-        '''
-            This closes the Server, after the kill command is received.
-        '''
-        super().kill_Task()
-        if self.server:
-            self.server.shutdown()
-        self.__log.send_log("Server stopped.")
-        self.__log.send_log("Quite command received.")
+        self.app.run(debug=False, host=self.__hostName, port=self.__serverPort, threaded=True)
     def set_sensor_list(self, sensors):
         '''
             This function takes a list of sensor classes that the system has created. 
@@ -155,26 +137,14 @@ class serverHandler(threadWrapper):
         #Make the dictionary of all the file paths to each sensors html page, and generate the page (the get_html_page) generates the html page
         for sensor in self.__sensor_list:
             self.__sensor_html_dict[sensor.get_sensor_name()] = (sensor.get_html_page().replace('templates/', ''), sensor)
-    def serial_run_request(self):
-        '''
-            Send a request to the serial writer to execute a command.
-        '''
-        thread_name = request.args.get('serial_name')
-        #make a request for the messages
-        id_request = self.__coms.send_request(thread_name, ['write_to_serial_port', request.args.get('serial_command')]) #send the request to the serial writer
-        data_obj = None
-        #wait for the messages to be returned
-        while data_obj is None:
-            data_obj = self.__coms.get_return(thread_name, id_request)
-        return data_obj
     def get_serial_names(self):
-            '''
-                Returns all the serial names so the webpage knows about them. 
-            '''
-            return jsonify({
-                'listener' : self.__listener_name,
-                'writer' : self.__serial_writer_name
-            })
+        '''
+            Returns all the serial names so the webpage knows about them. 
+        '''
+        return jsonify({
+            'listener' : self.__listener_name,
+            'writer' : self.__serial_writer_name
+        })
     def command(self):
         '''
             Returns html for the command page, and the display name
@@ -196,6 +166,9 @@ class serverHandler(threadWrapper):
     
         return render_template('Command.html', table_data=table_data)
     def set_host_url(self):
+        '''
+            The host calls this to let the pi know about its url.
+        '''
         # Get the URL of the sending Flask app from the POST request data
         sender_url = request.form.get('sender_url')
 
@@ -207,14 +180,6 @@ class serverHandler(threadWrapper):
             Returns java script to the browser. So that it can be run in browser. 
         '''
         return send_from_directory('source', 'page_manigure.js')
-    def get_serial_names(self):
-        '''
-            Returns all the serial names so the webpage knows about them. 
-        '''
-        return jsonify({
-            'listener' : self.__listener_name,
-            'writer' : self.__serial_writer_name
-        })
     def get_serial_status(self):
         '''
             This is function returns the serial status to the web server for processing. 

@@ -1,3 +1,7 @@
+'''
+    This file contains all the constants that the whole system needs. 
+'''
+
 swp_board_writer = ""
 
 # Command packet constants

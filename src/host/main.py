@@ -15,9 +15,9 @@ from data_publisher import data_publisher # pylint: disable=e0401
 from cmd_inter import cmd_inter # pylint: disable=e0401
 from server import serverHandler # pylint: disable=e0401
 
-import system_constants
+import system_constants # pylint: disable=e0401
 
-def main():
+def main(): # pylint: disable=r0915
     '''
     This module runs everything, its main job is to create and run all of the 
     system objects and classes. 

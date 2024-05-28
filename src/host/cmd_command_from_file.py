@@ -4,8 +4,8 @@
 import time
 
 from commandParent import commandParent # pylint: disable=e0401
-from command_packets.functions import ccsds_crc16
-import system_constants
+from command_packets.functions import ccsds_crc16 # pylint: disable=e0401
+import system_constants # pylint: disable=e0401
 
 #import DTO for communicating internally
 from logging_system_display_python_api.DTOs.print_message_dto import print_message_dto # pylint: disable=e0401
