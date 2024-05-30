@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>https://usu.cse.spacecraftemulator.com</title>
+    <script src="page_manigure.js"></script>
+    <!-- Link to CSS file -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="horizontal-container">
+        <div="item"><h1 class="white-text">CSE Space Craft Emulator failed test Archive</h1>
+    </div>
+    <div class="tab-container">
+        <div class="tab" onclick="open_tab('Status Report')">Status Report</div>
+        <div class="tab" onclick="open_tab('Data Stream')">Data Stream</div>
+        <div class="tab" onclick="open_tab('Command')">Command</div>
+        <div class="tab" onclick="open_tab('unit_testing')">Passed Unit test</div>
+
+    </div>
+    <table>
+        <thead>
+            <tr class = "orange-text">
+                <th>Failed_test_archive</th>
+            </tr>
+            <tbody id = "failed_test_list">
+                <!-- Table body will be populated dynamically -->
+            </tbody>
+        </thead>
+    </table>
+    <script>
+        //update the sensor status table
+        setInterval(update_failed_test, 1000);
+    </script>
+</body>
+</html>

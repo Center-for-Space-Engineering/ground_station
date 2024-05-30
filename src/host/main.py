@@ -6,6 +6,7 @@
 import time
 import datetime
 import yaml
+import argparse
 
 #python custom imports
 import system_constants as sensor_config # pylint: disable=e0401 
@@ -17,20 +18,18 @@ from server import serverHandler # pylint: disable=e0401
 from server_message_handler import serverMessageHandler # pylint: disable=e0401
 from pytesting_api.test_runner import test_runner # pylint: disable=e0401
 from pytesting_api import global_test_variables # pylint: disable=e0401
+from peripheral_hand_shake import peripheral_hand_shake # pylint: disable=e0401
 
 #These are some Debugging tools I add, Turning off the display is really useful for seeing errors, because the terminal wont get erased every few milliseconds with the display on.
-NO_SERIAL_LISTENER = False
-NO_SERIAL_WRITER = False
+NO_PORT_LISTENER = False
 NO_SENSORS = False
 
-if not NO_SERIAL_LISTENER:
-    from python_serial_api.serial_listener import serial_listener # pylint: disable=e0401
-if not NO_SERIAL_WRITER:
-    from python_serial_api.serial_writer import serial_writer # pylint: disable=e0401
+if not NO_PORT_LISTENER:
+    from port_interface_api.port_listener import port_listener # pylint: disable=e0401
 if not NO_SENSORS:
     from sensor_interface_api.collect_sensor import sensor_importer # pylint: disable=e0401
 
-def main():
+def main(): # pylint: disable=R0915
     '''
     This module runs everything, its main job is to create and run all of the 
     system objects and classes. 
@@ -41,56 +40,93 @@ def main():
     with open("main.yaml", "r") as file:
         config_data = yaml.safe_load(file)
     
-    test_interval = config_data.get("test_interval", 0)
+    test_interval = datetime.timedelta(seconds=config_data.get("test_interval", 0))
     failed_test_path = config_data.get("failed_test_path", 0)
     passed_test_path = config_data.get("passed_test_path", 0)
     max_passed_test = config_data.get("max_passed_test", 0)
 
-    batch_size_1 = config_data.get("batch_size_1", 0)
-    batch_size_2 = config_data.get("batch_size_2", 0)
+    display_name = config_data.get("display_name", "")
 
-    serial_listener_name = config_data.get("serial_listener_name", "")
-    serial_writer_name = config_data.get("serial_writer_name", "")
-    serial_listener_2_name = config_data.get("serial_listener_2_name", "")
-    serial_writer_2_name = config_data.get("serial_writer_2_name", "")
-
-    uart_0 = config_data.get("uart_0", "")
-    uart_2 = config_data.get("uart_2", "")
-
-    serial_listener_list = config_data.get("serial_listener_list", [])
-    serial_writer_list = config_data.get("serial_writer_list", [])
+    peripheral_config_dict = config_data.get("peripheral_config_dict", "")
 
     hostname = config_data.get("hostname", "")
     port = config_data.get("port", 0)
     server_listener_name = config_data.get("server_listener_name", "")
     server_name_host = config_data.get("server_name_host", "")
 
-    data_base = config_data.get("data_base", "")
+    data_base = config_data.get("data_base", "") #thread name
+    data_base_name = config_data.get("data_base_name", "")#sql database name
+    sensor_config.database_name = data_base #other things want this varible as well. 
+
+    host = config_data.get("host", "")
+    user = config_data.get("user", "")
+    password = config_data.get("password", "")
+
+    port_listener_list = [sub_key['name'] for key in peripheral_config_dict for sub_key in peripheral_config_dict[key]['listener_port_list']]
+
+    serial_writer_list = []
+
+    list_of_peripherals_url = [peripheral_config_dict[key]['host_name'] + ':' + str(peripheral_config_dict[key]['connection_port']) for key in peripheral_config_dict]
+
+    
     if not NO_SENSORS:
         # Sensor configs
         sensor_config_dict = config_data.get("sensor_config_dict", {})
 
         # set up the config file
-        sensor_config.interface_listener_list = serial_listener_list
-        sensor_config.interface_writer_list = serial_writer_list
+        sensor_config.interface_listener_list = port_listener_list
         sensor_config.server = server_listener_name
         sensor_config.sensors_config = sensor_config_dict
-        sensor_config.database_name = data_base
+
+        #ccsds packet parsing constants
+        ccsds_header_len = config_data.get("ccsds_header_len", 0)
+        sync_word = config_data.get("sync_word", 0)
+        sync_word_len = config_data.get("sync_word_len", 0)
+        packet_len_addr1 = config_data.get("packet_len_addr1", 0)
+        packet_len_addr2 = config_data.get("packet_len_addr2", 0)
+        system_clock = config_data.get("system_clock", 0)
+        real_time_clock = config_data.get("real_time_clock", 0)
+
+
+        sensor_config.ccsds_header_len = ccsds_header_len
+        sensor_config.sync_word = sync_word
+        sensor_config.sync_word_len = sync_word_len
+        sensor_config.packet_len_addr1 = packet_len_addr1
+        sensor_config.packet_len_addr2 = packet_len_addr2
+        sensor_config.system_clock = system_clock
+        sensor_config.real_time_clock = real_time_clock
+
+        # packet structre definition
+        packet_struture_path = config_data.get("packets_structure_file_path", 0)
+    
 
     ########################################################################################
+    ######################## Get the peripherals informations ##############################
 
+    parser = argparse.ArgumentParser(description='Update repositories and submodules.')
+    parser.add_argument('--clear-database', action='store_true', help='Disable updating repositories')
+    args = parser.parse_args()
+
+    clear_database = args.clear_database
+    ########################################################################################
+
+
+    ######################## Get the peripherals informations ##############################
+    peripherals = peripheral_hand_shake(list_of_peripheral=list_of_peripherals_url, host_url=hostname + ":" + str(port))
+    ########################################################################################
+    
     ########### Set up server, database, and threading interface ########### 
     #create a server obj, not it will also create the coms object #144.39.167.206
     coms = messageHandler(server_name=server_listener_name, hostname=hostname)
     #make database object 
-    dataBase = DataBaseHandler(coms, is_gui=False)
+    dataBase = DataBaseHandler(coms, db_name = data_base_name,is_gui=False, host=host, user=user, password=password, clear_database=clear_database)
     #now that we have the data base we can collect all of our command handlers.s
     cmd = cmd_inter(coms, dataBase)
     #now that we have all the commands we can make the server
     #note because the server requires a thread to run, it cant have a dedicated thread to listen to coms like
     #other classes so we need another class object to listen to internal coms for the server.
     server_message_handler = serverMessageHandler(coms=coms)
-    server = serverHandler(hostname, port, coms, cmd, serverMessageHandler, server_listener_name, serial_writer_name=serial_writer_list, serial_listener_name=serial_listener_list, failed_test_path=failed_test_path, passed_test_path=passed_test_path)
+    server = serverHandler(hostname, port, coms, cmd, serverMessageHandler, server_listener_name, serial_writer_name=serial_writer_list, listener_name=port_listener_list, failed_test_path=failed_test_path, passed_test_path=passed_test_path, peripheral_handler = peripherals, display_name=display_name)
     
 
     #first start our thread handler and the message handler (coms) so we can start reporting
@@ -110,29 +146,20 @@ def main():
     threadPool.start() #we need to start all the threads we have collected.
     ########################################################################################
 
-
-    ########### Set up seral interface ###########  
+    ########### Set up port interface ###########  
     # create the ser_listener
-    if not NO_SERIAL_LISTENER:
-        # Serial listener one
-        ser_listener = serial_listener(coms = coms, batch_size=batch_size_1, thread_name=serial_listener_name, stopbits=1, pins=uart_0)
-        threadPool.add_thread(ser_listener.run, serial_listener_name, ser_listener)
+    if not NO_PORT_LISTENER:
+        for key in peripheral_config_dict:
+            host = peripheral_config_dict[key]['host_name']
+            for sub_dictionary in peripheral_config_dict[key]['listener_port_list']:
+                port_listener_name = sub_dictionary['name']
+                port = sub_dictionary['port']
+                batch_size = sub_dictionary['batch_size']
+                
+                # Port listener one
+                port_listener_obj = port_listener(coms = coms, batch_size=batch_size, thread_name=port_listener_name, host=host, port=port)
+                threadPool.add_thread(port_listener_obj.run, port_listener_name, port_listener_obj)
 
-        # Serial listener two
-        ser_2_listener = serial_listener(coms = coms, batch_size=batch_size_2, thread_name=serial_listener_2_name, baudrate=9600, stopbits=1, pins=uart_2)
-        threadPool.add_thread(ser_2_listener.run, serial_listener_2_name, ser_2_listener)
-        
-        threadPool.start() #start the new task
-
-    # create the ser_writer
-    if not NO_SERIAL_WRITER:
-        # Serial writer one
-        ser_writer = serial_writer(coms = coms, thread_name=serial_writer_name, pins=uart_0)
-        threadPool.add_thread(ser_writer.run, serial_writer_name, ser_writer)
-
-        # Serial writer two
-        ser_2_writer = serial_writer(coms = coms, thread_name=serial_writer_2_name, baudrate=9600, stopbits=1, pins=uart_2)
-        threadPool.add_thread(ser_2_writer.run, serial_writer_2_name, ser_2_writer)
         
         threadPool.start() #start the new task
     ########################################################################################
@@ -140,7 +167,7 @@ def main():
     ########### Set up sensor interface ###########
     if not NO_SENSORS:
         # create the sensors interface
-        importer = sensor_importer() # create the importer object
+        importer = sensor_importer(packets_file=packet_struture_path) # create the importer object
         importer.import_modules() # collect the models to import
         importer.instantiate_sensor_objects(coms=coms) # create the sensors objects.
 
@@ -150,6 +177,11 @@ def main():
         for sensor in sensors:
             threadPool.add_thread(sensor.run, sensor.get_sensor_name(), sensor)
         threadPool.start()
+
+        #Now that all the sensors are started lets build the tap network.
+        # create a thread for each sensor and then start them. 
+        for sensor in sensors:
+            sensor.set_up_taps()
 
         # give the webpage gain access to the sensors.
         server.set_sensor_list(sensors=sensors)
@@ -223,16 +255,10 @@ def main():
             else :
                 session_start_time = datetime.datetime.now()
                 session_was_running = False
+            time.sleep(0.1) # the main thread needs to sleep so that it doesnt hurt the cup
 
 
         except KeyboardInterrupt:
-            data = {
-                    'session_id' : [session],
-                    'start_time' : [str(session_start_time)],
-                    'end_time' : [str(session_end_time)],
-                    'description' : [description],
-                }
-            coms.send_request(data_base, ['save_data_group', table_name, data, 'main'])
             running = False
             print('\n>>> Main thread Shutdown Commanded, please wait.')        
     

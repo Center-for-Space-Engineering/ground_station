@@ -9,28 +9,21 @@ passed_test_path: templates/passed_test
 #Maximum passed test Archive 
 max_passed_test: 15
 
-# Serial Configs
-batch_size_1: 8
-batch_size_2: 32
+display_name : CSE_ground_station
 
-serial_listener_name: &serial_listener_name serial_listener_one
-serial_writer_name: &serial_writer_name serial_writer_one
+peripheral_config_dict:
+  pi_one:
+    host_name: '144.39.167.206'
+    connection_port : 8010
+    listener_port_list: 
+      # Location of ports on Raspberry Pi system
+      - name: gps_port_listener
+        port: 8020
+        batch_size: 100
+      - name: swp2_port_listener
+        port: 8050
+        batch_size: 1024
 
-serial_listener_2_name: &serial_listener_2_name serial_listener_two
-serial_writer_2_name: &serial_writer_2_name serial_writer_two
-
-# Location of serial port on Raspberry Pi system
-uart_0: /dev/ttyS0
-uart_2: /dev/ttyAMA2
-
-# List of interfaces for system to use
-serial_listener_list:
-  - *serial_listener_name
-  - *serial_listener_2_name
-
-serial_writer_list:
-  - *serial_writer_name
-  - *serial_writer_2_name
 
 # Writer's NOTE
 # The Raspberry pi 4b has 5 Uart lines.
@@ -53,15 +46,32 @@ serial_writer_list:
 # One you find the correct path, that is the path you should pass in to our serial class. (see uart_2 or uart_0)
 
 # Server Configs
-hostname: '144.39.167.206'  # get this by running hostname -I
+# Get the hostname by running hostname -I
 # hostname: '127.0.0.1'
-# port: 5000
-port: 8080
+hostname: 129.123.4.228
+port: 8000
+
 server_listener_name: 'CSE_Server_Listener'  # this the name for the internal thread that collects server info 
 server_name_host: 'CSE_Host'  # this is the name for the thread that services all the web requests
 
 # Data Base configs
-data_base: 'Data Base'
+data_base: 'data_base' # cse thread name.
+data_base_name: 'ground_data_testing' #sql name
+host: 'localhost'
+user: 'ground_cse'
+password: 'usuCSEgs'
+
+# Telecommand packet header parsing constants
+ccsds_header_len: 5 # length of the ccsds header-1 (indecies 0 to 5)
+sync_word: 0x352ef853
+sync_word_len: 4 # total length of the sync word in bytes
+packet_len_addr1: 8 # MSByte of the packet length
+packet_len_addr2: 9 # LSByte of the packet length
+
+# Packet processing
+packets_structure_file_path: 'command_packets/packets_unpacking/packets.yaml'
+system_clock: 4
+real_time_clock: 3 
 
 # Sensor configs
 sensor_config_dict:
@@ -69,7 +79,7 @@ sensor_config_dict:
   # NOTE: The key here becomes part of a file name so make sure you use valid chars in the name. 
   gps_board:
       # This dictionary tells the GPS sensor how to configure itself.
-      tap_request: [*serial_listener_2_name]  # Index in the list can be the name of a serial listener or any sensors whose data you want to listen to or None (Example for none: None) 
+      tap_request: [gps_port_listener]  # Index in the list can be the name of a serial listener or any sensors whose data you want to listen to or None (Example for none: None) 
       publisher: 'yes'
       publish_data_name: 'gps_packets'  # NOTE: NOT used right now
       passive_active: 'passive'  # Passive sensors only publish when they receive then process data, active sensors always publish on an interval.
@@ -78,3 +88,22 @@ sensor_config_dict:
       # Binary tag representing the data terminator used by the sensor.
       # Modify this tag to match the data terminator of additional sensors.
       Sensor_terminator_data_tag: 0x0D0A  # Hexadecimal representation of '\r\n'
+  packet_detect:
+      # This dictionary tells the packet detect sensor how to configure itself.
+      tap_request: [swp2_port_listener]  # Index in the list can be the name of a serial listener or any sensors whose data you want to listen to or None (Example for none: None) 
+      publisher: 'yes'
+      publish_data_name: 'detected_packets'  # NOTE: NOT used right now
+      passive_active: 'passive'  # Passive sensors only publish when they receive then process data, active sensors always publish on an interval.
+      interval_pub: 'NA'  # We are not using this param because we are a passive publisher, however if the sensor is active we will need to set this interval to the desired rate. 
+  packet_parser: #this is the confiugration for all our packet parsers they will all use this configuration. 
+      tap_request: [packet_detect]
+      publisher: 'yes'
+      publish_data_name: 'processed_packet'  # NOTE: NOT used right now
+      passive_active: 'passive'
+      interval_pub: 'NA'
+  stt_L0_to_L1_converter:
+      tap_request: [STT]
+      publisher: 'no'
+      publish_data_name: 'NA'  # NOTE: NOT used right now
+      passive_active: 'passive'
+      interval_pub: 'NA'

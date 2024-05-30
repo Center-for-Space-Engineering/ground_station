@@ -1,7 +1,12 @@
 # Server overview
-This document contains many examples. They are all write with 127.0.0.1 witch the home address when running on other computers this needs to be replace with the IP of the computer you want to talk to.
+This Document explains how the server runs and collects data from perphilas. The structure of the code is simple, the perphials report to the host. If you want more perphials then add them to the main yaml file. Most of the server configurations can be controlled from the main yaml file. 
 
-
+## Key concepts:
+- Commands start with `cmd_` these are executable by the server. (See the `HOWTO.md` for instruction on how to create them.)
+- Sensor objects collect, process, then publish data they start with `sobj_`. (See the `HOWTO.md` for instruction on how to create them.)
+- The `message_handler.py` is the internal communication class it is often referred to as `coms` or `self.__coms`.
+- Class will listen to each others data using a method called `taps`. The basics is when an object wants to publish data, it reads from a list of functions to call, then send the data using the functions in that list.
+- This repo also uses unittesting repo to verify sensors preformance.
 
 
 ## clone repo
@@ -12,7 +17,7 @@ This document contains many examples. They are all write with 127.0.0.1 witch th
 Handles starting and running the server. It also creates an object for `server`, `taskHandler` (threading), and `data_collection`.
 
 
-![class structure](ground_station_sserver.png)
+![class structure](data_flow.png)
 
 
 ## `Server`
@@ -87,12 +92,7 @@ This class is simple. All it does is search the current directory for any python
 
 
 
-
-
-
-![importer](cmd_import_flow.png) \
-
-
+![importer](cmd_import_flow.png) 
 
 
 ## `commandParent`
@@ -236,12 +236,8 @@ Hold the actual database and the database definition file.
 ## running main
 The command to run main in `python3 main.py` from the host folder. Main also is a meeting point for all the other `api`'s being used. NOTE: for ease of use it is best if all the other `api`'s are in the same folder as `main.py`
 
-
-## testing server
-
-
-## unit tests
-
+## Unit Tests
+To create a unit test just add a test into the `pytesting_api/tests` the file should start with `test_`. The unit tests will run when ever a session is active. 
 
 ## Logger
 The logger class contains access to all the logs. It takes a message, writes it to the file it has access to and then flushes the file. Using this system makes the files more likely to survive if the system loses power.
