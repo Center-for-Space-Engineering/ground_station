@@ -55,7 +55,7 @@ server_listener_name: 'CSE_Server_Listener'  # this the name for the internal th
 server_name_host: 'CSE_Host'  # this is the name for the thread that services all the web requests
 
 # Data Base configs
-data_base: 'data_base' # cse thread name.
+data_base: 'data_base_testing' # cse thread name.
 data_base_name: 'ground_data_testing' #sql name
 host: 'localhost'
 user: 'ground_cse'
