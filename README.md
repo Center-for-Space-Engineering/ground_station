@@ -8,9 +8,6 @@ This Document provides an overview of how the peripherals should be structure in
 - Class will listen to each others data using a method called `taps`. The basics is when an object wants to publish data, it reads from a list of functions to call, then send the data using the functions in that list.
 
 
-
-
-
 ## clone repo
 NOTE: this repo has submodels and must be clone with the 
 ```bash
