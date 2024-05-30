@@ -44,6 +44,7 @@ class cmd_data_collector(commandParent):
             "get_data": self.get_data,
             "get_dto": self.get_dto,
             "get_dto_full_table" : self.get_dto_full_table,
+            "delete_table" : self.delete_table,
         }
 
         self.__coms = coms
@@ -89,7 +90,13 @@ class cmd_data_collector(commandParent):
         '''
         message = []
         for key in self.__args:
-            if key == "get_data_type":
+            if key == "delete_table":
+                message.append({
+                    'Name' : key,
+                    'Path' : f"/{self.__command_name}/{key}/-delete table-",
+                    'Description' : 'This command deletes a table from the database.',
+                })
+            elif key == "get_data_type":
                 message.append({
                     'Name' : key,
                     'Path' : f"/{self.__command_name}/{key}/-data type-",
@@ -127,7 +134,9 @@ class cmd_data_collector(commandParent):
         '''
         message = "<p></p>"
         for key in self.__args:
-            if key == "get_data_type":
+            if key == 'delete_table':
+                message += f"<url>/{self.__command_name}/{key}/<arg>-table name-</arg></url><p></p>"
+            elif key == "get_data_type":
                 message += f"<url>/{self.__command_name}/{key}/<arg>-data type-</arg></url><p></p>"
             elif key == "get_data":
                 message += f"<url>/{self.__command_name}/{key}/<arg>-table name-</arg>/<arg>-start index-</arg></url><p></p>"
@@ -286,4 +295,20 @@ class cmd_data_collector(commandParent):
             'download': 'yes',
             'file_extension' : file_extension, 
         }
-        
+    def delete_table(self, args):
+        '''
+            delets a table from the database
+
+            ARGS:
+                args[0] : not used by this function
+                args[1] : name of table
+        '''
+        #make the data request to the database.
+        request_num = self.__data_base.make_request('delete_table', [args[1]])
+        return_str = self.__data_base.get_request(request_num)
+
+        #wait for the database to return the data
+        while return_str is None: #wait until we get a return value
+            return_str = self.__data_base.get_request(request_num)
+            time.sleep(0.1) #let other process run
+        return return_str

@@ -6,6 +6,7 @@
 import time
 import datetime
 import yaml
+import argparse
 
 #python custom imports
 import system_constants as sensor_config # pylint: disable=e0401 
@@ -100,6 +101,15 @@ def main(): # pylint: disable=R0915
     
 
     ########################################################################################
+    ######################## Get the peripherals informations ##############################
+
+    parser = argparse.ArgumentParser(description='Update repositories and submodules.')
+    parser.add_argument('--clear-database', action='store_true', help='Disable updating repositories')
+    args = parser.parse_args()
+
+    clear_database = args.clear_database
+    ########################################################################################
+
 
     ######################## Get the peripherals informations ##############################
     peripherals = peripheral_hand_shake(list_of_peripheral=list_of_peripherals_url, host_url=hostname + ":" + str(port))
@@ -109,7 +119,7 @@ def main(): # pylint: disable=R0915
     #create a server obj, not it will also create the coms object #144.39.167.206
     coms = messageHandler(server_name=server_listener_name, hostname=hostname)
     #make database object 
-    dataBase = DataBaseHandler(coms, db_name = data_base_name,is_gui=False, host=host, user=user, password=password)
+    dataBase = DataBaseHandler(coms, db_name = data_base_name,is_gui=False, host=host, user=user, password=password, clear_database=clear_database)
     #now that we have the data base we can collect all of our command handlers.s
     cmd = cmd_inter(coms, dataBase)
     #now that we have all the commands we can make the server

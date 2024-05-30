@@ -1,4 +1,7 @@
 
+gps_port_listener
+    batch_sample:100 > byte
+
 swp2_port_listener
     batch_sample:1024 > byte
 
@@ -289,6 +292,3 @@ tests_record
     test_run_time:0 > string
     pass_fail:0 > string
     session_ID:0 > string
-
-gps_port_listener
-    batch_sample:100 > byte
