@@ -1,7 +1,7 @@
 # Serial Configs
 # this is how many bytes are recorded in a buffer before they are transmitted.
 batch_size_1: 1024
-batch_size_2: 64
+batch_size_2: 98
 
 serial_listener_name: &serial_listener_name serial_listener_one
 serial_writer_name: &serial_writer_name serial_writer_one
@@ -73,3 +73,20 @@ mask_packet_count_1: 0b11111100000000
 mask_packet_count_2: 0b00000011111111
 mask_packet_len_1: 0xFF00
 mask_packet_len_2: 0x00FF
+
+# Sensor configs
+sensor_config_dict:
+  # This dictionary holds all the sensors configuration, NOTE: the key must match the self.__name variable in the sobj_<sensor> object. 
+  # NOTE: The key here becomes part of a file name so make sure you use valid chars in the name. 
+  gps_board:
+      # This dictionary tells the GPS sensor how to configure itself.
+      tap_request: [*serial_listener_2_name]  # Index in the list can be the name of a serial listener or any sensors whose data you want to listen to or None (Example for none: None) 
+      serial_writer: *serial_writer_2_name
+      publisher: 'yes'
+      publish_data_name: 'gps_packets'  # NOTE: NOT used right now
+      passive_active: 'passive'  # Passive sensors only publish when they receive then process data, active sensors always publish on an interval.
+      interval_pub: 'NA'  # We are not using this param because we are a passive publisher, however if the sensor is active we will need to set this interval to the desired rate. 
+      Sensor_data_tag: 0x24  # Hexadecimal representation of '$' This parameter is for the sensor class to search data from the tag, whether it comes from the serial line or from other sensors on the system.
+      # Binary tag representing the data terminator used by the sensor.
+      # Modify this tag to match the data terminator of additional sensors.
+      Sensor_terminator_data_tag: 0x0D0A  # Hexadecimal representation of '\r\n'

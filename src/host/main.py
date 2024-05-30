@@ -17,6 +17,11 @@ from server import serverHandler # pylint: disable=e0401
 
 import system_constants # pylint: disable=e0401
 
+NO_SENSORS = False
+
+if not NO_SENSORS:
+    from sensor_interface_api.collect_sensor import sensor_importer # pylint: disable=e0401
+
 def main(): # pylint: disable=r0915
     '''
     This module runs everything, its main job is to create and run all of the 
@@ -95,7 +100,14 @@ def main(): # pylint: disable=r0915
     port_serial_1 = config_data.get("port_serial_1", "")
     port_serial_2 = config_data.get("port_serial_2", "")
 
+    if not NO_SENSORS:
+        # Sensor configs
+        sensor_config_dict = config_data.get("sensor_config_dict", {})
 
+        # set up the config file
+        system_constants.interface_listener_list = serial_listener_list
+        system_constants.interface_writer_list = serial_writer_list
+        system_constants.sensors_config = sensor_config_dict
     ########################################################################################
 
     ########### Set up threading interface and server ########### 
@@ -149,6 +161,24 @@ def main(): # pylint: disable=r0915
     print(data_publisher_two.start_data_publisher([port_serial_2, 'live']))
     ########################################################################################
 
+    ########### Set up sensor interface ###########
+    if not NO_SENSORS:
+        # create the sensors interface
+        importer = sensor_importer() # create the importer object
+        importer.import_modules() # collect the models to import
+        importer.instantiate_sensor_objects(coms=coms) # create the sensors objects.
+
+        sensors = importer.get_sensors() #get the sensors objects
+        
+        # create a thread for each sensor and then start them. 
+        for sensor in sensors:
+            threadPool.add_thread(sensor.run, sensor.get_sensor_name(), sensor)
+        threadPool.start()
+
+        # give the webpage gain access to the sensors.
+        server.set_sensor_list(sensors=sensors)
+
+    ########################################################################################
 
     #Run the main loop handle session, testing, and threading overhead
     running = True

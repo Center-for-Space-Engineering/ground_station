@@ -10,3 +10,6 @@
 [submodule "src/host/command_packets"]
 	path = src/host/command_packets
 	url = git@github.com:Center-for-Space-Engineering/command_packets.git
+[submodule "src/host/sensor_interface_api"]
+	path = src/host/sensor_interface_api
+	url = git@github.com:Center-for-Space-Engineering/sensor_interface_api.git

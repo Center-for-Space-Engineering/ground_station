@@ -1,6 +1,9 @@
 '''
     This file contains all the constants that the whole system needs. 
 '''
+interface_listener_list = []
+interface_writer_list = []
+sensors_config = {}
 
 swp_board_writer = ""
 
