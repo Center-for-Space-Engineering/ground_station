@@ -14,14 +14,14 @@ display_name : CSE_ground_station
 peripheral_config_dict:
   pi_one:
     host_name: '144.39.167.206'
-    connection_port : 8010
+    connection_port : 5010
     listener_port_list: 
       # Location of ports on Raspberry Pi system
       - name: gps_port_listener
-        port: 8020
+        port: 5020
         batch_size: 100
       - name: swp2_port_listener
-        port: 8050
+        port: 5050
         batch_size: 1024
 
 
