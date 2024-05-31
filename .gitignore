@@ -4,5 +4,6 @@
 **/.vscode/**
 **/.pytest_cache/
 **/failed_test/
+**/passed_test/
 gps_board.html
 **/templates/assets/**

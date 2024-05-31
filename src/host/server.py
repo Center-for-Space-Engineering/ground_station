@@ -92,6 +92,7 @@ class serverHandler(threadWrapper):
         self.__current_session_name = "NA"
         self.__session_running = False
         self.__session_description = "NA"
+        self.__unit_test_group = "Defult"
         self.__session_lock = threading.Lock()
         
     def setup_routes(self):
@@ -617,10 +618,12 @@ class serverHandler(threadWrapper):
         '''
         session_name = request.json.get('sessionName')
         session_description = request.json.get('description')
+        unittestGroup = request.json.get('unittestGroup')
 
         if self.__session_lock.acquire(timeout=1): # pylint: disable=R1732
             self.__current_session_name = session_name
             self.__session_description = session_description
+            self.__unit_test_group = unittestGroup
             self.__session_running = True
             self.__session_lock.release()
         else : 
@@ -654,10 +657,11 @@ class serverHandler(threadWrapper):
             name = self.__current_session_name
             session_description = self.__session_description
             running = self.__session_running
+            test_group = self.__unit_test_group
             self.__session_lock.release()
         else : 
             raise RuntimeError("Could not aquire session lock")
-        return name, session_description, running
+        return name, session_description, running, test_group
     def logger_reports(self):
         '''
             Collect data form the peripherals. The pass that data into our logging system.

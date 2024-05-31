@@ -101,6 +101,7 @@ sensor_config_dict:
       publish_data_name: 'processed_packet'  # NOTE: NOT used right now
       passive_active: 'passive'
       interval_pub: 'NA'
+      extention: 'board_1'
   stt_L0_to_L1_converter:
       tap_request: [STT]
       publisher: 'no'

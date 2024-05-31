@@ -228,12 +228,13 @@ def main(): # pylint: disable=R0915
         try:
             threadPool.get_thread_status() #this commands the threads to report to the server how they are running. 
             
-            session, description, session_running = server.get_session_info() #get the current session settings. 
+            session, description, session_running, test_group = server.get_session_info() #get the current session settings. 
 
             if session_running: 
                 #tell users we have started
                 if not session_was_running:
                     coms.report_additional_status('Main', f'Main thread : Running Session {datetime.datetime.now()}')
+                    test_interface.set_test_group([test_group])
 
                 session_was_running = True
 
