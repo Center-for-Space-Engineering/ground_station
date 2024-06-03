@@ -7,3 +7,6 @@
 **/passed_test/
 gps_board.html
 **/templates/assets/**
+**/templates/**_1.html
+**/templates/packet_detect.html
+**/templates/stt_L0_to_L1_converter.html
