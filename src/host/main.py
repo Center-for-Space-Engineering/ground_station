@@ -101,7 +101,7 @@ def main(): # pylint: disable=R0915
     
 
     ########################################################################################
-    ######################## Get the peripherals informations ##############################
+    ############################## Get the Users augments ##################################
 
     parser = argparse.ArgumentParser(description='Update repositories and submodules.')
     parser.add_argument('--clear-database', action='store_true', help='Disable updating repositories')
@@ -111,7 +111,7 @@ def main(): # pylint: disable=R0915
     ########################################################################################
 
 
-    ######################## Get the peripherals informations ##############################
+    ######################## Get the peripherals information ##############################
     peripherals = peripheral_hand_shake(list_of_peripheral=list_of_peripherals_url, host_url=hostname + ":" + str(port))
     ########################################################################################
     

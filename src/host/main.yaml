@@ -13,7 +13,7 @@ display_name : CSE_ground_station
 
 peripheral_config_dict:
   pi_one:
-    host_name: '144.39.167.206'
+    host_name: '192.168.50.3'
     connection_port : 8010
     listener_port_list: 
       # Location of ports on Raspberry Pi system
@@ -48,7 +48,7 @@ peripheral_config_dict:
 # Server Configs
 # Get the hostname by running hostname -I
 # hostname: '127.0.0.1'
-hostname: 129.123.4.228
+hostname: '192.168.50.2' 
 port: 8000
 
 server_listener_name: 'CSE_Server_Listener'  # this the name for the internal thread that collects server info 
