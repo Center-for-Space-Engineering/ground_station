@@ -219,12 +219,11 @@ def main(): # pylint: disable=R0915
 
     instrument_dict = instruments.get_instruments()
 
-    instrument_dict['keithley6221'].write(["*RST"]) #reset
-    instrument_dict['keithley6221'].write(["SOUR:CURR 0.001"]) #set current to 1mA
-    instrument_dict['keithley6221'].write(["OUTP ON"]) #turn on
-    current = instrument_dict['keithley6221'].write_read(["SOUR:CURR?"]) #write and read current
-    input()
-    instrument_dict['keithley6221'].write(["OUTP OFF"]) #turn off
+    instrument_dict['keithley6221'].write(["*RST"]) #reset machine
+    instrument_dict['keithley6221'].write(["SOUR:CURR 0.005"]) #set current to 1mA
+    instrument_dict['keithley6221'].write(["OUTP ON"]) #turn on output
+    current = instrument_dict['keithley6221'].write_read(["SOUR:CURR?"]) #read current
+    instrument_dict['keithley6221'].write(["OUTP OFF"]) #turn off output
     ########################################################################################
 
 
