@@ -21,3 +21,6 @@ vaild_apids = []
 telemetry_packet_types = []
 system_clock=0
 real_time_clock=0
+
+#instruments dict
+instruments = {}

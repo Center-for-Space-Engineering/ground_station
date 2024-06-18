@@ -292,3 +292,8 @@ tests_record
     test_run_time:0 > string
     pass_fail:0 > string
     session_ID:0 > string
+
+instrument_control_record
+    instrument_name:0 > string
+    command:0 > string
+    time_stamp:0 > string
