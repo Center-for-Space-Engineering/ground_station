@@ -24,6 +24,7 @@ from cse_instrument_control.instruments_init import instruments_init # pylint: d
 #These are some Debugging tools I add, Turning off the display is really useful for seeing errors, because the terminal wont get erased every few milliseconds with the display on.
 NO_PORT_LISTENER = False
 NO_SENSORS = False
+DEBUG_UNIT_TEST = True
 
 if not NO_PORT_LISTENER:
     from port_interface_api.port_listener import port_listener # pylint: disable=e0401
@@ -206,7 +207,7 @@ def main(): # pylint: disable=R0915
     coms.send_request(data_base, ['create_table_external', table_structure]) 
 
     #Now create the test_runner object
-    test_interface = test_runner(failed_test_path=failed_test_path, passed_test_path=passed_test_path, max_files_passed=max_passed_test)
+    test_interface = test_runner(failed_test_path=failed_test_path, passed_test_path=passed_test_path, max_files_passed=max_passed_test, debug=DEBUG_UNIT_TEST)
     ########################################################################################
 
     ######################### Set up instruments ###########################################
