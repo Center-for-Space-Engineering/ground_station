@@ -45,7 +45,7 @@ uart_2: /dev/ttyAMA2
 # One you find the correct path, that is the path you should pass in to our serial class. (see uart_2 or uart_0)
 
 # Server Configs
-hostname: '144.39.167.206'  # get this by running hostname -I
+hostname: '192.168.50.3'  # get this by running hostname -I
 display_name : 'space_weather_probes_serial_#_1'
 port: 8010
 port_serial_1: 8050
