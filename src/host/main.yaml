@@ -23,6 +23,17 @@ peripheral_config_dict:
       - name: swp2_port_listener
         port: 8050
         batch_size: 1024
+  pi_two:
+    host_name: '192.168.50.7'
+    connection_port : 8010
+    listener_port_list: 
+      # Location of ports on Raspberry Pi system
+      - name: gps_port_listener_aux
+        port: 8020
+        batch_size: 100
+      - name: aux_port_listener
+        port: 8050
+        batch_size: 150
 
 
 # Writer's NOTE
@@ -90,12 +101,12 @@ sensor_config_dict:
       Sensor_terminator_data_tag: 0x0D0A  # Hexadecimal representation of '\r\n'
   packet_detect:
       # This dictionary tells the packet detect sensor how to configure itself.
-      tap_request: [swp2_port_listener]  # Index in the list can be the name of a serial listener or any sensors whose data you want to listen to or None (Example for none: None) 
+      tap_request: [swp2_port_listener, aux_port_listener]  # Index in the list can be the name of a serial listener or any sensors whose data you want to listen to or None (Example for none: None) 
       publisher: 'yes'
       publish_data_name: 'detected_packets'  # NOTE: NOT used right now
       passive_active: 'passive'  # Passive sensors only publish when they receive then process data, active sensors always publish on an interval.
       interval_pub: 'NA'  # We are not using this param because we are a passive publisher, however if the sensor is active we will need to set this interval to the desired rate. 
-  packet_parser: #this is the confiugration for all our packet parsers they will all use this configuration. 
+  packet_parser: #this is the configuration for all our packet parsers they will all use this configuration. 
       tap_request: [packet_detect]
       publisher: 'yes'
       publish_data_name: 'processed_packet'  # NOTE: NOT used right now

@@ -212,19 +212,19 @@ def main(): # pylint: disable=R0915
 
     ######################### Set up instruments ###########################################
     # collect all the instruments we know about on the network. 
-    instruments = instruments_init(coms=coms)
+    # instruments = instruments_init(coms=coms)
 
-    # give the tests and the sensors access to the instruments so they can use them. 
-    global_test_variables.instruments = instruments.get_instruments()
-    sensor_config.instruments = instruments.get_instruments()
+    # # give the tests and the sensors access to the instruments so they can use them. 
+    # global_test_variables.instruments = instruments.get_instruments()
+    # sensor_config.instruments = instruments.get_instruments()
 
-    instrument_dict = instruments.get_instruments()
+    # instrument_dict = instruments.get_instruments()
 
-    instrument_dict['keithley6221'].write(["*RST"]) #reset machine
-    instrument_dict['keithley6221'].write(["SOUR:CURR 0.005"]) #set current to 1mA
-    instrument_dict['keithley6221'].write(["OUTP ON"]) #turn on output
-    current = instrument_dict['keithley6221'].write_read(["SOUR:CURR?"]) #read current
-    instrument_dict['keithley6221'].write(["OUTP OFF"]) #turn off output
+    # instrument_dict['keithley6221'].write(["*RST"]) #reset machine
+    # instrument_dict['keithley6221'].write(["SOUR:CURR 0.005"]) #set current to 1mA
+    # instrument_dict['keithley6221'].write(["OUTP ON"]) #turn on output
+    # current = instrument_dict['keithley6221'].write_read(["SOUR:CURR?"]) #read current
+    # instrument_dict['keithley6221'].write(["OUTP OFF"]) #turn off output
     ########################################################################################
 
 

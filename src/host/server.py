@@ -93,8 +93,7 @@ class serverHandler(threadWrapper):
         self.__session_running = False
         self.__session_description = "NA"
         self.__unit_test_group = "Defult"
-        self.__session_lock = threading.Lock()
-        
+        self.__session_lock = threading.Lock()       
     def setup_routes(self):
         '''
             This function sets up all the git request that can be accessed by the webpage.
