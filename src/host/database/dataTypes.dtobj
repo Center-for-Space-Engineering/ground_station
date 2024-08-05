@@ -26,6 +26,13 @@ processed_data_for_packet_detect_counts
     EFS2:0 > int
     EFS3:0 > int
     ECO:0 > int
+    STTA:0 > int
+    AOP:0 > int
+    TAA:0 > int
+    FBPI:0 > int
+    TAMA:0 > int
+    PDSI:0 > int
+    ECOA:0 > int
 
 processed_data_for_packet_detect_rates
     time:0 > string
@@ -48,6 +55,13 @@ processed_data_for_packet_detect_rates
     EFS2:0 > float
     EFS3:0 > float
     ECO:0 > float
+    STTA:0 > float
+    AOP:0 > float
+    TAA:0 > float
+    FBPI:0 > float
+    TAMA:0 > float
+    PDSI:0 > float
+    ECOA:0 > float
 
 STT_L1
     GPSW:0 > uint
@@ -273,40 +287,6 @@ EFS3
     time_STM_CLK:0 > bigint
     time_RTC:0 > uint
 
-processed_data_for_gps_board_ccsds_packet
-    gps_packets:14 > byte
-
-processed_data_for_gps_board
-    day:0 > int
-    hour:0 > int
-    minute:0 > int
-    second:0 > int
-
-session_record
-    session_id:0 > string
-    start_time:0 > string
-    end_time:0 > string
-    description:0 > string
-
-tests_record
-    test_run_time:0 > string
-    pass_fail:0 > string
-    session_ID:0 > string
-
-instrument_control_record
-    instrument_name:0 > string
-    command:0 > string
-    time_stamp:0 > string
-
-gps_port_listener_aux
-    batch_sample:100 > byte
-
-swp2_port_listener_aux
-    batch_sample:150 > byte
-
-aux_port_listener
-    batch_sample:150 > byte
-
 STTA
     TBD1:0 > uint
     TBD2:0 > uint
@@ -406,3 +386,23 @@ PDSI
     PSD16:0 > uint
     time_STM_CLK:0 > bigint
     time_RTC:0 > uint
+
+processed_data_for_gps_board_ccsds_packet
+    gps_packets:14 > byte
+
+processed_data_for_gps_board
+    day:0 > int
+    hour:0 > int
+    minute:0 > int
+    second:0 > int
+
+session_record
+    session_id:0 > string
+    start_time:0 > string
+    end_time:0 > string
+    description:0 > string
+
+tests_record
+    test_run_time:0 > string
+    pass_fail:0 > string
+    session_ID:0 > string

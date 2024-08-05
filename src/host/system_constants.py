@@ -15,6 +15,7 @@ sync_word = b''
 sync_word_len = b''
 packet_len_addr1 = b''
 packet_len_addr2 = b''
+telemetry_packet_num = 0
 
 #Spesific Packet information
 vaild_apids = []
