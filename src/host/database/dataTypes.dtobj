@@ -1,9 +1,14 @@
 
 gps_port_listener
-    batch_sample:100 > byte
+    batch_sample:1024 > byte
 
 swp2_port_listener
     batch_sample:1024 > byte
+
+TAM_L1
+    MBX:0 > float
+    MBY:0 > float
+    MBZ:0 > float
 
 processed_data_for_packet_detect_counts
     time:0 > string
@@ -26,13 +31,6 @@ processed_data_for_packet_detect_counts
     EFS2:0 > int
     EFS3:0 > int
     ECO:0 > int
-    STTA:0 > int
-    AOP:0 > int
-    TAA:0 > int
-    FBPI:0 > int
-    TAMA:0 > int
-    PDSI:0 > int
-    ECOA:0 > int
 
 processed_data_for_packet_detect_rates
     time:0 > string
@@ -55,13 +53,6 @@ processed_data_for_packet_detect_rates
     EFS2:0 > float
     EFS3:0 > float
     ECO:0 > float
-    STTA:0 > float
-    AOP:0 > float
-    TAA:0 > float
-    FBPI:0 > float
-    TAMA:0 > float
-    PDSI:0 > float
-    ECOA:0 > float
 
 STT_L1
     GPSW:0 > uint
@@ -107,8 +98,10 @@ STT_L1
     time_RTC:0 > uint
 
 STT
-    GPSW:0 > uint
-    GPSM:0 > uint
+    PPSW:0 > uint
+    PPSM:0 > uint
+    PPSS:0 > uint
+    PPSR:0 > uint
     0ADC0:0 > uint
     0ADC1:0 > uint
     0ADC2:0 > uint
@@ -135,9 +128,9 @@ STT
     PAC:0 > uint
     PHFC:0 > uint
     PCFC:0 > uint
-    TBD1:0 > uint
-    TBD2:0 > uint
-    TBD3:0 > uint
+    VERS:0 > uint
+    MODE1:0 > uint
+    MODE2:0 > uint
     TBD4:0 > uint
     TBD5:0 > uint
     TBD6:0 > uint
@@ -163,7 +156,7 @@ FPP2
 FPP3
     V1S:0 > uint
     V2S:0 > uint
-    VS3:0 > uint
+    V3S:0 > uint
     time_STM_CLK:0 > bigint
     time_RTC:0 > uint
 
@@ -284,106 +277,6 @@ EFS2
 
 EFS3
     EFS:0 > uint
-    time_STM_CLK:0 > bigint
-    time_RTC:0 > uint
-
-STTA
-    TBD1:0 > uint
-    TBD2:0 > uint
-    TBD3:0 > uint
-    TBD4:0 > uint
-    TBD5:0 > uint
-    TBD6:0 > uint
-    TBD7:0 > uint
-    TBD8:0 > uint
-    TBD9:0 > uint
-    TBD10:0 > uint
-    TBD11:0 > uint
-    TBD12:0 > uint
-    TBD13:0 > uint
-    TBD14:0 > uint
-    TBD15:0 > uint
-    TBD16:0 > uint
-    0ADC0:0 > uint
-    0ADC1:0 > uint
-    0ADC2:0 > uint
-    0ADC3:0 > uint
-    0ADCT:0 > uint
-    1ADC0:0 > uint
-    1ADC1:0 > uint
-    1ADC2:0 > uint
-    1ADC3:0 > uint
-    1ADCT:0 > uint
-    2ADC0:0 > uint
-    2ADC1:0 > uint
-    2ADC2:0 > uint
-    2ADC3:0 > uint
-    2ADCT:0 > uint
-    3ADC0:0 > uint
-    3ADC1:0 > uint
-    3ADC2:0 > uint
-    3ADC3:0 > uint
-    3ADCT:0 > uint
-    4ADC0:0 > uint
-    4ADC1:0 > uint
-    4ADC2:0 > uint
-    4ADC3:0 > uint
-    4ADCT:0 > uint
-    time_STM_CLK:0 > bigint
-    time_RTC:0 > uint
-
-AOP
-    AO1:0 > uint
-    AO2:0 > uint
-    RIC:0 > uint
-    time_STM_CLK:0 > bigint
-    time_RTC:0 > uint
-
-TAA
-    A1X:0 > uint
-    A1Y:0 > uint
-    A1Z:0 > uint
-    A1S:0 > uint
-    A2X:0 > uint
-    A2Y:0 > uint
-    A2Z:0 > uint
-    A2S:0 > uint
-    time_STM_CLK:0 > bigint
-    time_RTC:0 > uint
-
-FBPI
-    DCI:0 > uint
-    time_STM_CLK:0 > bigint
-    time_RTC:0 > uint
-
-TAMA
-    BEX:0 > uint
-    BEY:0 > uint
-    BEZ:0 > uint
-    temp:0 > uint
-    B1X:0 > uint
-    B1Y:0 > uint
-    B1Z:0 > uint
-    time_STM_CLK:0 > bigint
-    time_RTC:0 > uint
-
-PDSI
-    PSD1:0 > uint
-    PSD2:0 > uint
-    PSD3:0 > uint
-    PSD4:0 > uint
-    PSD5:0 > uint
-    PSD6:0 > uint
-    PSD7:0 > uint
-    PSD8:0 > uint
-    PSD9:0 > uint
-    PSD10:0 > uint
-    PSD11:0 > uint
-    PSD12:0 > uint
-    PSD13:0 > uint
-    PSD14:0 > uint
-    PSD15:0 > uint
-    PSD16:0 > uint
     time_STM_CLK:0 > bigint
     time_RTC:0 > uint
 

@@ -19,7 +19,7 @@ peripheral_config_dict:
       # Location of ports on Raspberry Pi system
       - name: gps_port_listener
         port: 5020
-        batch_size: 100
+        batch_size: 1024
       - name: swp2_port_listener
         port: 5050
         batch_size: 1024
@@ -115,6 +115,12 @@ sensor_config_dict:
       extention: 'board_1'
   stt_L0_to_L1_converter:
       tap_request: [STT]
+      publisher: 'no'
+      publish_data_name: 'NA'  # NOTE: NOT used right now
+      passive_active: 'passive'
+      interval_pub: 'NA'
+  TAM_L0_to_L1_converter:
+      tap_request: [TAMboard_1]
       publisher: 'no'
       publish_data_name: 'NA'  # NOTE: NOT used right now
       passive_active: 'passive'
