@@ -97,9 +97,6 @@ def main(): # pylint: disable=R0915
         sensor_config.packet_len_addr2 = packet_len_addr2
         sensor_config.system_clock = system_clock
         sensor_config.real_time_clock = real_time_clock
-
-        # packet structre definition
-        packet_struture_path = config_data.get("packets_structure_file_path", 0)
     
 
     ########################################################################################
@@ -168,8 +165,19 @@ def main(): # pylint: disable=R0915
     
     ########### Set up sensor interface ###########
     if not NO_SENSORS:
+        packet_list = []
+        detector_list = []
+        processor_list = []
+
+        for sensor in sensor_config_dict:
+            if 'packet_detect' in sensor:
+                packet_list.append(sensor_config_dict[sensor]['packet_sturture'])
+                detector_list.append(sensor)
+            if 'packet_parser' in sensor:
+                processor_list.append((sensor, sensor_config_dict[sensor]['source']))
+
         # create the sensors interface
-        importer = sensor_importer(packets_file=packet_struture_path) # create the importer object
+        importer = sensor_importer(packets_file_list=packet_list, detector_list=detector_list, processor_list=processor_list) # create the importer object
         importer.import_modules() # collect the models to import
         importer.instantiate_sensor_objects(coms=coms) # create the sensors objects.
 

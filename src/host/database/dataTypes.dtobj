@@ -1,16 +1,22 @@
 
 gps_port_listener
-    batch_sample:1024 > byte
+    batch_sample:100 > byte
 
 swp2_port_listener
     batch_sample:1024 > byte
+
+gps_port_listener_aux
+    batch_sample:100 > byte
+
+aux_port_listener
+    batch_sample:150 > byte
 
 TAM_L1
     MBX:0 > float
     MBY:0 > float
     MBZ:0 > float
 
-processed_data_for_packet_detect_counts
+processed_data_for_packet_detect_swp2_counts
     time:0 > string
     Ukwn:0 > int
     bad_crc:0 > int
@@ -32,7 +38,7 @@ processed_data_for_packet_detect_counts
     EFS3:0 > int
     ECO:0 > int
 
-processed_data_for_packet_detect_rates
+processed_data_for_packet_detect_swp2_rates
     time:0 > string
     Ukwn:0 > float
     bad_crc:0 > float
@@ -53,6 +59,18 @@ processed_data_for_packet_detect_rates
     EFS2:0 > float
     EFS3:0 > float
     ECO:0 > float
+
+processed_data_for_packet_detect_aux_counts
+    time:0 > string
+    Ukwn:0 > int
+    bad_crc:0 > int
+    STTA:0 > int
+
+processed_data_for_packet_detect_aux_rates
+    time:0 > string
+    Ukwn:0 > float
+    bad_crc:0 > float
+    STTA:0 > float
 
 STT_L1
     GPSW:0 > uint
@@ -277,6 +295,48 @@ EFS2
 
 EFS3
     EFS:0 > uint
+    time_STM_CLK:0 > bigint
+    time_RTC:0 > uint
+
+STTA
+    PPSW:0 > uint
+    PPSM:0 > uint
+    PPSS:0 > uint
+    PPSR:0 > uint
+    1ADC0:0 > uint
+    1ADC1:0 > uint
+    1ADC2:0 > uint
+    1ADC3:0 > uint
+    1ADCT:0 > uint
+    2ADC0:0 > uint
+    2ADC1:0 > uint
+    2ADC2:0 > uint
+    2ADC3:0 > uint
+    2ADCT:0 > uint
+    3ADC0:0 > uint
+    3ADC1:0 > uint
+    3ADC2:0 > uint
+    3ADC3:0 > uint
+    3ADCT:0 > uint
+    4ADC0:0 > uint
+    4ADC1:0 > uint
+    4ADC2:0 > uint
+    4ADC3:0 > uint
+    4ADCT:0 > uint
+    PAC:0 > uint
+    PHFC:0 > uint
+    PCFC:0 > uint
+    VERS:0 > uint
+    MODE1:0 > uint
+    MODE2:0 > uint
+    TBD4:0 > uint
+    TBD5:0 > uint
+    TBD6:0 > uint
+    TBD7:0 > uint
+    TBD8:0 > uint
+    TBD9:0 > uint
+    TBD10:0 > uint
+    TBD11:0 > uint
     time_STM_CLK:0 > bigint
     time_RTC:0 > uint
 

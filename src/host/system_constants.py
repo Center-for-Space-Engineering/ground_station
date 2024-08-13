@@ -15,11 +15,11 @@ sync_word = b''
 sync_word_len = b''
 packet_len_addr1 = b''
 packet_len_addr2 = b''
-telemetry_packet_num = 0
+telemetry_packet_num = {}
 
 #Spesific Packet information
-vaild_apids = []
-telemetry_packet_types = []
+vaild_apids = {}
+telemetry_packet_types = {}
 system_clock=0
 real_time_clock=0
 

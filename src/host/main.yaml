@@ -19,21 +19,21 @@ peripheral_config_dict:
       # Location of ports on Raspberry Pi system
       - name: gps_port_listener
         port: 5020
-        batch_size: 1024
+        batch_size: 100
       - name: swp2_port_listener
         port: 5050
         batch_size: 1024
-  # pi_two:
-  #   host_name: '192.168.50.7'
-  #   connection_port : 8010
-  #   listener_port_list: 
-  #     # Location of ports on Raspberry Pi system
-  #     - name: gps_port_listener_aux
-  #       port: 8020
-  #       batch_size: 100
-  #     - name: aux_port_listener
-  #       port: 8050
-  #       batch_size: 150
+  pi_two:
+    host_name: '192.168.50.7'
+    connection_port : 8010
+    listener_port_list: 
+      # Location of ports on Raspberry Pi system
+      - name: gps_port_listener_aux
+        port: 8020
+        batch_size: 100
+      - name: aux_port_listener
+        port: 8050
+        batch_size: 150
 
 
 # Writer's NOTE
@@ -80,7 +80,7 @@ packet_len_addr1: 8 # MSByte of the packet length
 packet_len_addr2: 9 # LSByte of the packet length
 
 # Packet processing
-packets_structure_file_path: 'command_packets/packets_unpacking/packets.yaml'
+packets_structure_file_path: 
 system_clock: 4
 real_time_clock: 3 
 
@@ -99,20 +99,38 @@ sensor_config_dict:
       # Binary tag representing the data terminator used by the sensor.
       # Modify this tag to match the data terminator of additional sensors.
       Sensor_terminator_data_tag: 0x0D0A  # Hexadecimal representation of '\r\n'
-  packet_detect:
+  packet_detect_swp2:
       # This dictionary tells the packet detect sensor how to configure itself.
-      tap_request: [swp2_port_listener, aux_port_listener]  # Index in the list can be the name of a serial listener or any sensors whose data you want to listen to or None (Example for none: None) 
+      tap_request: [swp2_port_listener]  # Index in the list can be the name of a serial listener or any sensors whose data you want to listen to or None (Example for none: None) 
       publisher: 'yes'
-      publish_data_name: 'detected_packets'  # NOTE: NOT used right now
+      publish_data_name: 'detected_packets_swp2'  # NOTE: NOT used right now
       passive_active: 'passive'  # Passive sensors only publish when they receive then process data, active sensors always publish on an interval.
       interval_pub: 'NA'  # We are not using this param because we are a passive publisher, however if the sensor is active we will need to set this interval to the desired rate. 
-  packet_parser: #this is the configuration for all our packet parsers they will all use this configuration. 
-      tap_request: [packet_detect]
+      packet_sturture: 'command_packets/packets_unpacking/packets_swp2.yaml'
+  packet_detect_aux:
+      # This dictionary tells the packet detect sensor how to configure itself.
+      tap_request: [aux_port_listener]  # Index in the list can be the name of a serial listener or any sensors whose data you want to listen to or None (Example for none: None) 
       publisher: 'yes'
-      publish_data_name: 'processed_packet'  # NOTE: NOT used right now
+      publish_data_name: 'detected_packets_aux'  # NOTE: NOT used right now
+      passive_active: 'passive'  # Passive sensors only publish when they receive then process data, active sensors always publish on an interval.
+      interval_pub: 'NA'  # We are not using this param because we are a passive publisher, however if the sensor is active we will need to set this interval to the desired rate. 
+      packet_sturture: 'command_packets/packets_unpacking/packets_aux.yaml'
+  packet_parser_swp2: #this is the configuration for all our packet parsers they will all use this configuration. 
+      tap_request: [packet_detect_swp2]
+      publisher: 'yes'
+      publish_data_name: 'processed_packet_swp2'  # NOTE: NOT used right now
       passive_active: 'passive'
       interval_pub: 'NA'
-      extention: 'board_1'
+      extention: '_spw2_1'
+      source: 'command_packets/packets_unpacking/packets_swp2.yaml'
+  packet_parser_aux: #this is the configuration for all our packet parsers they will all use this configuration. 
+      tap_request: [packet_detect_aux]
+      publisher: 'yes'
+      publish_data_name: 'processed_packet_aux'  # NOTE: NOT used right now
+      passive_active: 'passive'
+      interval_pub: 'NA'
+      extention: '_aux'
+      source: 'command_packets/packets_unpacking/packets_aux.yaml'
   stt_L0_to_L1_converter:
       tap_request: [STT]
       publisher: 'no'
@@ -120,7 +138,7 @@ sensor_config_dict:
       passive_active: 'passive'
       interval_pub: 'NA'
   TAM_L0_to_L1_converter:
-      tap_request: [TAMboard_1]
+      tap_request: [TAM_swp2_1]
       publisher: 'no'
       publish_data_name: 'NA'  # NOTE: NOT used right now
       passive_active: 'passive'
