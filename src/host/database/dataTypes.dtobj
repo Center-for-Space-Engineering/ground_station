@@ -9,7 +9,7 @@ gps_port_listener_aux
     batch_sample:100 > byte
 
 aux_port_listener
-    batch_sample:150 > byte
+    batch_sample:16 > byte
 
 TAM_L1
     MBX:0 > float

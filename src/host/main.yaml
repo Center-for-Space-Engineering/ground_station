@@ -33,7 +33,7 @@ peripheral_config_dict:
         batch_size: 100
       - name: aux_port_listener
         port: 8050
-        batch_size: 150
+        batch_size: 16
 
 
 # Writer's NOTE
