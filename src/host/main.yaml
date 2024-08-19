@@ -47,9 +47,9 @@ uart_2: /dev/ttyAMA2
 # Server Configs
 hostname: '192.168.50.3'  # get this by running hostname -I
 display_name : 'space_weather_probes_serial_#_1'
-port: 8010
-port_serial_1: 8050
-port_serial_2: 8020
+port: 5000
+port_serial_1: 5050
+port_serial_2: 5020
 
 
 #Command packets config
