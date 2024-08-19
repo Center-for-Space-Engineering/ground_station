@@ -1,13 +1,13 @@
 # Serial Configs
 # this is how many bytes are recorded in a buffer before they are transmitted.
-batch_size_1: 1024
-batch_size_2: 98
+batch_size_1: 16
+batch_size_2: 100
 
-serial_listener_name: &serial_listener_name serial_listener_one
-serial_writer_name: &serial_writer_name serial_writer_one
+serial_listener_name: &serial_listener_name serial_listener_one_aux
+serial_writer_name: &serial_writer_name serial_writer_one_aux
 
-serial_listener_2_name: &serial_listener_2_name serial_listener_two
-serial_writer_2_name: &serial_writer_2_name serial_writer_two
+serial_listener_2_name: &serial_listener_2_name serial_listener_two_aux
+serial_writer_2_name: &serial_writer_2_name serial_writer_two_aux
 
 #List of interfaces for system to use, anything you put in this list will be added to the server and by extension the ground station host. 
 serial_listener_list:
@@ -45,8 +45,8 @@ uart_2: /dev/ttyAMA2
 # One you find the correct path, that is the path you should pass in to our serial class. (see uart_2 or uart_0)
 
 # Server Configs
-hostname: '144.39.167.206'  # get this by running hostname -I
-display_name : 'space_weather_probes_serial_#_1'
+hostname: '192.168.50.7'  # get this by running hostname -I
+display_name : 'space_weather_probes_aux_serial_#_1'
 port: 8010
 port_serial_1: 8050
 port_serial_2: 8020
@@ -89,4 +89,4 @@ sensor_config_dict:
       Sensor_data_tag: 0x24  # Hexadecimal representation of '$' This parameter is for the sensor class to search data from the tag, whether it comes from the serial line or from other sensors on the system.
       # Binary tag representing the data terminator used by the sensor.
       # Modify this tag to match the data terminator of additional sensors.
-      Sensor_terminator_data_tag: 0x0D0A  # Hexadecimal representation of '\r\n'
+  Sensor_terminator_data_tag: 0x0D0A  # Hexadecimal representation of '\r\n'
