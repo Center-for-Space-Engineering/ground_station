@@ -43,6 +43,7 @@ uart_2: /dev/ttyAMA2
 # Then reboot the pi.
 # Then check the /dev/ folder for the new serial over lay. It will probably be something like '/dev/ttyAMA3' or '/dev/ttyS3'. 
 # One you find the correct path, that is the path you should pass in to our serial class. (see uart_2 or uart_0)
+# NOTE: It is very important the login over serial is disabled!!!
 
 # Server Configs
 hostname: '192.168.50.3'  # get this by running hostname -I
