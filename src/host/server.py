@@ -359,7 +359,7 @@ class serverHandler(threadWrapper):
         request_list = [] #keeps track of all the request we have sent. 
         list_pos = 0
 
-        if self.__serial_listener_lock.acquire(timeout=1): # pylint: disable=R1732
+        if self.__serial_listener_lock.acquire(timeout=10): # pylint: disable=R1732
             serial_listener = copy.deepcopy(self.__listener_name)
             self.__serial_listener_lock.release()
         else :
@@ -370,7 +370,7 @@ class serverHandler(threadWrapper):
             list_pos += 1
             data_obj.append({"Place holder": None}) # We are creating a list will all spots we need for return values so later we can pack the list and everything will be in the same order. 
         
-        if self.__serial_writter_lock.acquire(timeout=1): # pylint: disable=R1732
+        if self.__serial_writter_lock.acquire(timeout=10): # pylint: disable=R1732
             serial_writer = self.__serial_writer_name
             self.__serial_writter_lock.release()
         else :
@@ -395,7 +395,7 @@ class serverHandler(threadWrapper):
                         data_obj[request_list[i][3]] = data_obj_temp
                 all_request_serviced = all_request_serviced and request_list[i][2] #All the request have to say they have been serviced for this to mark as true. 
         
-        if self.__peripherals_serial_interface_lock.acquire(timeout=1): # pylint: disable=R1732
+        if self.__peripherals_serial_interface_lock.acquire(timeout=10): # pylint: disable=R1732
             peripherals_serial_copy = copy.deepcopy(self.__peripherals_serial_interface)
             self.__peripherals_serial_interface_lock.release()
         else :
@@ -415,12 +415,12 @@ class serverHandler(threadWrapper):
             Returns all the serial names so the webpage knows about them. 
         '''
 
-        if self.__serial_listener_lock.acquire(timeout=1): # pylint: disable=R1732
+        if self.__serial_listener_lock.acquire(timeout=10): # pylint: disable=R1732
             serial_listener = copy.deepcopy(self.__listener_name)
             self.__serial_listener_lock.release()
         else :
             raise RuntimeError("Could not aquire serial listener lock")
-        if self.__serial_writter_lock.acquire(timeout=1): # pylint: disable=R1732
+        if self.__serial_writter_lock.acquire(timeout=10): # pylint: disable=R1732
             serial_writer = copy.deepcopy(self.__serial_writer_name)
             self.__serial_writter_lock.release()
         else : 
@@ -430,7 +430,7 @@ class serverHandler(threadWrapper):
             'writer' : serial_writer
         }
         
-        if self.__peripherals_serial_interface_lock.acquire(timeout=1): # pylint: disable=R1732
+        if self.__peripherals_serial_interface_lock.acquire(timeout=10): # pylint: disable=R1732
             peripherals_serial_copy = copy.deepcopy(self.__peripherals_serial_interface)
             self.__peripherals_serial_interface_lock.release()
         else : 
@@ -561,7 +561,7 @@ class serverHandler(threadWrapper):
         '''
             Returns html for the command page
         '''
-        if self.__system_info_lock.acquire(timeout=1): # pylint: disable=R1732
+        if self.__system_info_lock.acquire(timeout=10): # pylint: disable=R1732
             display_name = self.__display_name
             self.__system_info_lock.release()
         else : 
@@ -570,7 +570,7 @@ class serverHandler(threadWrapper):
         for command_dict in table_data:
             command_dict['Host'] = 'Local'
             command_dict['display_name'] = display_name
-        if self.__peripherals_commands_lock.acquire(timeout=1): # pylint: disable=R1732
+        if self.__peripherals_commands_lock.acquire(timeout=10): # pylint: disable=R1732
             peripherals_commands_copy = copy.deepcopy(self.__peripherals_commands)
             self.__peripherals_commands_lock.release()
         else :
@@ -619,7 +619,7 @@ class serverHandler(threadWrapper):
         session_description = request.json.get('description')
         unittestGroup = request.json.get('unittestGroup')
 
-        if self.__session_lock.acquire(timeout=1): # pylint: disable=R1732
+        if self.__session_lock.acquire(timeout=10): # pylint: disable=R1732
             self.__current_session_name = session_name
             self.__session_description = session_description
             self.__unit_test_group = unittestGroup
@@ -638,7 +638,7 @@ class serverHandler(threadWrapper):
             This functions marks the session to end.
         '''
         # Do something to end the session
-        if self.__session_lock.acquire(timeout=1): # pylint: disable=R1732
+        if self.__session_lock.acquire(timeout=10): # pylint: disable=R1732
             self.__session_running = False
             self.__session_lock.release()
         else : 
@@ -652,7 +652,7 @@ class serverHandler(threadWrapper):
             Return order:
             name, description, running 
         '''
-        if self.__session_lock.acquire(timeout=1): # pylint: disable=R1732
+        if self.__session_lock.acquire(timeout=10): # pylint: disable=R1732
             name = self.__current_session_name
             session_description = self.__session_description
             running = self.__session_running

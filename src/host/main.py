@@ -283,7 +283,7 @@ def main(): # pylint: disable=R0915
             else :
                 session_start_time = datetime.datetime.now()
                 session_was_running = False
-            time.sleep(0.1) # the main thread needs to sleep so that it doesnt hurt the cup
+            time.sleep(0.5) # the main thread needs to sleep so that it doesnt hurt the cup
 
 
         except KeyboardInterrupt:

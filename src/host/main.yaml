@@ -19,10 +19,10 @@ peripheral_config_dict:
       # Location of ports on Raspberry Pi system
       - name: gps_port_listener
         port: 5020
-        batch_size: 100
+        batch_size: 1024
       - name: swp2_port_listener
         port: 5050
-        batch_size: 1024
+        batch_size: 500
   pi_two:
     host_name: '192.168.50.7'
     connection_port : 8010
@@ -30,10 +30,10 @@ peripheral_config_dict:
       # Location of ports on Raspberry Pi system
       - name: gps_port_listener_aux
         port: 8020
-        batch_size: 100
+        batch_size: 1024
       - name: aux_port_listener
         port: 8050
-        batch_size: 16
+        batch_size: 500
 
 
 # Writer's NOTE
@@ -121,7 +121,7 @@ sensor_config_dict:
       publish_data_name: 'processed_packet_swp2'  # NOTE: NOT used right now
       passive_active: 'passive'
       interval_pub: 'NA'
-      extention: '_spw2_1'
+      extention: '_swp2_1'
       source: 'command_packets/packets_unpacking/packets_swp2.yaml'
   packet_parser_aux: #this is the configuration for all our packet parsers they will all use this configuration. 
       tap_request: [packet_detect_aux]
@@ -132,7 +132,7 @@ sensor_config_dict:
       extention: '_aux'
       source: 'command_packets/packets_unpacking/packets_aux.yaml'
   stt_L0_to_L1_converter:
-      tap_request: [STT]
+      tap_request: [STT_swp2_1]
       publisher: 'no'
       publish_data_name: 'NA'  # NOTE: NOT used right now
       passive_active: 'passive'
@@ -141,5 +141,17 @@ sensor_config_dict:
       tap_request: [TAM_swp2_1]
       publisher: 'no'
       publish_data_name: 'NA'  # NOTE: NOT used right now
+      passive_active: 'passive'
+      interval_pub: 'NA'
+  SIP_L0_to_L1:
+      tap_request: [SIP_swp2_1]
+      publisher: 'no'
+      publish_data_name: 'NA'
+      passive_active: 'passive'
+      interval_pub: 'NA'
+  TIP_L0_to_L1:
+      tap_request: [TIP_swp2_1]
+      publisher: 'no'
+      publish_data_name: 'NA'
       passive_active: 'passive'
       interval_pub: 'NA'
