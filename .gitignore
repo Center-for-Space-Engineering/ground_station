@@ -12,4 +12,11 @@ gps_board.html
 **/templates/stt_L0_to_L1_converter.html
 **_aux.html
 **_swp2_1.html
+**.log
+**/templates/SIP_L0_to_L1.html
+**/templates/TAM_L0_to_L1.html
+**/templates/TIP_L0_to_L1.html
+**/templates/packet_detect_swp2.html
+**/templates/packet_detect_aux.html
+**/templates/TAM_L0_to_L1_converter.html
 
