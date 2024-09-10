@@ -19,10 +19,12 @@ from server_message_handler import serverMessageHandler # pylint: disable=e0401
 from pytesting_api.test_runner import test_runner # pylint: disable=e0401
 from pytesting_api import global_test_variables # pylint: disable=e0401
 from peripheral_hand_shake import peripheral_hand_shake # pylint: disable=e0401
+from cse_instrument_control.instruments_init import instruments_init # pylint: disable=e0401
 
 #These are some Debugging tools I add, Turning off the display is really useful for seeing errors, because the terminal wont get erased every few milliseconds with the display on.
 NO_PORT_LISTENER = False
 NO_SENSORS = False
+DEBUG_UNIT_TEST = True
 
 if not NO_PORT_LISTENER:
     from port_interface_api.port_listener import port_listener # pylint: disable=e0401
@@ -95,13 +97,10 @@ def main(): # pylint: disable=R0915
         sensor_config.packet_len_addr2 = packet_len_addr2
         sensor_config.system_clock = system_clock
         sensor_config.real_time_clock = real_time_clock
-
-        # packet structre definition
-        packet_struture_path = config_data.get("packets_structure_file_path", 0)
     
 
     ########################################################################################
-    ######################## Get the peripherals informations ##############################
+    ############################## Get the Users augments ##################################
 
     parser = argparse.ArgumentParser(description='Update repositories and submodules.')
     parser.add_argument('--clear-database', action='store_true', help='Disable updating repositories')
@@ -111,13 +110,13 @@ def main(): # pylint: disable=R0915
     ########################################################################################
 
 
-    ######################## Get the peripherals informations ##############################
+    ######################## Get the peripherals information ##############################
     peripherals = peripheral_hand_shake(list_of_peripheral=list_of_peripherals_url, host_url=hostname + ":" + str(port))
     ########################################################################################
     
     ########### Set up server, database, and threading interface ########### 
     #create a server obj, not it will also create the coms object #144.39.167.206
-    coms = messageHandler(server_name=server_listener_name, hostname=hostname)
+    coms = messageHandler(server_name=server_listener_name, hostname=hostname, database_name = data_base)
     #make database object 
     dataBase = DataBaseHandler(coms, db_name = data_base_name,is_gui=False, host=host, user=user, password=password, clear_database=clear_database)
     #now that we have the data base we can collect all of our command handlers.s
@@ -166,8 +165,19 @@ def main(): # pylint: disable=R0915
     
     ########### Set up sensor interface ###########
     if not NO_SENSORS:
+        packet_list = []
+        detector_list = []
+        processor_list = []
+
+        for sensor in sensor_config_dict:
+            if 'packet_detect' in sensor:
+                packet_list.append(sensor_config_dict[sensor]['packet_sturture'])
+                detector_list.append(sensor)
+            if 'packet_parser' in sensor:
+                processor_list.append((sensor, sensor_config_dict[sensor]['source']))
+
         # create the sensors interface
-        importer = sensor_importer(packets_file=packet_struture_path) # create the importer object
+        importer = sensor_importer(packets_file_list=packet_list, detector_list=detector_list, processor_list=processor_list) # create the importer object
         importer.import_modules() # collect the models to import
         importer.instantiate_sensor_objects(coms=coms) # create the sensors objects.
 
@@ -205,7 +215,24 @@ def main(): # pylint: disable=R0915
     coms.send_request(data_base, ['create_table_external', table_structure]) 
 
     #Now create the test_runner object
-    test_interface = test_runner(failed_test_path=failed_test_path, passed_test_path=passed_test_path, max_files_passed=max_passed_test)
+    test_interface = test_runner(failed_test_path=failed_test_path, passed_test_path=passed_test_path, max_files_passed=max_passed_test, debug=DEBUG_UNIT_TEST)
+    ########################################################################################
+
+    ######################### Set up instruments ###########################################
+    # collect all the instruments we know about on the network. 
+    # instruments = instruments_init(coms=coms)
+
+    # # give the tests and the sensors access to the instruments so they can use them. 
+    # global_test_variables.instruments = instruments.get_instruments()
+    # sensor_config.instruments = instruments.get_instruments()
+
+    # instrument_dict = instruments.get_instruments()
+
+    # instrument_dict['keithley6221'].write(["*RST"]) #reset machine
+    # instrument_dict['keithley6221'].write(["SOUR:CURR 0.005"]) #set current to 1mA
+    # instrument_dict['keithley6221'].write(["OUTP ON"]) #turn on output
+    # current = instrument_dict['keithley6221'].write_read(["SOUR:CURR?"]) #read current
+    # instrument_dict['keithley6221'].write(["OUTP OFF"]) #turn off output
     ########################################################################################
 
 
@@ -228,12 +255,13 @@ def main(): # pylint: disable=R0915
         try:
             threadPool.get_thread_status() #this commands the threads to report to the server how they are running. 
             
-            session, description, session_running = server.get_session_info() #get the current session settings. 
+            session, description, session_running, test_group = server.get_session_info() #get the current session settings. 
 
             if session_running: 
                 #tell users we have started
                 if not session_was_running:
                     coms.report_additional_status('Main', f'Main thread : Running Session {datetime.datetime.now()}')
+                    test_interface.set_test_group([test_group])
 
                 session_was_running = True
 
@@ -255,7 +283,7 @@ def main(): # pylint: disable=R0915
             else :
                 session_start_time = datetime.datetime.now()
                 session_was_running = False
-            time.sleep(0.1) # the main thread needs to sleep so that it doesnt hurt the cup
+            time.sleep(0.5) # the main thread needs to sleep so that it doesnt hurt the cup
 
 
         except KeyboardInterrupt:

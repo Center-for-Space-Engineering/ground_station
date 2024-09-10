@@ -117,6 +117,7 @@ li {
     margin-top: 10px;
     border-radius: 5px;
     justify-content: left;
+    align-items: flex-start;
 }
 
 /* Style for the individual tabs */

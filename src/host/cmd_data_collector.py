@@ -45,6 +45,7 @@ class cmd_data_collector(commandParent):
             "get_dto": self.get_dto,
             "get_dto_full_table" : self.get_dto_full_table,
             "delete_table" : self.delete_table,
+            "get_dto_full_table_last_lines" : self.get_dto_full_table_last_lines,
         }
 
         self.__coms = coms
@@ -120,6 +121,12 @@ class cmd_data_collector(commandParent):
                     'Path' : f"/{self.__command_name}/{key}/-table_name-/-start index-/-Optional max lines-",
                     'Description' : 'This command returns data from one table in the data base from a start index to a finishing index. It may not be as fast.',
                 })
+            elif key == "get_dto_full_table_last_lines":
+                message.append({
+                    'Name' : key,
+                    'Path' : f"/{self.__command_name}/{key}/-table_name-/-number of lines to get-/-Optional max lines-",
+                    'Description' : 'This command returns the last number of specified lines from one table in the data base. It may not be as fast.',
+                })
             else :
                 message.append({
                     'Name' : key,
@@ -144,6 +151,8 @@ class cmd_data_collector(commandParent):
                 message += f"<url>/{self.__command_name}/{key}/<arg>-table_name-</arg>/<arg>-start index-</arg>/<arg>-field name-</arg>/<arg>-Optional max lines-</arg></url></url><p></p>"
             elif key == "get_dto_full_table":
                 message += f"<url>/{self.__command_name}/{key}/<arg>-table_name-</arg>/<arg>-start index-</arg>/<arg>-Optional max lines-</arg></url></url><p></p>"
+            elif key == "get_dto_full_table_last_lines":
+                message += f"<url>/{self.__command_name}/{key}/<arg>-table_name-</arg>/<arg>-lines to grab-</arg>/<arg>-Optional max lines-</arg></url></url><p></p>"
             else :
                 message += f"<url>/{self.__command_name}/{key}</url><p></p>"
         self.__logger.send_log("Returned to server: " + message)
@@ -246,6 +255,72 @@ class cmd_data_collector(commandParent):
             pass
         #make the data request to the database.
         request_num = self.__data_base.make_request('get_data_large', [args[1], args[2], self.__max_rows])
+        data_in_table_df = self.__data_base.get_request(request_num)
+
+        #wait for the database to return the data
+        while data_in_table_df is None: #wait until we get a return value
+            data_in_table_df = self.__data_base.get_request(request_num)
+            time.sleep(0.1) #let other process run
+        
+         #if the database returns a string it is an error
+        if isinstance(data_in_table_df, str) : 
+            return data_in_table_df
+        # table is empty so drop out of function
+        if data_in_table_df.empty: 
+            return  "<! DOCTYPE html>\n<html>\n<body>\n<h1><strong>dto (data transfer object): No saved data</strong></h1>\n</body>\n</html>"
+        
+        #get the table information
+        request_num = self.__data_base.make_request('get_data_type', [args[1]])
+        table_info = self.__data_base.get_request(request_num)
+
+        #wait for the database to return the table object
+        while table_info is None: #wait until we get a return value
+            table_info = self.__data_base.get_request(request_num)
+            time.sleep(0.1) #let other process run
+
+        table_column_information = table_info.get_fields()
+        for column_key in table_column_information:
+            if table_column_information[column_key][1] == 'byte': #if the data is byte data we need to encode it before we ship it off to the webpage.
+                data_in_table_df[column_key] = data_in_table_df[column_key].apply(lambda x: x.hex())
+
+       
+        last_db_index = data_in_table_df['Table Index'].tail(1).iat[0] #get the last row in the dto
+        dto_internal = print_message_dto("DTO returned to requester.")
+        self.__coms.print_message(dto_internal)
+        try : 
+            data_combined = data_in_table_df.to_csv(index=False, header=True)
+           # Encode the string using base64 encoding
+            base64_encoded_bytes = base64.b64encode(data_combined.encode('utf-8'))
+            file_extension = 'csv'
+
+            # Decode the base64 encoded bytes to a UTF-8 string
+            base64_data_combined = base64_encoded_bytes.decode('utf-8')
+        except Exception as e: # pylint: disable=w0718
+            return f'Error occurred {e}'
+        
+        return {
+            'text_data': f'The last line fetched was {last_db_index}',
+            'file_data': base64_data_combined,
+            'download': 'yes',
+            'file_extension' : file_extension, 
+        }
+    def get_dto_full_table_last_lines(self, args):
+        '''
+            Gets data from the data base, then convert it to a dto (Data transfer Object)
+            Args:
+                args[0] is not used in this function, 
+                    it is used by the caller function, it should be the function name
+                args[1] is the table name
+                args[2] number of lines to grab
+                args[3] is optional but if passed it will set the max number of rows per dto to the new value
+        '''
+        #see if we have a new max row
+        try :
+            self.__max_rows = int(args[3])
+        except : # pylint: disable=w0702
+            pass
+        #make the data request to the database.
+        request_num = self.__data_base.make_request('get_last_data_points', [args[1], args[2], self.__max_rows])
         data_in_table_df = self.__data_base.get_request(request_num)
 
         #wait for the database to return the data

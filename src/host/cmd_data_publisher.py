@@ -102,7 +102,7 @@ class cmd_data_publisher(commandParent, threadWrapper):
             This function simply tells the data publisher to shut down. 
             It does this by setting the self.__Running variable to false. 
         '''
-        if self.__Running_lock.acquire(timeout=1):  # pylint: disable=R1732
+        if self.__Running_lock.acquire(timeout=10):  # pylint: disable=R1732
             self.__Running = False
             self.__Running_lock.release()
         else : 
@@ -148,7 +148,7 @@ class cmd_data_publisher(commandParent, threadWrapper):
             while running:
                 if connected:
                     try:
-                        if self.__data_lock.acquire(timeout=1):  # pylint: disable=R1732
+                        if self.__data_lock.acquire(timeout=10):  # pylint: disable=R1732
                             length_data_received = len(self.__data_received)
                             self.__data_lock.release()
                         else : 
@@ -165,7 +165,7 @@ class cmd_data_publisher(commandParent, threadWrapper):
                                 print(message)
                                 client_socket.sendall(message)
                         elif length_data_received > 0: # If we are live and we have data
-                            if self.__data_lock.acquire(timeout=1):  # pylint: disable=R1732
+                            if self.__data_lock.acquire(timeout=10):  # pylint: disable=R1732
                                 message = b''.join(self.__data_received)
                                 self.__data_received.clear()
                                 self.__data_lock.release()
@@ -190,7 +190,7 @@ class cmd_data_publisher(commandParent, threadWrapper):
                             dto = logger_dto(message="Timeout occurred while waiting for a connection.", time=str(datetime.now()))
                             self.__coms.print_message(dto)
                             connected = False
-                if self.__Running_lock.acquire(timeout=1):  # pylint: disable=R1732
+                if self.__Running_lock.acquire(timeout=10):  # pylint: disable=R1732
                     running = self.__Running
                     self.__Running_lock.release()
                 else : 
@@ -211,7 +211,7 @@ class cmd_data_publisher(commandParent, threadWrapper):
         '''
             This is the function that is called by the class you asked to make a tap.
         '''
-        if self.__data_lock.acquire(timeout=1):  # pylint: disable=R1732
+        if self.__data_lock.acquire(timeout=10):  # pylint: disable=R1732
             self.__data_received = copy.deepcopy(data) #NOTE: This could make things really slow, depending on the data rate.
             self.__data_lock.release()
         else : 

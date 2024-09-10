@@ -21,12 +21,18 @@
         <div class="tab" onclick="open_tab('failed_test')">failed test</div>
     </div>
     <h1>Session Control</h1>
-    <div class="container">
+    <div class="horizontal-container">
         <div class="box_style">
             <label for="sessionInput">Enter Session Name:</label>
             <input type="text" id="sessionInput" name="sessionName">
+        </div>
+        <div class="box_style">
             <label for="sessionDescription">Enter Session Description:</label>
             <input type="text" id="sessionDescription" name="description">
+        </div>
+        <div class="box_style">
+            <label for="unittest_group">Enter unittest group:</label>
+            <input type="text" id="unittestGroup" name="unittest">
         </div>
     </div>
     <!-- Button to start session -->
@@ -77,13 +83,14 @@
         function startSession() {
             var sessionName = document.getElementById("sessionInput").value;
             var description = document.getElementById("sessionDescription").value;
+            var unittestGroup = document.getElementById("unittestGroup").value;
             // Make AJAX request to Flask server to start session
             fetch('/start_session', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ sessionName: sessionName, description:description }),
+                body: JSON.stringify({ sessionName: sessionName, description:description, unittestGroup:unittestGroup}),
             })
         }
 
