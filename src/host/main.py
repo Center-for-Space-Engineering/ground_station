@@ -116,7 +116,7 @@ def main(): # pylint: disable=R0915
     
     ########### Set up server, database, and threading interface ########### 
     #create a server obj, not it will also create the coms object #144.39.167.206
-    coms = messageHandler(server_name=server_listener_name, hostname=hostname)
+    coms = messageHandler(server_name=server_listener_name, hostname=hostname, database_name = data_base)
     #make database object 
     dataBase = DataBaseHandler(coms, db_name = data_base_name,is_gui=False, host=host, user=user, password=password, clear_database=clear_database)
     #now that we have the data base we can collect all of our command handlers.s

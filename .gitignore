@@ -10,3 +10,6 @@ gps_board.html
 **/templates/**_1.html
 **/templates/packet_detect.html
 **/templates/stt_L0_to_L1_converter.html
+**_aux.html
+**_swp2_1.html
+

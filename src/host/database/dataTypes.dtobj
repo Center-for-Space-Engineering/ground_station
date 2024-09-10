@@ -438,3 +438,35 @@ tests_record
     test_run_time:0 > string
     pass_fail:0 > string
     session_ID:0 > string
+
+serial_listener_one_byte_report
+    bytes_per_second:0 > float
+    time:0 > string
+
+serial_listener_one_aux_byte_report
+    bytes_per_second:0 > float
+    time:0 > string
+
+serial_listener_two_aux_byte_report
+    bytes_per_second:0 > float
+    time:0 > string
+
+serial_listener_two_byte_report
+    bytes_per_second:0 > float
+    time:0 > string
+
+gps_port_listener_aux_byte_report
+    bytes_per_second:0 > float
+    time:0 > string
+
+aux_port_listener_byte_report
+    bytes_per_second:0 > float
+    time:0 > string
+
+swp2_port_listener_byte_report
+    bytes_per_second:0 > float
+    time:0 > string
+
+gps_port_listener_byte_report
+    bytes_per_second:0 > float
+    time:0 > string
