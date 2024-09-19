@@ -106,7 +106,8 @@ sensor_config_dict:
       publish_data_name: 'detected_packets_swp2'  # NOTE: NOT used right now
       passive_active: 'passive'  # Passive sensors only publish when they receive then process data, active sensors always publish on an interval.
       interval_pub: 'NA'  # We are not using this param because we are a passive publisher, however if the sensor is active we will need to set this interval to the desired rate. 
-      packet_sturture: 'command_packets/packets_unpacking/packets_swp2.yaml'
+      # packet_sturture: 'command_packets/packets_unpacking/packets_swp2.yaml'
+      packet_sturture: 'command_packets/packets_unpacking/packets_swp2_test_wave.yaml'
   packet_detect_aux:
       # This dictionary tells the packet detect sensor how to configure itself.
       tap_request: [aux_port_listener]  # Index in the list can be the name of a serial listener or any sensors whose data you want to listen to or None (Example for none: None) 
@@ -122,7 +123,8 @@ sensor_config_dict:
       passive_active: 'passive'
       interval_pub: 'NA'
       extention: '_swp2_1'
-      source: 'command_packets/packets_unpacking/packets_swp2.yaml'
+      # source: 'command_packets/packets_unpacking/packets_swp2.yaml'
+      source: 'command_packets/packets_unpacking/packets_swp2_test_wave.yaml'
   packet_parser_aux: #this is the configuration for all our packet parsers they will all use this configuration. 
       tap_request: [packet_detect_aux]
       publisher: 'yes'
@@ -151,6 +153,18 @@ sensor_config_dict:
       interval_pub: 'NA'
   TIP_L0_to_L1:
       tap_request: [TIP_swp2_1]
+      publisher: 'no'
+      publish_data_name: 'NA'
+      passive_active: 'passive'
+      interval_pub: 'NA'
+  QIP_L0_to_L1:
+      tap_request: [QIP_swp2_1]
+      publisher: 'no'
+      publish_data_name: 'NA'
+      passive_active: 'passive'
+      interval_pub: 'NA'
+  LIP_L0_to_L1:
+      tap_request: [LIP_swp2_1]
       publisher: 'no'
       publish_data_name: 'NA'
       passive_active: 'passive'

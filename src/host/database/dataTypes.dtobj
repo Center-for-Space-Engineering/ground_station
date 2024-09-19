@@ -39,6 +39,7 @@ processed_data_for_packet_detect_swp2_counts
     EFS2:0 > int
     EFS3:0 > int
     ECO:0 > int
+    LIP:0 > int
 
 processed_data_for_packet_detect_swp2_rates
     time:0 > string
@@ -61,6 +62,7 @@ processed_data_for_packet_detect_swp2_rates
     EFS2:0 > float
     EFS3:0 > float
     ECO:0 > float
+    LIP:0 > float
 
 processed_data_for_packet_detect_aux_counts
     time:0 > string
@@ -83,6 +85,22 @@ processed_data_for_packet_detect_aux_rates
     TAMA:0 > float
     PDSI:0 > float
     ECOA:0 > float
+
+QIP_L1
+    IiS:0 > float
+    IQS:0 > float
+    Mag:0 > float
+    Phase:0 > float
+    time_STM_CLK:0 > uint
+    time_RTC:0 > uint
+
+LIP_L1
+    IiS:0 > float
+    IQS:0 > float
+    Mag:0 > float
+    Phase:0 > float
+    time_STM_CLK:0 > uint
+    time_RTC:0 > uint
 
 STT_L1
     PPSW:0 > uint
@@ -245,6 +263,10 @@ SIP
     time_STM_CLK:0 > bigint
     time_RTC:0 > uint
 
+serial_listener_two_byte_report
+    bytes_per_second:0 > float
+    time:0 > string
+
 TIP
     TFQ:0 > uint
     time_STM_CLK:0 > bigint
@@ -252,11 +274,9 @@ TIP
 
 QIP
     TFQ:0 > uint
-    FM0:0 > uint
-    FM1:0 > uint
-    FM2:0 > uint
-    FM3:0 > uint
-    FM4:0 > uint
+    IiQ:0 > uint
+    IQQ:0 > uint
+    temp:0 > uint
     time_STM_CLK:0 > bigint
     time_RTC:0 > uint
 
@@ -322,6 +342,12 @@ EFS2
 
 EFS3
     EFS:0 > uint
+    time_STM_CLK:0 > bigint
+    time_RTC:0 > uint
+
+LIP
+    IiS:0 > uint
+    IQS:0 > uint
     time_STM_CLK:0 > bigint
     time_RTC:0 > uint
 
@@ -439,11 +465,12 @@ tests_record
     pass_fail:0 > string
     session_ID:0 > string
 
-serial_listener_one_byte_report
-    bytes_per_second:0 > float
-    time:0 > string
+instrument_control_record
+    instrument_name:0 > string
+    command:0 > string
+    time_stamp:0 > string
 
-serial_listener_one_aux_byte_report
+serial_listener_one_byte_report
     bytes_per_second:0 > float
     time:0 > string
 
@@ -451,15 +478,15 @@ serial_listener_two_aux_byte_report
     bytes_per_second:0 > float
     time:0 > string
 
-serial_listener_two_byte_report
-    bytes_per_second:0 > float
-    time:0 > string
-
-gps_port_listener_aux_byte_report
+serial_listener_one_aux_byte_report
     bytes_per_second:0 > float
     time:0 > string
 
 aux_port_listener_byte_report
+    bytes_per_second:0 > float
+    time:0 > string
+
+gps_port_listener_aux_byte_report
     bytes_per_second:0 > float
     time:0 > string
 

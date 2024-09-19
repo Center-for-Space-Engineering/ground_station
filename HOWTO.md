@@ -475,6 +475,8 @@ Authors Note: This example is write to our data scientist, who are quite smart, 
 
 The system supports dynamically adding sensors. A sensors is anything that consumes and/or produces data. The system also supports producing sensor chains. For example: serial line -> L0 processing -> L1 processing. The sensors also allow for dynamically graphing your data. The sensors also support data insertion into the Data Base. Finally they will also handel shipping all that data to the webpage. This should allow for real time debugging on the system. However the primary purpose of sensors is to facilitate unit testing.
 
+Note: We have designed a special type of sensor that allows you to import a data for a dictionary file and automatically parse a raw bit stream. The steps for creating this are a little different from the following and will be explained after the basic steps. Under the section call `Unpacking Sensors`.
+
 ### Step One:
 Set up a config dictionary in the `main.yaml`. This tells the system how to handle this sensor. Consider the following example:
 ```yaml
@@ -756,6 +758,13 @@ You may want to check to make sure you have publisher your last batch of data fi
 ```python
 sensor_parent.has_been_published(self)
 ```
+
+## Unpacking Sensors
+Often times when we add a new prefill to the system. (Often times a raspberry pi.) We will have a defined dictionary for all the packet types. In this we can build a lot of sensors with very little work. Allowing use to parse raw packets into the database automatically. This section will walk though the process for setting this up. 
+
+### Step 1: Create a yaml file from the dictionary
+Go to the `processing_telemetry_dictionary` git repo. This repo has instructions on how to export the y
+
 
 ## Mutex Locks:
 Mutex locks serve to protect your data when multiple threads want to access your data. Basically if multiple threads try and access a variable at the same time wired things can happen. So we made mutex locks to prevent data loss and data corruption. Python is pretty easy to use mutex lock, just uses the `with` command. (See examples) Be warned though it is really easy to take a nice parallel program and turn it into a 'single' threaded program by abusing mutex locks.  \

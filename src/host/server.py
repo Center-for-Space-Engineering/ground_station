@@ -100,6 +100,7 @@ class serverHandler(threadWrapper):
         '''
         #Paths that the server will need 
         self.app.route('/')(self.status_report)
+        self.app.route('/templates/assets/style.css', methods=['GET'])(self.style)
         self.app.route('/open_data_stream')(self.open_data_stream)
         self.app.route('/Sensor')(self.open_sensor)
         self.app.route('/Command')(self.command)
@@ -133,6 +134,8 @@ class serverHandler(threadWrapper):
             Returns image in the corner of the tab. 
         '''
         return send_from_directory(self.__favicon_directory, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+    def style(self):
+        return send_from_directory('templates/assets/style.css', 'style.css', mimetype='css')
     def handle_unknown_path(self, unknown_path):
         '''
             This handles path that are not automatically added. (Basically user defined commands.)

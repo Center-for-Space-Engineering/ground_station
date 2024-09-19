@@ -20,11 +20,12 @@ from pytesting_api.test_runner import test_runner # pylint: disable=e0401
 from pytesting_api import global_test_variables # pylint: disable=e0401
 from peripheral_hand_shake import peripheral_hand_shake # pylint: disable=e0401
 from cse_instrument_control.instruments_init import instruments_init # pylint: disable=e0401
+from logging_system_display_python_api.logger import loggerCustom
 
 #These are some Debugging tools I add, Turning off the display is really useful for seeing errors, because the terminal wont get erased every few milliseconds with the display on.
 NO_PORT_LISTENER = False
 NO_SENSORS = False
-DEBUG_UNIT_TEST = True
+DEBUG_UNIT_TEST = False
 
 if not NO_PORT_LISTENER:
     from port_interface_api.port_listener import port_listener # pylint: disable=e0401
@@ -36,6 +37,7 @@ def main(): # pylint: disable=R0915
     This module runs everything, its main job is to create and run all of the 
     system objects and classes. 
     '''
+    logger = loggerCustom("logs/main.txt")
 
     ###################### Import from the Yaml file #########################
     # Load the YAML file
@@ -220,19 +222,44 @@ def main(): # pylint: disable=R0915
 
     ######################### Set up instruments ###########################################
     # collect all the instruments we know about on the network. 
-    # instruments = instruments_init(coms=coms)
+    instruments = instruments_init(coms=coms)
 
     # # give the tests and the sensors access to the instruments so they can use them. 
-    # global_test_variables.instruments = instruments.get_instruments()
-    # sensor_config.instruments = instruments.get_instruments()
+    global_test_variables.instruments = instruments.get_instruments()
+    sensor_config.instruments = instruments.get_instruments()
 
-    # instrument_dict = instruments.get_instruments()
+    instrument_dict = instruments.get_instruments()
 
-    # instrument_dict['keithley6221'].write(["*RST"]) #reset machine
-    # instrument_dict['keithley6221'].write(["SOUR:CURR 0.005"]) #set current to 1mA
-    # instrument_dict['keithley6221'].write(["OUTP ON"]) #turn on output
-    # current = instrument_dict['keithley6221'].write_read(["SOUR:CURR?"]) #read current
-    # instrument_dict['keithley6221'].write(["OUTP OFF"]) #turn off output
+    #digital ossiciscope example
+    instrument_dict['keithley6221'].write(['*RST']) #reset machine
+    instrument_dict['keithley6221'].write(["SOUR:CURR 0.005"]) #set current to 1mA
+    instrument_dict['keithley6221'].write(["OUTP OFF"]) #turn on output
+    current = instrument_dict['keithley6221'].write_read(["SOUR:CURR?"]) #read current
+    instrument_dict['keithley6221'].write(["OUTP OFF"]) #turn off output
+    logger.send_log(current)
+
+    #digital power supply example
+    instrument_dict['digital_powersupply_RS'].write(['*RST']) #reset machine
+    instrument_dict['digital_powersupply_RS'].write([f'INST OUT1 \nAPPLY \"5,1\" \nOUTP OFF']) #reset machine
+    instrument_code = instrument_dict['digital_powersupply_RS'].write_read([f'*IDN?']) #reset machine
+    logger.send_log(instrument_code)
+    read_voltage = instrument_dict['digital_powersupply_RS'].write_read(['APPLY?'])
+    logger.send_log(read_voltage)
+
+    #digital volmeter
+    instrument_dict['digital_voltmeter_keithley'].write(['*RST']) #reset machine
+    instrument_code = instrument_dict['digital_voltmeter_keithley'].write_read([f'*IDN?']) #reset machine
+    logger.send_log(instrument_code)
+    read_voltage = instrument_dict['digital_voltmeter_keithley'].write_read(['MEAS:VOLT?'])
+    logger.send_log(read_voltage)
+
+    
+    
+
+    
+
+    
+
     ########################################################################################
 
 
